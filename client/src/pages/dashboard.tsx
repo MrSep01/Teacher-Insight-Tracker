@@ -7,10 +7,41 @@ import RecentAssessments from "@/components/dashboard/recent-assessments";
 import StudentTable from "@/components/dashboard/student-table";
 import AssessmentModal from "@/components/modals/assessment-modal";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { StudentWithScores } from "@shared/schema";
 
 export default function Dashboard() {
   const [isAssessmentModalOpen, setIsAssessmentModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: students } = useQuery<StudentWithScores[]>({
+    queryKey: ["/api/dashboard/students"],
+  });
+
+  const exportStudentData = () => {
+    if (!students) return;
+    
+    const headers = ['Student Name', 'Grade', 'Student ID', 'Overall %', 'Math %', 'Science %', 'English %', 'Status'];
+    const rows = students.map(student => [
+      student.name,
+      student.grade,
+      student.studentId,
+      Math.round(student.overallPercentage).toString(),
+      Math.round(student.subjectAverages.Mathematics || 0).toString(),
+      Math.round(student.subjectAverages.Science || 0).toString(),
+      Math.round(student.subjectAverages.English || 0).toString(),
+      student.status
+    ]);
+    
+    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `student-performance-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <>
@@ -63,7 +94,10 @@ export default function Dashboard() {
                     className="pl-10 w-64"
                   />
                 </div>
-                <Button className="bg-green-500 hover:bg-green-600 text-white">
+                <Button 
+                  onClick={() => exportStudentData()}
+                  className="bg-green-500 hover:bg-green-600 text-white"
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>

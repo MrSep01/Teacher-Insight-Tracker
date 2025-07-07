@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { StudentWithScores } from "@shared/schema";
 import { X, Plus, Calendar, FileText, Lightbulb } from "lucide-react";
+import { generateRecommendations, getRecommendationPriorityColor, getRecommendationBadgeColor } from "@/lib/recommendations";
 
 interface StudentModalProps {
   student: StudentWithScores | null;
@@ -96,58 +97,33 @@ export default function StudentModal({ student, isOpen, onClose }: StudentModalP
             <div>
               <h5 className="text-lg font-medium text-gray-900 mb-4">Tailored Lesson Suggestions</h5>
               <div className="space-y-4">
-                {/* Sample recommendations based on student performance */}
-                {student.subjectAverages.English && student.subjectAverages.English < 80 && (
-                  <div className={`p-4 rounded-lg border ${getPriorityColor("high")}`}>
+                {generateRecommendations(student).map((recommendation, index) => (
+                  <div key={index} className={`p-4 rounded-lg border ${getRecommendationPriorityColor(recommendation.priority)}`}>
                     <div className="flex items-center space-x-2 mb-2">
                       <Lightbulb className="h-4 w-4 text-primary" />
-                      <h6 className="font-medium text-gray-900">Reading Comprehension Focus</h6>
+                      <h6 className="font-medium text-gray-900">{recommendation.title}</h6>
                     </div>
                     <p className="text-sm text-gray-700">
-                      Based on recent performance, consider additional reading exercises with guided questions.
+                      {recommendation.description}
                     </p>
                     <div className="mt-2 flex items-center space-x-2">
-                      <span className={`text-xs px-2 py-1 rounded ${getPriorityBadgeColor("high")}`}>
-                        Priority: High
+                      <span className={`text-xs px-2 py-1 rounded ${getRecommendationBadgeColor(recommendation.priority)}`}>
+                        Priority: {recommendation.priority.charAt(0).toUpperCase() + recommendation.priority.slice(1)}
                       </span>
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">English</span>
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{recommendation.subjectName}</span>
                     </div>
                   </div>
-                )}
-
-                {student.subjectAverages.Mathematics && student.subjectAverages.Mathematics > 90 && (
-                  <div className={`p-4 rounded-lg border ${getPriorityColor("medium")}`}>
+                ))}
+                
+                {generateRecommendations(student).length === 0 && (
+                  <div className="p-4 rounded-lg border border-green-200 bg-green-50">
                     <div className="flex items-center space-x-2 mb-2">
                       <Lightbulb className="h-4 w-4 text-green-600" />
-                      <h6 className="font-medium text-gray-900">Advanced Math Challenges</h6>
+                      <h6 className="font-medium text-gray-900">Great Progress!</h6>
                     </div>
                     <p className="text-sm text-gray-700">
-                      {student.name} shows strong math skills. Consider providing advanced problem sets.
+                      {student.name} is performing well across all subjects. Continue with current learning plan and consider enrichment activities.
                     </p>
-                    <div className="mt-2 flex items-center space-x-2">
-                      <span className={`text-xs px-2 py-1 rounded ${getPriorityBadgeColor("medium")}`}>
-                        Priority: Medium
-                      </span>
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Mathematics</span>
-                    </div>
-                  </div>
-                )}
-
-                {student.overallPercentage < 70 && (
-                  <div className={`p-4 rounded-lg border ${getPriorityColor("high")}`}>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Lightbulb className="h-4 w-4 text-primary" />
-                      <h6 className="font-medium text-gray-900">General Study Support</h6>
-                    </div>
-                    <p className="text-sm text-gray-700">
-                      Consider one-on-one tutoring sessions to address foundational gaps.
-                    </p>
-                    <div className="mt-2 flex items-center space-x-2">
-                      <span className={`text-xs px-2 py-1 rounded ${getPriorityBadgeColor("high")}`}>
-                        Priority: High
-                      </span>
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">All Subjects</span>
-                    </div>
                   </div>
                 )}
               </div>

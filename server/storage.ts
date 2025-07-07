@@ -132,7 +132,14 @@ export class MemStorage implements IStorage {
     ];
 
     scores.forEach(score => {
-      this.studentScores.set(this.currentStudentScoreId, { ...score, id: this.currentStudentScoreId, createdAt: new Date() });
+      this.studentScores.set(this.currentStudentScoreId, { 
+        ...score, 
+        id: this.currentStudentScoreId, 
+        createdAt: new Date(),
+        score: score.score.toString(),
+        percentage: score.percentage.toString(),
+        notes: null
+      });
       this.currentStudentScoreId++;
     });
   }
@@ -182,7 +189,7 @@ export class MemStorage implements IStorage {
 
   async createStudent(student: InsertStudent): Promise<Student> {
     const id = this.currentStudentId++;
-    const newStudent = { ...student, id };
+    const newStudent = { ...student, id, status: student.status || "on_track" };
     this.students.set(id, newStudent);
     return newStudent;
   }
@@ -254,7 +261,12 @@ export class MemStorage implements IStorage {
 
   async createAssessment(assessment: InsertAssessment): Promise<Assessment> {
     const id = this.currentAssessmentId++;
-    const newAssessment = { ...assessment, id, createdAt: new Date() };
+    const newAssessment = { 
+      ...assessment, 
+      id, 
+      createdAt: new Date(),
+      description: assessment.description || null
+    };
     this.assessments.set(id, newAssessment);
     return newAssessment;
   }
@@ -302,7 +314,12 @@ export class MemStorage implements IStorage {
 
   async createStudentScore(score: InsertStudentScore): Promise<StudentScore> {
     const id = this.currentStudentScoreId++;
-    const newScore = { ...score, id, createdAt: new Date() };
+    const newScore = { 
+      ...score, 
+      id, 
+      createdAt: new Date(),
+      notes: score.notes || null
+    };
     this.studentScores.set(id, newScore);
     return newScore;
   }
@@ -332,7 +349,13 @@ export class MemStorage implements IStorage {
 
   async createLessonRecommendation(recommendation: InsertLessonRecommendation): Promise<LessonRecommendation> {
     const id = this.currentLessonRecommendationId++;
-    const newRecommendation = { ...recommendation, id, createdAt: new Date() };
+    const newRecommendation = { 
+      ...recommendation, 
+      id, 
+      createdAt: new Date(),
+      priority: recommendation.priority || "medium",
+      isActive: recommendation.isActive ?? true
+    };
     this.lessonRecommendations.set(id, newRecommendation);
     return newRecommendation;
   }
