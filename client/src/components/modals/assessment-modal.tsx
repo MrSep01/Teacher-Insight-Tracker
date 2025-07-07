@@ -1,0 +1,20 @@
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import AssessmentForm from "@/components/forms/assessment-form";
+
+interface AssessmentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function AssessmentModal({ isOpen, onClose }: AssessmentModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-gray-900">Add New Assessment</DialogTitle>
+        </DialogHeader>
+        <AssessmentForm onSuccess={onClose} />
+      </DialogContent>
+    </Dialog>
+  );
+}
