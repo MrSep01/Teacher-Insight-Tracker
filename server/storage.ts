@@ -11,8 +11,15 @@ import {
   InsertLessonRecommendation,
   StudentWithScores,
   AssessmentWithDetails,
-  DashboardStats
+  DashboardStats,
+  students,
+  subjects,
+  assessments,
+  studentScores,
+  lessonRecommendations
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc, gte } from "drizzle-orm";
 
 export interface IStorage {
   // Students
@@ -409,4 +416,325 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getStudents(): Promise<Student[]> {
+    return await db.select().from(students);
+  }
+
+  async getStudentById(id: number): Promise<Student | undefined> {
+    const [student] = await db.select().from(students).where(eq(students.id, id));
+    return student || undefined;
+  }
+
+  async getStudentWithScores(id: number): Promise<StudentWithScores | undefined> {
+    const student = await this.getStudentById(id);
+    if (!student) return undefined;
+
+    const scores = await db
+      .select({
+        id: studentScores.id,
+        studentId: studentScores.studentId,
+        assessmentId: studentScores.assessmentId,
+        score: studentScores.score,
+        percentage: studentScores.percentage,
+        notes: studentScores.notes,
+        createdAt: studentScores.createdAt,
+        assessment: {
+          id: assessments.id,
+          title: assessments.title,
+          subjectId: assessments.subjectId,
+          date: assessments.date,
+          totalPoints: assessments.totalPoints,
+          description: assessments.description,
+          createdAt: assessments.createdAt,
+        },
+        subject: {
+          id: subjects.id,
+          name: subjects.name,
+          color: subjects.color,
+          icon: subjects.icon,
+        },
+      })
+      .from(studentScores)
+      .innerJoin(assessments, eq(studentScores.assessmentId, assessments.id))
+      .innerJoin(subjects, eq(assessments.subjectId, subjects.id))
+      .where(eq(studentScores.studentId, id));
+
+    const overallPercentage = scores.length > 0 
+      ? scores.reduce((sum, score) => sum + Number(score.percentage), 0) / scores.length
+      : 0;
+
+    const subjectAverages: { [key: string]: number } = {};
+    const subjectScores: { [key: string]: number[] } = {};
+
+    scores.forEach(score => {
+      const subjectName = score.subject.name;
+      if (!subjectScores[subjectName]) {
+        subjectScores[subjectName] = [];
+      }
+      subjectScores[subjectName].push(Number(score.percentage));
+    });
+
+    Object.entries(subjectScores).forEach(([subject, percentages]) => {
+      subjectAverages[subject] = percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
+    });
+
+    return { 
+      ...student, 
+      scores: scores.map(s => ({
+        ...s,
+        assessment: s.assessment,
+        subject: s.subject
+      })), 
+      overallPercentage, 
+      subjectAverages 
+    };
+  }
+
+  async createStudent(student: InsertStudent): Promise<Student> {
+    const [newStudent] = await db
+      .insert(students)
+      .values(student)
+      .returning();
+    return newStudent;
+  }
+
+  async updateStudent(id: number, student: Partial<InsertStudent>): Promise<Student | undefined> {
+    const [updated] = await db
+      .update(students)
+      .set(student)
+      .where(eq(students.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteStudent(id: number): Promise<boolean> {
+    const result = await db.delete(students).where(eq(students.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async searchStudents(query: string): Promise<Student[]> {
+    const allStudents = await db.select().from(students);
+    return allStudents.filter(student => 
+      student.name.toLowerCase().includes(query.toLowerCase()) ||
+      student.studentId.includes(query)
+    );
+  }
+
+  async getSubjects(): Promise<Subject[]> {
+    return await db.select().from(subjects);
+  }
+
+  async getSubjectById(id: number): Promise<Subject | undefined> {
+    const [subject] = await db.select().from(subjects).where(eq(subjects.id, id));
+    return subject || undefined;
+  }
+
+  async createSubject(subject: InsertSubject): Promise<Subject> {
+    const [newSubject] = await db
+      .insert(subjects)
+      .values(subject)
+      .returning();
+    return newSubject;
+  }
+
+  async getAssessments(): Promise<Assessment[]> {
+    return await db.select().from(assessments);
+  }
+
+  async getAssessmentById(id: number): Promise<Assessment | undefined> {
+    const [assessment] = await db.select().from(assessments).where(eq(assessments.id, id));
+    return assessment || undefined;
+  }
+
+  async getAssessmentWithDetails(id: number): Promise<AssessmentWithDetails | undefined> {
+    const assessment = await this.getAssessmentById(id);
+    if (!assessment) return undefined;
+
+    const subject = await this.getSubjectById(assessment.subjectId);
+    if (!subject) return undefined;
+
+    const scores = await db
+      .select({
+        id: studentScores.id,
+        studentId: studentScores.studentId,
+        assessmentId: studentScores.assessmentId,
+        score: studentScores.score,
+        percentage: studentScores.percentage,
+        notes: studentScores.notes,
+        createdAt: studentScores.createdAt,
+        student: {
+          id: students.id,
+          name: students.name,
+          grade: students.grade,
+          studentId: students.studentId,
+          status: students.status,
+        },
+      })
+      .from(studentScores)
+      .innerJoin(students, eq(studentScores.studentId, students.id))
+      .where(eq(studentScores.assessmentId, id));
+
+    const averageScore = scores.length > 0 
+      ? scores.reduce((sum, score) => sum + Number(score.percentage), 0) / scores.length
+      : 0;
+
+    return { 
+      ...assessment, 
+      subject, 
+      averageScore, 
+      studentCount: scores.length, 
+      scores: scores.map(s => ({
+        ...s,
+        student: s.student
+      }))
+    };
+  }
+
+  async createAssessment(assessment: InsertAssessment): Promise<Assessment> {
+    const [newAssessment] = await db
+      .insert(assessments)
+      .values(assessment)
+      .returning();
+    return newAssessment;
+  }
+
+  async updateAssessment(id: number, assessment: Partial<InsertAssessment>): Promise<Assessment | undefined> {
+    const [updated] = await db
+      .update(assessments)
+      .set(assessment)
+      .where(eq(assessments.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteAssessment(id: number): Promise<boolean> {
+    const result = await db.delete(assessments).where(eq(assessments.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getRecentAssessments(limit = 5): Promise<AssessmentWithDetails[]> {
+    const recentAssessments = await db
+      .select()
+      .from(assessments)
+      .orderBy(desc(assessments.date))
+      .limit(limit);
+
+    const assessmentsWithDetails = await Promise.all(
+      recentAssessments.map(async (assessment) => {
+        const details = await this.getAssessmentWithDetails(assessment.id);
+        return details!;
+      })
+    );
+
+    return assessmentsWithDetails;
+  }
+
+  async getStudentScores(): Promise<StudentScore[]> {
+    return await db.select().from(studentScores);
+  }
+
+  async getStudentScoresByStudentId(studentId: number): Promise<StudentScore[]> {
+    return await db.select().from(studentScores).where(eq(studentScores.studentId, studentId));
+  }
+
+  async getStudentScoresByAssessmentId(assessmentId: number): Promise<StudentScore[]> {
+    return await db.select().from(studentScores).where(eq(studentScores.assessmentId, assessmentId));
+  }
+
+  async createStudentScore(score: InsertStudentScore): Promise<StudentScore> {
+    const [newScore] = await db
+      .insert(studentScores)
+      .values(score)
+      .returning();
+    return newScore;
+  }
+
+  async updateStudentScore(id: number, score: Partial<InsertStudentScore>): Promise<StudentScore | undefined> {
+    const [updated] = await db
+      .update(studentScores)
+      .set(score)
+      .where(eq(studentScores.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteStudentScore(id: number): Promise<boolean> {
+    const result = await db.delete(studentScores).where(eq(studentScores.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getLessonRecommendations(): Promise<LessonRecommendation[]> {
+    return await db.select().from(lessonRecommendations);
+  }
+
+  async getLessonRecommendationsByStudentId(studentId: number): Promise<LessonRecommendation[]> {
+    return await db
+      .select()
+      .from(lessonRecommendations)
+      .where(and(
+        eq(lessonRecommendations.studentId, studentId),
+        eq(lessonRecommendations.isActive, true)
+      ));
+  }
+
+  async createLessonRecommendation(recommendation: InsertLessonRecommendation): Promise<LessonRecommendation> {
+    const [newRecommendation] = await db
+      .insert(lessonRecommendations)
+      .values(recommendation)
+      .returning();
+    return newRecommendation;
+  }
+
+  async updateLessonRecommendation(id: number, recommendation: Partial<InsertLessonRecommendation>): Promise<LessonRecommendation | undefined> {
+    const [updated] = await db
+      .update(lessonRecommendations)
+      .set(recommendation)
+      .where(eq(lessonRecommendations.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteLessonRecommendation(id: number): Promise<boolean> {
+    const result = await db.delete(lessonRecommendations).where(eq(lessonRecommendations.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getDashboardStats(): Promise<DashboardStats> {
+    const allStudents = await db.select().from(students);
+    const totalStudents = allStudents.length;
+    const needsAttention = allStudents.filter(s => s.status === "needs_attention").length;
+    
+    const allScores = await db.select().from(studentScores);
+    const averageScore = allScores.length > 0 
+      ? allScores.reduce((sum, score) => sum + Number(score.percentage), 0) / allScores.length
+      : 0;
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const recentAssessments = await db
+      .select()
+      .from(assessments)
+      .where(gte(assessments.date, oneWeekAgo));
+
+    return {
+      totalStudents,
+      averageScore: Math.round(averageScore),
+      needsAttention,
+      assessmentsThisWeek: recentAssessments.length,
+    };
+  }
+
+  async getStudentsWithScores(): Promise<StudentWithScores[]> {
+    const allStudents = await db.select().from(students);
+    const studentsWithScores = await Promise.all(
+      allStudents.map(async (student) => {
+        const studentWithScores = await this.getStudentWithScores(student.id);
+        return studentWithScores!;
+      })
+    );
+    return studentsWithScores;
+  }
+}
+
+export const storage = new DatabaseStorage();

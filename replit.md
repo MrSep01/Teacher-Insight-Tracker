@@ -17,14 +17,15 @@ EduTrack is a comprehensive teacher dashboard application built with React and E
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
-- **Database**: PostgreSQL with Drizzle ORM
-- **Database Provider**: Neon serverless PostgreSQL
+- **Database**: PostgreSQL with Drizzle ORM for persistent data storage
+- **Database Provider**: Neon serverless PostgreSQL with automatic seeding
 - **API Design**: RESTful API with JSON responses
 - **Middleware**: Express middleware for logging, error handling, and request parsing
 
 ### Development Setup
 - **Monorepo Structure**: Client and server code in separate directories with shared schema
 - **Development Server**: Vite dev server with HMR for frontend, tsx for backend development
+- **Database Migration**: Drizzle Kit for schema management with automatic database seeding
 - **Production Build**: Vite build for frontend, esbuild for backend bundling
 
 ## Key Components
@@ -125,6 +126,8 @@ Changelog:
   * Interactive progress charts with subject-specific filtering
   * Fixed navigation issues and LSP errors
   * Integrated smart recommendation engine for tailored teaching strategies
+  * Migrated from in-memory storage to PostgreSQL database with persistent data
+  * Added automatic database seeding with sample students, subjects, and assessments
 ```
 
 ## User Preferences
