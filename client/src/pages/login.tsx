@@ -23,12 +23,21 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      const response = await apiRequest("/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       });
-      return response;
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Login failed");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -48,12 +57,21 @@ export default function Login() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: typeof registerData) => {
-      const response = await apiRequest("/api/auth/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       });
-      return response;
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Registration failed");
+      }
+      
+      return response.json();
     },
     onSuccess: (data: any) => {
       toast({
