@@ -69,13 +69,14 @@ export default function ProfileSetup() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
+  const [selectedCurriculum, setSelectedCurriculum] = useState<string>("");
+  const [selectedGradeLevels, setSelectedGradeLevels] = useState<string[]>([]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<ProfileSetupData>({
     resolver: zodResolver(profileSetupSchema),
     defaultValues: {
@@ -83,9 +84,6 @@ export default function ProfileSetup() {
       gradeLevels: [],
     },
   });
-
-  const selectedCurriculum = watch("curriculum");
-  const selectedGradeLevels = watch("gradeLevels") || [];
   
   const availableGrades = selectedCurriculum 
     ? curriculumOptions.find(c => c.id === selectedCurriculum)?.grades || []
@@ -114,19 +112,26 @@ export default function ProfileSetup() {
   });
 
   const onSubmit = (data: ProfileSetupData) => {
-    setupProfileMutation.mutate(data);
+    // Update form values with local state before submitting
+    const formData = {
+      curriculum: selectedCurriculum as ProfileSetupData["curriculum"],
+      gradeLevels: selectedGradeLevels,
+    };
+    setupProfileMutation.mutate(formData);
   };
 
   const handleCurriculumSelect = (curriculumId: string) => {
+    setSelectedCurriculum(curriculumId);
+    setSelectedGradeLevels([]); // Reset grade levels when curriculum changes
     setValue("curriculum", curriculumId as any);
-    setValue("gradeLevels", []); // Reset grade levels when curriculum changes
+    setValue("gradeLevels", []);
   };
 
   const handleGradeLevelToggle = (gradeId: string) => {
-    const current = selectedGradeLevels;
-    const updated = current.includes(gradeId)
-      ? current.filter(id => id !== gradeId)
-      : [...current, gradeId];
+    const updated = selectedGradeLevels.includes(gradeId)
+      ? selectedGradeLevels.filter(id => id !== gradeId)
+      : [...selectedGradeLevels, gradeId];
+    setSelectedGradeLevels(updated);
     setValue("gradeLevels", updated);
   };
 
