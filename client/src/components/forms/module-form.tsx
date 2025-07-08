@@ -111,12 +111,13 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
       description: data.description,
       curriculumTopic: data.curriculum, // Map curriculum to curriculumTopic
       gradeLevels: [data.gradeLevel], // Convert to array as expected by schema
-      topics: selectedTopics, // Include selected topics
-      objectives: selectedObjectives, // Include selected objectives
-      estimatedHours: data.estimatedHours || autoCalculatedHours, // Include estimated hours
+      topics: selectedTopics.length > 0 ? selectedTopics : ["default"], // Include selected topics
+      objectives: selectedObjectives.length > 0 ? selectedObjectives : ["default"], // Include selected objectives
+      estimatedHours: data.estimatedHours || autoCalculatedHours || 10, // Include estimated hours
     };
     
     console.log("Form submitting with data:", moduleData);
+    console.log("Form validation state:", data);
     onSubmit(moduleData);
   };
 

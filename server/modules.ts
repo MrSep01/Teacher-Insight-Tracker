@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { storage } from "./storage";
 import { requireAuth } from "./auth";
 import { insertModuleSchema } from "../shared/schema";
+import { z } from "zod";
 
 export function registerModuleRoutes(app: Express) {
   // Get all modules for the authenticated user
@@ -27,12 +28,44 @@ export function registerModuleRoutes(app: Express) {
       
       console.log("Processed module data:", JSON.stringify(moduleData, null, 2));
       
-      // Validate the data against the schema
+      // Create a custom validation schema for debugging
+      const debugSchema = z.object({
+        userId: z.number(),
+        title: z.string().min(1),
+        description: z.string().optional(),
+        curriculumTopic: z.string().min(1),
+        gradeLevels: z.array(z.string()).optional(),
+        topics: z.array(z.string()).optional(),
+        objectives: z.array(z.string()).optional(),
+        estimatedHours: z.number().optional(),
+        classId: z.number().optional(),
+        isActive: z.boolean().optional(),
+      });
+      
+      // Test with custom schema first
+      const customValidation = debugSchema.safeParse(moduleData);
+      if (!customValidation.success) {
+        console.error("Custom validation failed:", customValidation.error.errors);
+        console.error("Input data:", JSON.stringify(moduleData, null, 2));
+        const errorMessages = customValidation.error.errors.map(err => 
+          `${err.path.join('.')}: ${err.message}`
+        ).join(', ');
+        return res.status(400).json({ 
+          error: `Custom validation failed: ${errorMessages}`, 
+          details: customValidation.error.errors 
+        });
+      }
+      
+      // If custom validation passes, try the original schema
       const validationResult = insertModuleSchema.safeParse(moduleData);
       if (!validationResult.success) {
-        console.error("Validation failed:", validationResult.error.errors);
+        console.error("Drizzle validation failed:", validationResult.error.errors);
+        console.error("Input data:", JSON.stringify(moduleData, null, 2));
+        const errorMessages = validationResult.error.errors.map(err => 
+          `${err.path.join('.')}: ${err.message}`
+        ).join(', ');
         return res.status(400).json({ 
-          error: "Validation failed", 
+          error: `Drizzle validation failed: ${errorMessages}`, 
           details: validationResult.error.errors 
         });
       }
