@@ -7,10 +7,12 @@ import { useAuth } from "@/hooks/useAuth";
 import AuthGuard from "@/components/auth/auth-guard";
 import Dashboard from "@/pages/dashboard";
 import Students from "@/pages/students";
+import Classes from "@/pages/classes";
 import Assessments from "@/pages/assessments";
 import Modules from "@/pages/modules";
 import Reports from "@/pages/reports";
 import AIRecommendations from "@/pages/ai-recommendations";
+import Profile from "@/pages/profile";
 import Login from "@/pages/login";
 import VerifyEmail from "@/pages/verify-email";
 import DevVerify from "@/pages/dev-verify";
@@ -40,10 +42,12 @@ function Router() {
               <Switch>
                 <Route path="/" component={Dashboard} />
                 <Route path="/students" component={Students} />
+                <Route path="/classes" component={Classes} />
                 <Route path="/modules" component={Modules} />
                 <Route path="/assessments" component={Assessments} />
                 <Route path="/reports" component={Reports} />
                 <Route path="/ai-recommendations" component={AIRecommendations} />
+                <Route path="/profile" component={Profile} />
                 <Route component={NotFound} />
               </Switch>
             </div>

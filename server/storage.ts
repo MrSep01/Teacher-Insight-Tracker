@@ -1,6 +1,8 @@
 import { 
   User,
   InsertUser,
+  Class,
+  InsertClass,
   Student, 
   InsertStudent, 
   Subject, 
@@ -19,6 +21,7 @@ import {
   AssessmentWithDetails,
   DashboardStats,
   users,
+  classes,
   students,
   subjects,
   assessments,
@@ -38,6 +41,13 @@ export interface IStorage {
   getUserByResetToken(token: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+
+  // Classes
+  getClassesByTeacherId(teacherId: number): Promise<Class[]>;
+  getClassById(id: number): Promise<Class | undefined>;
+  createClass(cls: InsertClass): Promise<Class>;
+  updateClass(id: number, cls: Partial<InsertClass>): Promise<Class | undefined>;
+  deleteClass(id: number): Promise<boolean>;
 
   // Students
   getStudents(): Promise<Student[]>;
@@ -489,6 +499,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
+  }
+
+  // Class methods
+  async getClassesByTeacherId(teacherId: number): Promise<Class[]> {
+    return await db.select().from(classes).where(eq(classes.teacherId, teacherId));
+  }
+
+  async getClassById(id: number): Promise<Class | undefined> {
+    const [cls] = await db.select().from(classes).where(eq(classes.id, id));
+    return cls;
+  }
+
+  async createClass(cls: InsertClass): Promise<Class> {
+    const [newClass] = await db.insert(classes).values(cls).returning();
+    return newClass;
+  }
+
+  async updateClass(id: number, cls: Partial<InsertClass>): Promise<Class | undefined> {
+    const [updatedClass] = await db.update(classes).set(cls).where(eq(classes.id, id)).returning();
+    return updatedClass;
+  }
+
+  async deleteClass(id: number): Promise<boolean> {
+    const result = await db.delete(classes).where(eq(classes.id, id));
+    return result.rowCount > 0;
   }
 
   async getStudents(): Promise<Student[]> {

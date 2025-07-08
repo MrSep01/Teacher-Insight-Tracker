@@ -17,7 +17,7 @@ export const users = pgTable("users", {
   resetPasswordToken: varchar("reset_password_token"),
   resetPasswordExpires: timestamp("reset_password_expires"),
   // Teacher profile fields
-  curriculum: varchar("curriculum"), // "IGCSE Chemistry Edexcel" or "A Level Chemistry Edexcel"
+  curricula: text("curricula").array(), // ["IGCSE Chemistry Edexcel", "A Level Chemistry Edexcel"]
   gradeLevels: text("grade_levels").array(), // ["10", "11", "12"]
   profileCompleted: boolean("profile_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
@@ -34,12 +34,28 @@ export const userSessions = pgTable(
   (table) => [index("IDX_user_session_expire").on(table.expire)],
 );
 
+// Classes table for organizing students
+export const classes = pgTable("classes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // "Grade 10 IGCSE Chemistry A", "Grade 12 A Level Chemistry"
+  grade: text("grade").notNull(), // "10", "11", "12"
+  level: text("level").notNull(), // "IGCSE", "A Level"
+  curriculum: text("curriculum").notNull(), // "IGCSE Chemistry Edexcel", "A Level Chemistry Edexcel"
+  teacherId: integer("teacher_id").references(() => users.id),
+  description: text("description"),
+  academicYear: text("academic_year").notNull(), // "2024-2025"
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   grade: text("grade").notNull(), // "10", "11", "12"
   level: text("level").notNull(), // "IGCSE", "A Level"
   studentId: text("student_id").notNull().unique(),
+  classId: integer("class_id").references(() => classes.id),
   // Status will be calculated from assessment results, not stored
 });
 
@@ -82,6 +98,7 @@ export const modules = pgTable("modules", {
   description: text("description"),
   curriculumTopic: varchar("curriculum_topic").notNull(),
   gradeLevels: text("grade_levels").array(),
+  classId: integer("class_id").references(() => classes.id), // Optional class association
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -158,9 +175,18 @@ export const insertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+export const insertClassSchema = createInsertSchema(classes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type Class = typeof classes.$inferSelect;
+export type InsertClass = z.infer<typeof insertClassSchema>;
 
 export type Student = typeof students.$inferSelect;
 export type InsertStudent = z.infer<typeof insertStudentSchema>;

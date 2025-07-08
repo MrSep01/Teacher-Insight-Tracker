@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { GraduationCap, BarChart3, Users, Book, ClipboardCheck, FileText, Brain, LogOut, Settings } from "lucide-react";
+import { GraduationCap, BarChart3, Users, Book, ClipboardCheck, FileText, Brain, LogOut, Settings, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Students", href: "/students", icon: Users },
+  { name: "Classes", href: "/classes", icon: Users },
   { name: "Modules", href: "/modules", icon: Book },
   { name: "Assessments", href: "/assessments", icon: ClipboardCheck },
   { name: "Reports", href: "/reports", icon: FileText },
@@ -95,6 +96,12 @@ function UserProfile() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuItem asChild>
+            <Link href="/profile" className="w-full">
+              <User className="mr-2 h-4 w-4" />
+              Teacher Profile
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
             Settings

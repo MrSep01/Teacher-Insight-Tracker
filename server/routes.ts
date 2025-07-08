@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema } from "@shared/schema";
+import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
 import { setupAuth, requireAuth } from "./auth";
 import { registerModuleRoutes } from "./modules";
@@ -12,6 +12,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register module routes
   registerModuleRoutes(app);
+
+  // Profile update routes (protected)
+  app.put("/api/auth/update-profile", requireAuth, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { firstName, lastName, email } = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        firstName,
+        lastName,
+        email,
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update profile" });
+    }
+  });
+
+  app.put("/api/auth/update-curricula", requireAuth, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { curricula, gradeLevels } = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        curricula,
+        gradeLevels,
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update curricula" });
+    }
+  });
+
+  // Classes routes (protected)
+  app.get("/api/classes", requireAuth, async (req, res) => {
+    try {
+      const teacherId = req.user.id;
+      const classes = await storage.getClassesByTeacherId(teacherId);
+      res.json(classes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch classes" });
+    }
+  });
+
+  app.post("/api/classes", requireAuth, async (req, res) => {
+    try {
+      const teacherId = req.user.id;
+      const classData = insertClassSchema.parse({ ...req.body, teacherId });
+      const newClass = await storage.createClass(classData);
+      res.json(newClass);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to create class" });
+    }
+  });
+
+  app.put("/api/classes/:id", requireAuth, async (req, res) => {
+    try {
+      const classId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      // Verify the class belongs to the teacher
+      const existingClass = await storage.getClassById(classId);
+      if (!existingClass || existingClass.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Class not found" });
+      }
+      
+      const classData = insertClassSchema.partial().parse(req.body);
+      const updatedClass = await storage.updateClass(classId, classData);
+      res.json(updatedClass);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update class" });
+    }
+  });
+
+  app.delete("/api/classes/:id", requireAuth, async (req, res) => {
+    try {
+      const classId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      // Verify the class belongs to the teacher
+      const existingClass = await storage.getClassById(classId);
+      if (!existingClass || existingClass.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Class not found" });
+      }
+      
+      const deleted = await storage.deleteClass(classId);
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Class not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete class" });
+    }
+  });
 
   // Dashboard routes (protected)
   app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
