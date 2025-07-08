@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { storage } from "./storage";
 import { requireAuth } from "./auth";
 import { insertModuleSchema } from "../shared/schema";
-import { z } from "zod";
 
 export function registerModuleRoutes(app: Express) {
   // Get all modules for the authenticated user
@@ -18,89 +17,27 @@ export function registerModuleRoutes(app: Express) {
 
   // Create a new module
   app.post("/api/modules", requireAuth, async (req, res) => {
-    console.log("\n=== MODULE POST REQUEST RECEIVED ===");
-    console.log("Request body:", req.body);
-    console.log("User authenticated:", !!req.user);
-    
     try {
-      console.log("\n=== MODULE CREATION DEBUG ===");
-      console.log("Received module data:", JSON.stringify(req.body, null, 2));
-      console.log("User ID:", req.user.id);
-      
       const moduleData = {
         ...req.body,
         userId: req.user.id,
       };
       
-      console.log("Processed module data:", JSON.stringify(moduleData, null, 2));
-      console.log("Data types:", {
-        userId: typeof moduleData.userId,
-        title: typeof moduleData.title,
-        description: typeof moduleData.description,
-        curriculumTopic: typeof moduleData.curriculumTopic,
-        gradeLevels: Array.isArray(moduleData.gradeLevels) ? 'array' : typeof moduleData.gradeLevels,
-        topics: Array.isArray(moduleData.topics) ? 'array' : typeof moduleData.topics,
-        objectives: Array.isArray(moduleData.objectives) ? 'array' : typeof moduleData.objectives,
-        estimatedHours: typeof moduleData.estimatedHours
-      });
+      // Validate the data against the schema
+      const validationResult = insertModuleSchema.safeParse(moduleData);
+      if (!validationResult.success) {
+        console.error("Validation failed:", validationResult.error.errors);
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validationResult.error.errors 
+        });
+      }
       
-      // Temporarily bypass all validation to test database insert directly
-      console.log("Attempting direct database insert without validation...");
-      
-      const { db } = await import("./db");
-      const { modules } = await import("../shared/schema");
-      
-      const directInsert = await db.insert(modules).values({
-        userId: moduleData.userId,
-        title: moduleData.title,
-        description: moduleData.description,
-        curriculumTopic: moduleData.curriculumTopic,
-        gradeLevels: moduleData.gradeLevels || [],
-        topics: moduleData.topics || [],
-        objectives: moduleData.objectives || [],
-        estimatedHours: moduleData.estimatedHours || 0,
-        isActive: true
-      }).returning();
-      
-      console.log("Direct insert successful:", directInsert);
-      const newModule = directInsert[0];
+      const newModule = await storage.createModule(validationResult.data);
       res.status(201).json(newModule);
     } catch (error) {
       console.error("Error creating module:", error);
-      console.error("Error details:", error.message);
-      console.error("Error stack:", error.stack);
-      console.error("Error name:", error.name);
-      console.error("Error constructor:", error.constructor.name);
-      
-      // If it's a syntax error, it might be in the storage layer
-      if (error.message && error.message.includes('string did not match the expected pattern')) {
-        console.error("This appears to be a Drizzle/Database validation error");
-        console.error("Trying direct database insert for debugging...");
-        
-        // Try to bypass validation and insert directly
-        try {
-          const { db } = await import("./db");
-          const { modules } = await import("../shared/schema");
-          const directInsert = await db.insert(modules).values({
-            userId: req.user.id,
-            title: req.body.title,
-            description: req.body.description,
-            curriculumTopic: req.body.curriculumTopic,
-            gradeLevels: req.body.gradeLevels,
-            topics: req.body.topics,
-            objectives: req.body.objectives,
-            estimatedHours: req.body.estimatedHours,
-            isActive: true
-          }).returning();
-          
-          console.log("Direct insert successful:", directInsert);
-          return res.status(201).json(directInsert[0]);
-        } catch (directError) {
-          console.error("Direct insert also failed:", directError);
-        }
-      }
-      
-      res.status(400).json({ error: error.message || "Failed to create module" });
+      res.status(500).json({ error: "Failed to create module" });
     }
   });
 

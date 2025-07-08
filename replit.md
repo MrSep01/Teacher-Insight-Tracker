@@ -190,6 +190,12 @@ Changelog:
   * Integrated practical work requirements and mathematical skills for each subtopic
   * Created search and filtering capabilities for easy curriculum navigation with real-time selection tracking
   * Added graceful fallback for OpenAI quota limitations to ensure system reliability
+- July 08, 2025. Fixed critical module creation functionality:
+  * Resolved "string did not match the expected pattern" error by correcting API request function usage
+  * Updated database schema to include topics, objectives, and estimatedHours fields in modules table
+  * Fixed apiRequest function call to use proper parameters (url, options) instead of incorrect signature
+  * Restored proper validation with insertModuleSchema for production-ready code
+  * Successfully enabled module creation with curriculum topic selection and time estimation
 ```
 
 ## User Preferences

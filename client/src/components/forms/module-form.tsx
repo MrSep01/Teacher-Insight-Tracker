@@ -105,31 +105,17 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
   };
 
   const handleSubmit = (data: ModuleFormData) => {
-    console.log("=== FORM SUBMIT START ===");
-    console.log("Raw form data:", data);
-    console.log("Selected topics:", selectedTopics);
-    console.log("Selected objectives:", selectedObjectives);
-    console.log("Auto calculated hours:", autoCalculatedHours);
-    
-    // Map form data to match database schema - now includes all required fields
     const moduleData = {
-      title: data.name, // Map name to title
+      title: data.name,
       description: data.description,
-      curriculumTopic: data.curriculum, // Map curriculum to curriculumTopic
-      gradeLevels: [data.gradeLevel], // Convert to array as expected by schema
-      topics: selectedTopics.length > 0 ? selectedTopics : ["default"], // Include selected topics
-      objectives: selectedObjectives.length > 0 ? selectedObjectives : ["default"], // Include selected objectives
-      estimatedHours: data.estimatedHours || autoCalculatedHours || 10, // Include estimated hours
+      curriculumTopic: data.curriculum,
+      gradeLevels: [data.gradeLevel],
+      topics: selectedTopics.length > 0 ? selectedTopics : [],
+      objectives: selectedObjectives.length > 0 ? selectedObjectives : [],
+      estimatedHours: data.estimatedHours || autoCalculatedHours || 10,
     };
     
-    console.log("=== CALLING onSubmit ===");
-    console.log("Mapped module data:", moduleData);
-    
-    try {
-      onSubmit(moduleData);
-    } catch (error) {
-      console.error("=== ERROR IN onSubmit ===", error);
-    }
+    onSubmit(moduleData);
   };
 
   return (
