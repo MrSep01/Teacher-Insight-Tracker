@@ -138,6 +138,14 @@ export const lessonPlans = pgTable("lesson_plans", {
   assessmentCriteria: text("assessment_criteria").array(), // How success is measured
   differentiation: text("differentiation"), // How to adapt for different abilities
   homework: text("homework"), // Follow-up work
+  // Assessment components for this lesson
+  hasAssessment: boolean("has_assessment").default(false),
+  assessmentType: varchar("assessment_type"), // "formative" | "summative" 
+  assessmentDescription: text("assessment_description"),
+  assessmentDuration: integer("assessment_duration"), // in minutes
+  assessmentPoints: integer("assessment_points"),
+  assessmentCriteriaLesson: text("assessment_criteria_lesson").array(), // Specific lesson assessment criteria
+  rubric: text("rubric"), // JSON string of detailed rubric
   aiGenerated: boolean("ai_generated").default(false),
   aiSuggestions: text("ai_suggestions"),
   isCompleted: boolean("is_completed").default(false),

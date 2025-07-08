@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { AssessmentForm, AssessmentTypeBadge, AssessmentSummary } from "@/components/assessment-form";
 import { 
   Plus, 
   Edit, 
@@ -54,6 +55,14 @@ interface LessonPlan {
   assessmentCriteria: string[];
   differentiation?: string;
   homework?: string;
+  // Assessment components
+  hasAssessment: boolean;
+  assessmentType?: "formative" | "summative";
+  assessmentDescription?: string;
+  assessmentDuration?: number;
+  assessmentPoints?: number;
+  assessmentCriteriaLesson?: string[];
+  rubric?: string;
   aiGenerated: boolean;
   aiSuggestions?: string;
   isCompleted: boolean;
@@ -306,6 +315,12 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                       <span>{lesson.activities.length} activities</span>
                     </div>
                   </div>
+                  
+                  {lesson.hasAssessment && (
+                    <div className="mt-4 pt-4 border-t">
+                      <AssessmentSummary assessment={lesson} />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -475,6 +490,14 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
     assessmentCriteria: lesson?.assessmentCriteria || [""],
     differentiation: lesson?.differentiation || "",
     homework: lesson?.homework || "",
+    // Assessment fields
+    hasAssessment: lesson?.hasAssessment || false,
+    assessmentType: lesson?.assessmentType || "formative",
+    assessmentDescription: lesson?.assessmentDescription || "",
+    assessmentDuration: lesson?.assessmentDuration || 15,
+    assessmentPoints: lesson?.assessmentPoints || 10,
+    assessmentCriteriaLesson: lesson?.assessmentCriteriaLesson || [],
+    rubric: lesson?.rubric || "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -488,6 +511,19 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
       prerequisites: formData.prerequisites.filter(pre => pre.trim() !== ""),
       assessmentCriteria: formData.assessmentCriteria.filter(crit => crit.trim() !== ""),
     });
+  };
+
+  const handleAssessmentSubmit = (assessmentData: any) => {
+    setFormData(prev => ({
+      ...prev,
+      hasAssessment: assessmentData.hasAssessment,
+      assessmentType: assessmentData.assessmentType,
+      assessmentDescription: assessmentData.assessmentDescription,
+      assessmentDuration: assessmentData.assessmentDuration,
+      assessmentPoints: assessmentData.assessmentPoints,
+      assessmentCriteriaLesson: assessmentData.assessmentCriteria,
+      rubric: assessmentData.rubric,
+    }));
   };
 
   const updateArrayField = (field: string, index: number, value: string) => {
@@ -516,10 +552,11 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="basic">Basic Info</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
+          <TabsTrigger value="assessment">Assessment</TabsTrigger>
         </TabsList>
         
         <TabsContent value="basic" className="space-y-4">
@@ -833,6 +870,29 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
               rows={3}
             />
           </div>
+        </TabsContent>
+
+        <TabsContent value="assessment" className="space-y-4">
+          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+            <h4 className="font-medium text-blue-900 mb-2">Lesson Assessment Component</h4>
+            <p className="text-sm text-blue-700">
+              Add formative or summative assessment to measure student understanding during or after this lesson.
+            </p>
+          </div>
+
+          <AssessmentForm
+            initialData={{
+              hasAssessment: formData.hasAssessment,
+              assessmentType: formData.assessmentType,
+              assessmentDescription: formData.assessmentDescription,
+              assessmentDuration: formData.assessmentDuration,
+              assessmentPoints: formData.assessmentPoints,
+              assessmentCriteria: formData.assessmentCriteriaLesson,
+              rubric: formData.rubric,
+            }}
+            onSubmit={handleAssessmentSubmit}
+            isLoading={false}
+          />
         </TabsContent>
       </Tabs>
 
