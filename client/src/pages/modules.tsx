@@ -55,14 +55,11 @@ export default function Modules() {
     mutationFn: async (data: any) => {
       console.log("=== CLIENT: Sending module data ===", data);
       try {
-        const response = await apiRequest("POST", "/api/modules", data);
-        console.log("=== CLIENT: Response received ===", response.status, response.statusText);
-        const result = await response.json();
+        const result = await apiRequest("/api/modules", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
         console.log("=== CLIENT: Response data ===", result);
-        if (!response.ok) {
-          console.error("=== CLIENT: Server error response ===", result);
-          throw new Error(result.error || "Failed to create module");
-        }
         return result;
       } catch (error) {
         console.error("=== CLIENT: Request failed ===", error);
