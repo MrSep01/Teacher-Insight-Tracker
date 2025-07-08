@@ -73,11 +73,23 @@ export const subjects = pgTable("subjects", {
 export const assessments = pgTable("assessments", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  subjectId: integer("subject_id").notNull(),
-  date: timestamp("date").notNull(),
-  totalPoints: integer("total_points").notNull(),
   description: text("description"),
+  subjectId: integer("subject_id").notNull(),
+  moduleId: integer("module_id").references(() => modules.id), // Link to module
+  classId: integer("class_id").references(() => classes.id), // Link to class
+  topics: text("topics").array(), // Topics covered in assessment
+  objectives: text("objectives").array(), // Learning objectives
+  assessmentType: text("assessment_type").notNull().default("summative"), // formative, summative, diagnostic, practice
+  difficulty: text("difficulty").default("intermediate"), // basic, intermediate, advanced, mixed
+  questionTypes: text("question_types").array(), // Types of questions included
+  totalPoints: integer("total_points").notNull(),
+  estimatedDuration: integer("estimated_duration").default(60), // minutes
+  instructions: text("instructions"),
+  markingScheme: text("marking_scheme"), // JSON string of marking criteria
+  aiGenerated: boolean("ai_generated").default(false),
+  date: timestamp("date").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const studentScores = pgTable("student_scores", {
@@ -145,6 +157,7 @@ export const insertSubjectSchema = createInsertSchema(subjects).omit({
 export const insertAssessmentSchema = createInsertSchema(assessments).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertStudentScoreSchema = createInsertSchema(studentScores).omit({

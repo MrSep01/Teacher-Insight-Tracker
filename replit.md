@@ -175,6 +175,13 @@ Changelog:
   * Fixed API request authentication by correcting apiRequest function usage
   * Enhanced error handling and validation for profile setup process
   * Successfully enabled teachers to complete curriculum and grade level selection
+- July 08, 2025. Enhanced assessment system with AI-powered generation:
+  * Implemented comprehensive AI assessment generator using OpenAI GPT-4o
+  * Created structured curriculum data system for proper topic/objective mapping
+  * Added assessment creation workflow based on modules, topics, and learning objectives
+  * Built curriculum API endpoints for hierarchical data access (topics → subtopics → objectives)
+  * Enhanced assessment schema to support AI-generated content with difficulty levels and question types
+  * Prepared curriculum data structure for official Edexcel specification integration
 ```
 
 ## User Preferences

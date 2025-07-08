@@ -736,20 +736,52 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecentAssessments(limit = 5): Promise<AssessmentWithDetails[]> {
-    const recentAssessments = await db
-      .select()
-      .from(assessments)
-      .orderBy(desc(assessments.date))
-      .limit(limit);
+    try {
+      const recentAssessments = await db
+        .select({
+          id: assessments.id,
+          title: assessments.title,
+          description: assessments.description,
+          subjectId: assessments.subjectId,
+          moduleId: assessments.moduleId,
+          classId: assessments.classId,
+          topics: assessments.topics,
+          objectives: assessments.objectives,
+          assessmentType: assessments.assessmentType,
+          difficulty: assessments.difficulty,
+          questionTypes: assessments.questionTypes,
+          totalPoints: assessments.totalPoints,
+          estimatedDuration: assessments.estimatedDuration,
+          instructions: assessments.instructions,
+          markingScheme: assessments.markingScheme,
+          aiGenerated: assessments.aiGenerated,
+          date: assessments.date,
+          createdAt: assessments.createdAt,
+          updatedAt: assessments.updatedAt,
+          subject: {
+            id: subjects.id,
+            name: subjects.name,
+            topicArea: subjects.topicArea,
+            grade: subjects.grade,
+            level: subjects.level,
+            curriculum: subjects.curriculum,
+            color: subjects.color,
+            icon: subjects.icon,
+          }
+        })
+        .from(assessments)
+        .leftJoin(subjects, eq(assessments.subjectId, subjects.id))
+        .orderBy(desc(assessments.date))
+        .limit(limit);
 
-    const assessmentsWithDetails = await Promise.all(
-      recentAssessments.map(async (assessment) => {
-        const details = await this.getAssessmentWithDetails(assessment.id);
-        return details!;
-      })
-    );
-
-    return assessmentsWithDetails;
+      return recentAssessments.map(assessment => ({
+        ...assessment,
+        studentCount: 0 // This would need to be calculated from scores
+      }));
+    } catch (error) {
+      console.error("Error fetching recent assessments:", error);
+      return [];
+    }
   }
 
   async getStudentScores(): Promise<StudentScore[]> {

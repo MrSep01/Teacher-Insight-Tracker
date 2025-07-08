@@ -3,8 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
+import { aiAssessmentGenerator } from "./ai-assessment-generator";
 import { setupAuth, requireAuth } from "./auth";
 import { registerModuleRoutes } from "./modules";
+import { registerCurriculumRoutes } from "./curriculum-api";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -12,6 +14,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register module routes
   registerModuleRoutes(app);
+
+  // Register curriculum routes
+  registerCurriculumRoutes(app);
 
   // Profile update routes (protected)
   app.put("/api/auth/update-profile", requireAuth, async (req, res) => {
@@ -215,8 +220,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Assessment Generation Routes
+  app.post("/api/assessments/generate-objectives", requireAuth, async (req, res) => {
+    try {
+      const { topics, curriculum, gradeLevel } = req.body;
+      const objectives = await aiAssessmentGenerator.generateObjectivesFromTopics(topics, curriculum, gradeLevel);
+      res.json({ objectives });
+    } catch (error) {
+      console.error("Error generating objectives:", error);
+      res.status(500).json({ error: "Failed to generate learning objectives" });
+    }
+  });
+
+  app.post("/api/assessments/suggest-topics", requireAuth, async (req, res) => {
+    try {
+      const { moduleId } = req.body;
+      const module = await storage.getModuleById(moduleId);
+      if (!module) {
+        return res.status(404).json({ error: "Module not found" });
+      }
+      const topics = await aiAssessmentGenerator.suggestTopicsFromModule(module);
+      res.json({ topics });
+    } catch (error) {
+      console.error("Error suggesting topics:", error);
+      res.status(500).json({ error: "Failed to suggest topics" });
+    }
+  });
+
+  app.post("/api/assessments/generate", requireAuth, async (req, res) => {
+    try {
+      const generatedAssessment = await aiAssessmentGenerator.generateAssessment(req.body);
+      
+      // Create the assessment in the database
+      const assessmentData = {
+        title: generatedAssessment.title,
+        description: generatedAssessment.description,
+        subjectId: req.body.subjectId,
+        moduleId: req.body.moduleId,
+        classId: req.body.classId,
+        topics: req.body.topics,
+        objectives: req.body.objectives.map((obj: any) => obj.objective),
+        assessmentType: req.body.assessmentType,
+        difficulty: req.body.difficulty,
+        questionTypes: req.body.questionTypes,
+        totalPoints: generatedAssessment.totalPoints,
+        estimatedDuration: generatedAssessment.estimatedDuration,
+        instructions: generatedAssessment.instructions,
+        markingScheme: JSON.stringify(generatedAssessment.markingScheme),
+        aiGenerated: true,
+        date: new Date(),
+      };
+
+      const newAssessment = await storage.createAssessment(assessmentData);
+      
+      res.json({
+        assessment: newAssessment,
+        generatedContent: generatedAssessment
+      });
+    } catch (error) {
+      console.error("Error generating assessment:", error);
+      res.status(500).json({ error: "Failed to generate assessment" });
+    }
+  });
+
   // Assessments routes
-  app.get("/api/assessments", async (req, res) => {
+  app.get("/api/assessments", requireAuth, async (req, res) => {
     try {
       const assessments = await storage.getAssessments();
       res.json(assessments);
