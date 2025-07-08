@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { storage } from "./storage";
 import { requireAuth } from "./auth";
+import { insertModuleSchema } from "../shared/schema";
 
 export function registerModuleRoutes(app: Express) {
   // Get all modules for the authenticated user
@@ -17,16 +18,32 @@ export function registerModuleRoutes(app: Express) {
   // Create a new module
   app.post("/api/modules", requireAuth, async (req, res) => {
     try {
+      console.log("Received module data:", JSON.stringify(req.body, null, 2));
+      
       const moduleData = {
         ...req.body,
         userId: req.user.id,
       };
       
-      const newModule = await storage.createModule(moduleData);
+      console.log("Processed module data:", JSON.stringify(moduleData, null, 2));
+      
+      // Validate the data against the schema
+      const validationResult = insertModuleSchema.safeParse(moduleData);
+      if (!validationResult.success) {
+        console.error("Validation failed:", validationResult.error.errors);
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validationResult.error.errors 
+        });
+      }
+      
+      const newModule = await storage.createModule(validationResult.data);
       res.status(201).json(newModule);
     } catch (error) {
       console.error("Error creating module:", error);
-      res.status(500).json({ error: "Failed to create module" });
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
+      res.status(400).json({ error: error.message || "Failed to create module" });
     }
   });
 
