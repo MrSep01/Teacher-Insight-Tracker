@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { GraduationCap, BarChart3, Users, Book, ClipboardCheck, FileText } from "lucide-react";
+import { GraduationCap, BarChart3, Users, Book, ClipboardCheck, FileText, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -8,6 +8,7 @@ const navigation = [
   { name: "Lesson Plans", href: "/lessons", icon: Book },
   { name: "Assessments", href: "/assessments", icon: ClipboardCheck },
   { name: "Reports", href: "/reports", icon: FileText },
+  { name: "AI Recommendations", href: "/ai-recommendations", icon: Brain },
 ];
 
 export default function Sidebar() {

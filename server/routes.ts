@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema } from "@shared/schema";
+import { aiEngine } from "./ai-recommendations";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard routes
@@ -218,6 +219,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(recommendation);
     } catch (error) {
       res.status(400).json({ error: "Invalid recommendation data" });
+    }
+  });
+
+  // AI Recommendations routes
+  app.get("/api/ai-recommendations/:studentId", async (req, res) => {
+    try {
+      const studentId = parseInt(req.params.studentId);
+      const student = await storage.getStudentWithScores(studentId);
+      
+      if (!student) {
+        return res.status(404).json({ error: "Student not found" });
+      }
+
+      const subjects = await storage.getSubjects();
+      const allStudents = await storage.getStudentsWithScores();
+      
+      const recommendations = await aiEngine.generateDetailedRecommendations(
+        student, 
+        subjects, 
+        allStudents
+      );
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error('Error generating AI recommendations:', error);
+      res.status(500).json({ error: "Failed to generate recommendations" });
+    }
+  });
+
+  app.get("/api/ai-recommendations", async (req, res) => {
+    try {
+      const allStudents = await storage.getStudentsWithScores();
+      const subjects = await storage.getSubjects();
+      
+      const allRecommendations = await Promise.all(
+        allStudents.map(async (student) => {
+          const recommendations = await aiEngine.generateDetailedRecommendations(
+            student, 
+            subjects, 
+            allStudents
+          );
+          return {
+            studentId: student.id,
+            studentName: student.name,
+            recommendations: recommendations.slice(0, 3) // Top 3 recommendations per student
+          };
+        })
+      );
+      
+      res.json(allRecommendations);
+    } catch (error) {
+      console.error('Error generating bulk AI recommendations:', error);
+      res.status(500).json({ error: "Failed to generate recommendations" });
     }
   });
 

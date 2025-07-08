@@ -8,6 +8,7 @@ import Students from "@/pages/students";
 import Assessments from "@/pages/assessments";
 import Lessons from "@/pages/lessons";
 import Reports from "@/pages/reports";
+import AIRecommendations from "@/pages/ai-recommendations";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/sidebar";
 
@@ -22,6 +23,7 @@ function Router() {
           <Route path="/lessons" component={Lessons} />
           <Route path="/assessments" component={Assessments} />
           <Route path="/reports" component={Reports} />
+          <Route path="/ai-recommendations" component={AIRecommendations} />
           <Route component={NotFound} />
         </Switch>
       </div>
