@@ -1,4 +1,11 @@
 import { useState, useEffect } from "react";
+
+// Add global type declaration
+declare global {
+  interface Window {
+    updateEstimatedHours?: (hours: number) => void;
+  }
+}
 import { useQuery } from "@tanstack/react-query";
 import { Book, Target, Clock, Zap, ChevronDown, ChevronRight, Plus, Check, GraduationCap, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -140,6 +147,38 @@ export function FlexibleCurriculumMapper({
   }
 
   const { igcseTopics, aLevelTopics } = getSelectedTopicsByLevel();
+
+  // Helper functions for time calculations
+  const calculateTopicHours = (topicIds: string[], curriculumData: any) => {
+    if (!curriculumData?.topics) return 0;
+    return topicIds.reduce((total, topicId) => {
+      const topic = curriculumData.topics.find((t: any) => t.id === topicId);
+      return total + (topic?.timeAllocation || 0);
+    }, 0);
+  };
+
+  const calculateObjectiveMinutes = (objectiveIds: string[], topics: CurriculumTopic[]) => {
+    return objectiveIds.reduce((total, objId) => {
+      const objective = topics.flatMap((t: CurriculumTopic) => 
+        t.subtopics.flatMap(s => s.objectives)
+      ).find((o: LearningObjective) => o.id === objId);
+      return total + (objective?.estimatedTeachingMinutes || 0);
+    }, 0);
+  };
+
+  // Calculate total estimated hours for parent component
+  const totalEstimatedHours = Math.round(
+    (calculateTopicHours(igcseTopics, igcseData) + 
+     calculateTopicHours(aLevelTopics, aLevelData) + 
+     calculateObjectiveMinutes(selectedObjectives, allTopics) / 60) * 10
+  ) / 10;
+
+  // Notify parent component of time estimate changes
+  useEffect(() => {
+    if (window.updateEstimatedHours) {
+      window.updateEstimatedHours(totalEstimatedHours);
+    }
+  }, [totalEstimatedHours]);
 
   return (
     <div className="space-y-6">
@@ -285,10 +324,10 @@ export function FlexibleCurriculumMapper({
         </div>
       </div>
 
-      {/* Mixed Selection Summary */}
+      {/* Enhanced Selection Summary with Time Estimates */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800">
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <h4 className="font-medium mb-2">IGCSE Selection</h4>
               <div className="space-y-1">
@@ -296,6 +335,9 @@ export function FlexibleCurriculumMapper({
                 <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
                   Foundation Level
                 </Badge>
+                <p className="text-xs text-gray-500">
+                  {calculateTopicHours(igcseTopics, igcseData)}h teaching time
+                </p>
               </div>
             </div>
             <div>
@@ -305,16 +347,45 @@ export function FlexibleCurriculumMapper({
                 <Badge variant="outline" className="bg-purple-50 dark:bg-purple-950">
                   Advanced Level
                 </Badge>
+                <p className="text-xs text-gray-500">
+                  {calculateTopicHours(aLevelTopics, aLevelData)}h teaching time
+                </p>
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-2">Total Objectives</h4>
+              <h4 className="font-medium mb-2">Learning Objectives</h4>
               <div className="space-y-1">
-                <p className="text-sm text-gray-600">{selectedObjectives.length} learning objectives</p>
+                <p className="text-sm text-gray-600">{selectedObjectives.length} objectives</p>
                 <Badge variant="outline">
                   <Clock className="h-3 w-3 mr-1" />
-                  Mixed difficulty levels
+                  {Math.round(calculateObjectiveMinutes(selectedObjectives, allTopics) / 60)}h estimated
                 </Badge>
+                <p className="text-xs text-gray-500">
+                  {calculateObjectiveMinutes(selectedObjectives, allTopics)} minutes total
+                </p>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2">Total Estimate</h4>
+              <div className="space-y-1">
+                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-semibold text-lg text-blue-700">
+                        {Math.round(
+                          (calculateTopicHours(igcseTopics, igcseData) + 
+                           calculateTopicHours(aLevelTopics, aLevelData) + 
+                           calculateObjectiveMinutes(selectedObjectives, allTopics) / 60) * 10
+                        ) / 10}h
+                      </p>
+                      <p className="text-xs text-gray-500">Recommended teaching time</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-blue-600">
+                  ✓ Based on Edexcel specifications
+                </p>
               </div>
             </div>
           </div>

@@ -1,4 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// Add global type declaration
+declare global {
+  interface Window {
+    updateEstimatedHours?: (hours: number) => void;
+  }
+}
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,6 +41,8 @@ interface ModuleFormProps {
 export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormProps) {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
+  const [autoCalculatedHours, setAutoCalculatedHours] = useState<number>(0);
+  const [manuallyAdjusted, setManuallyAdjusted] = useState<boolean>(false);
   
   const form = useForm<ModuleFormData>({
     resolver: zodResolver(moduleSchema),
@@ -47,6 +56,19 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
       estimatedHours: 10,
     },
   });
+
+  // Set up global function for curriculum mapper to update hours
+  useEffect(() => {
+    window.updateEstimatedHours = (hours: number) => {
+      setAutoCalculatedHours(hours);
+      if (!manuallyAdjusted && hours > 0) {
+        form.setValue("estimatedHours", Math.ceil(hours));
+      }
+    };
+    return () => {
+      delete window.updateEstimatedHours;
+    };
+  }, [manuallyAdjusted, form]);
 
   const watchedCurriculum = form.watch("curriculum");
   const watchedGradeLevel = form.watch("gradeLevel");
@@ -178,25 +200,76 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
                 name="estimatedHours"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estimated Hours</FormLabel>
+                    <FormLabel className="flex items-center space-x-2">
+                      <span>Estimated Hours</span>
+                      {autoCalculatedHours > 0 && (
+                        <Badge variant="outline" className="text-xs bg-blue-50">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Auto: {Math.ceil(autoCalculatedHours)}h
+                        </Badge>
+                      )}
+                    </FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        min="1" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
+                      <div className="space-y-2">
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          {...field} 
+                          onChange={(e) => {
+                            field.onChange(parseInt(e.target.value));
+                            setManuallyAdjusted(true);
+                          }}
+                          placeholder="Enter estimated hours"
+                        />
+                        {autoCalculatedHours > 0 && (
+                          <div className="flex items-center justify-between text-sm">
+                            <p className="text-gray-600">
+                              Specification-based estimate: {Math.ceil(autoCalculatedHours)} hours
+                            </p>
+                            {manuallyAdjusted && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  form.setValue("estimatedHours", Math.ceil(autoCalculatedHours));
+                                  setManuallyAdjusted(false);
+                                }}
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                Use Auto Estimate
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          💡 For new teachers: Start with the auto-calculated estimate based on Edexcel specifications, then adjust based on your teaching pace and student needs.
+                        </p>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Selection Summary */}
+              {/* Enhanced Selection Summary with Time Breakdown */}
               {(selectedTopics.length > 0 || selectedObjectives.length > 0) && (
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-medium mb-2">Current Selection</h4>
-                  <div className="space-y-2">
+                <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">Current Selection</h4>
+                    {autoCalculatedHours > 0 && (
+                      <div className="flex items-center space-x-2">
+                        <Badge className="bg-green-100 text-green-800">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {Math.ceil(autoCalculatedHours)}h estimated
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Specification-based
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-3">
                     {selectedTopics.length > 0 && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">
@@ -234,6 +307,18 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
                               +{selectedObjectives.length - 5} more
                             </Badge>
                           )}
+                        </div>
+                      </div>
+                    )}
+                    {autoCalculatedHours > 0 && (
+                      <div className="bg-white/60 p-3 rounded border border-green-200">
+                        <p className="text-sm font-medium text-green-800 mb-1">
+                          Teaching Time Breakdown:
+                        </p>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <p>• Specification-based estimate: {Math.ceil(autoCalculatedHours)} hours</p>
+                          <p>• Includes practical work and assessment preparation</p>
+                          <p>• Adjust based on your students' needs and pace</p>
                         </div>
                       </div>
                     )}
