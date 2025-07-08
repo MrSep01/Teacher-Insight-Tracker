@@ -516,15 +516,16 @@ function AssessmentCreationForm({ modules, lessons, subjects, onSubmit, isLoadin
 
       {selectedModule && (
         <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Selected Context</h4>
+          <h4 className="font-medium text-blue-900 mb-2">Assessment Context</h4>
           <div className="space-y-2 text-sm">
             <p><strong>Module:</strong> {selectedModule.title}</p>
             <p><strong>Topics:</strong> {selectedModule.topics.join(", ")}</p>
-            <p><strong>Module Objectives:</strong> {selectedModule.objectives.join(", ")}</p>
+            <p><strong>Available Objectives:</strong> {selectedModule.objectives.join(", ")}</p>
             {selectedLesson && (
               <>
                 <p><strong>Lesson:</strong> {selectedLesson.title}</p>
                 <p><strong>Lesson Objectives:</strong> {selectedLesson.objectives.join(", ")}</p>
+                <p className="text-green-700 font-medium">Assessment will be based on these lesson objectives only.</p>
               </>
             )}
           </div>

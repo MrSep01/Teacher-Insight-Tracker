@@ -115,9 +115,10 @@ Create a comprehensive ${request.lessonType} lesson plan for ${request.curriculu
 ${this.getLessonTypeSpecs(request.lessonType)}
 
 **Requirements:**
-1. Create 3-5 specific, measurable learning objectives
-2. Design 4-6 engaging activities appropriate for the lesson type
-3. List 5-8 resources including textbooks, digital tools, and materials
+1. Use ONLY the module objectives provided above - do not create new objectives
+2. Select 1-3 relevant module objectives that align with this lesson topic
+3. Design 4-6 engaging activities appropriate for the lesson type
+4. List 5-8 resources including textbooks, digital tools, and materials
 4. Include 3-4 prerequisites students should have
 5. Provide 3-4 assessment criteria for measuring success
 6. Write differentiation strategies for different ability levels
@@ -165,11 +166,23 @@ Make the lesson engaging, practical, and aligned with Edexcel chemistry specific
   }
 
   private processAIResponse(aiResponse: any, request: LessonGenerationRequest): GeneratedLesson {
+    // Filter AI objectives to only include those from the module
+    const aiObjectives = Array.isArray(aiResponse.objectives) ? aiResponse.objectives : [];
+    const validObjectives = aiObjectives.filter((obj: string) => 
+      request.moduleObjectives.some(moduleObj => 
+        moduleObj.toLowerCase().includes(obj.toLowerCase()) || 
+        obj.toLowerCase().includes(moduleObj.toLowerCase())
+      )
+    );
+
+    // If no valid objectives found, use the first module objective
+    const finalObjectives = validObjectives.length > 0 ? validObjectives : [request.moduleObjectives[0]];
+
     return {
       title: aiResponse.title || `${request.topic} - ${request.lessonType}`,
       description: aiResponse.description || `A ${request.lessonType} lesson on ${request.topic}`,
       lessonType: request.lessonType,
-      objectives: Array.isArray(aiResponse.objectives) ? aiResponse.objectives : ["Understand key concepts"],
+      objectives: finalObjectives,
       activities: Array.isArray(aiResponse.activities) ? aiResponse.activities : ["Interactive discussion"],
       resources: Array.isArray(aiResponse.resources) ? aiResponse.resources : ["Textbook", "Whiteboard"],
       equipment: Array.isArray(aiResponse.equipment) ? aiResponse.equipment : [],
@@ -177,7 +190,7 @@ Make the lesson engaging, practical, and aligned with Edexcel chemistry specific
       duration: request.duration,
       difficulty: request.difficulty,
       prerequisites: Array.isArray(aiResponse.prerequisites) ? aiResponse.prerequisites : [],
-      assessmentCriteria: Array.isArray(aiResponse.assessmentCriteria) ? aiResponse.assessmentCriteria : [],
+      assessmentCriteria: finalObjectives,
       differentiation: aiResponse.differentiation || "Provide support for different learning styles",
       homework: aiResponse.homework || "Review lesson notes and complete practice questions",
       sequenceOrder: 1, // Default to 1, can be updated later

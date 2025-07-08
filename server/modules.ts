@@ -123,6 +123,26 @@ export function registerModuleRoutes(app: Express) {
         return res.status(404).json({ error: "Module not found" });
       }
       
+      // Check if module has objectives
+      if (!module.objectives || module.objectives.length === 0) {
+        return res.status(400).json({ 
+          error: "Module must have at least one objective before creating lessons" 
+        });
+      }
+      
+      // Validate that lesson objectives exist in module objectives
+      if (req.body.objectives && req.body.objectives.length > 0) {
+        const invalidObjectives = req.body.objectives.filter((obj: string) => 
+          !module.objectives.includes(obj)
+        );
+        
+        if (invalidObjectives.length > 0) {
+          return res.status(400).json({ 
+            error: `Invalid objectives. Please use only module objectives: ${invalidObjectives.join(", ")}` 
+          });
+        }
+      }
+      
       const lessonPlanData = {
         ...req.body,
         moduleId,
@@ -144,6 +164,13 @@ export function registerModuleRoutes(app: Express) {
       
       if (!module || module.userId !== req.user.id) {
         return res.status(404).json({ error: "Module not found" });
+      }
+      
+      // Check if module has objectives
+      if (!module.objectives || module.objectives.length === 0) {
+        return res.status(400).json({ 
+          error: "Module must have at least one objective before generating lessons" 
+        });
       }
       
       const { lessonType, topic, duration, difficulty } = req.body;

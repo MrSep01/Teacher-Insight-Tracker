@@ -148,18 +148,42 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
   });
 
   const handleCreateLesson = () => {
+    if (!module.objectives || module.objectives.length === 0) {
+      toast({
+        title: "No objectives found",
+        description: "Please add at least one objective to the module before creating lessons.",
+        variant: "destructive",
+      });
+      return;
+    }
     setCreationMode("manual");
     setSelectedLesson(null);
     setIsCreateModalOpen(true);
   };
 
   const handleGenerateAILesson = () => {
+    if (!module.objectives || module.objectives.length === 0) {
+      toast({
+        title: "No objectives found",
+        description: "Please add at least one objective to the module before generating lessons.",
+        variant: "destructive",
+      });
+      return;
+    }
     setCreationMode("ai");
     setSelectedLesson(null);
     setIsCreateModalOpen(true);
   };
 
   const handleCreateFromObjectives = () => {
+    if (!module.objectives || module.objectives.length === 0) {
+      toast({
+        title: "No objectives found",
+        description: "Please add at least one objective to the module before creating lessons.",
+        variant: "destructive",
+      });
+      return;
+    }
     setCreationMode("objectives");
     setSelectedLesson(null);
     setIsCreateModalOpen(true);
@@ -201,6 +225,30 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
 
   return (
     <div className="space-y-6">
+      {/* Module objectives warning */}
+      {(!module.objectives || module.objectives.length === 0) && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">
+                Module Setup Required
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>
+                  This module needs at least one objective before lessons can be created. 
+                  Please add objectives to enable lesson creation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header with action buttons */}
       <div className="flex justify-between items-center">
         <div>
@@ -214,6 +262,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
             onClick={handleCreateFromObjectives}
             size="sm"
             className="bg-green-600 hover:bg-green-700"
+            disabled={!module.objectives || module.objectives.length === 0}
           >
             <Target className="h-4 w-4 mr-2" />
             From Objectives
@@ -222,6 +271,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
             onClick={handleCreateLesson}
             size="sm"
             className="bg-blue-600 hover:bg-blue-700"
+            disabled={!module.objectives || module.objectives.length === 0}
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Lesson
@@ -231,6 +281,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
             size="sm"
             variant="outline"
             className="border-purple-300 text-purple-700 hover:bg-purple-50"
+            disabled={!module.objectives || module.objectives.length === 0}
           >
             <Bot className="h-4 w-4 mr-2" />
             AI Generate
@@ -675,33 +726,42 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
         <TabsContent value="content" className="space-y-4">
           <div>
             <Label>Learning Objectives</Label>
-            {formData.objectives.map((objective, index) => (
-              <div key={index} className="flex items-center space-x-2 mt-2">
-                <Input
-                  value={objective}
-                  onChange={(e) => updateArrayField('objectives', index, e.target.value)}
-                  placeholder="Enter learning objective"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeArrayItem('objectives', index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => addArrayItem('objectives')}
-              className="mt-2"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add Objective
-            </Button>
+            <p className="text-sm text-gray-600 mb-3">
+              Select objectives from the module curriculum
+            </p>
+            <div className="space-y-2 max-h-60 overflow-y-auto border rounded-md p-3">
+              {module.objectives.map((objective, index) => (
+                <div key={index} className="flex items-start space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`lesson-objective-${index}`}
+                    checked={formData.objectives.includes(objective)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setFormData(prev => ({
+                          ...prev,
+                          objectives: [...prev.objectives, objective]
+                        }));
+                      } else {
+                        setFormData(prev => ({
+                          ...prev,
+                          objectives: prev.objectives.filter(obj => obj !== objective)
+                        }));
+                      }
+                    }}
+                    className="mt-1 rounded border-gray-300"
+                  />
+                  <Label htmlFor={`lesson-objective-${index}`} className="text-sm flex-1 cursor-pointer">
+                    {objective}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            {formData.objectives.length === 0 && (
+              <p className="text-sm text-red-600 mt-2">
+                Please select at least one objective from the module.
+              </p>
+            )}
           </div>
 
           <div>
@@ -922,7 +982,7 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
             }}
             onSubmit={handleAssessmentSubmit}
             isLoading={false}
-            lessonObjectives={formData.objectives.filter(obj => obj.trim() !== "")}
+            lessonObjectives={formData.objectives}
             lessonTopics={module.topics || []}
           />
         </TabsContent>
@@ -983,9 +1043,7 @@ function ObjectiveLessonCreator({ module, onCreateLessons, isLoading }: Objectiv
         assessmentCriteria: [objective],
         targetStudents: [],
         aiGenerated: false,
-        isCompleted: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        isCompleted: false
       };
       
       onCreateLessons(lessonData);
