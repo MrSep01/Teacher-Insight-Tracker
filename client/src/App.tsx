@@ -8,7 +8,7 @@ import AuthGuard from "@/components/auth/auth-guard";
 import Dashboard from "@/pages/dashboard";
 import Students from "@/pages/students";
 import Assessments from "@/pages/assessments";
-import Lessons from "@/pages/lessons";
+import Modules from "@/pages/modules";
 import Reports from "@/pages/reports";
 import AIRecommendations from "@/pages/ai-recommendations";
 import Login from "@/pages/login";
@@ -40,7 +40,7 @@ function Router() {
               <Switch>
                 <Route path="/" component={Dashboard} />
                 <Route path="/students" component={Students} />
-                <Route path="/lessons" component={Lessons} />
+                <Route path="/modules" component={Modules} />
                 <Route path="/assessments" component={Assessments} />
                 <Route path="/reports" component={Reports} />
                 <Route path="/ai-recommendations" component={AIRecommendations} />

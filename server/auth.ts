@@ -400,17 +400,15 @@ export async function setupAuth(app: Express) {
 
   app.post("/api/auth/setup-profile", requireAuth, async (req, res) => {
     try {
-      const { subjects, gradeLevels, educationLevels } = req.body;
+      const { curriculum, gradeLevels } = req.body;
       
-      if (!subjects || !gradeLevels || !educationLevels) {
-        return res.status(400).json({ error: "All profile fields are required" });
+      if (!curriculum || !gradeLevels || gradeLevels.length === 0) {
+        return res.status(400).json({ error: "Curriculum and grade levels are required" });
       }
 
       const updatedUser = await storage.updateUser(req.user.id, {
-        subjects,
+        curriculum,
         gradeLevels,
-        educationLevels,
-        curriculum: "Edexcel",
         profileCompleted: true,
       });
 

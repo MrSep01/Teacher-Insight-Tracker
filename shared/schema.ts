@@ -17,10 +17,8 @@ export const users = pgTable("users", {
   resetPasswordToken: varchar("reset_password_token"),
   resetPasswordExpires: timestamp("reset_password_expires"),
   // Teacher profile fields
-  subjects: text("subjects").array(), // Chemistry topics they teach
+  curriculum: varchar("curriculum"), // "IGCSE Chemistry Edexcel" or "A Level Chemistry Edexcel"
   gradeLevels: text("grade_levels").array(), // ["10", "11", "12"]
-  educationLevels: text("education_levels").array(), // ["IGCSE", "A Level"]
-  curriculum: varchar("curriculum").default("Edexcel"),
   profileCompleted: boolean("profile_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -76,6 +74,37 @@ export const studentScores = pgTable("student_scores", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Curriculum modules for teachers
+export const modules = pgTable("modules", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  curriculumTopic: varchar("curriculum_topic").notNull(),
+  gradeLevels: text("grade_levels").array(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Lesson plans within modules
+export const lessonPlans = pgTable("lesson_plans", {
+  id: serial("id").primaryKey(),
+  moduleId: integer("module_id").references(() => modules.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  objectives: text("objectives").array(),
+  activities: text("activities").array(),
+  resources: text("resources").array(),
+  duration: varchar("duration"), // "45 minutes", "1.5 hours"
+  difficulty: varchar("difficulty"), // "beginner", "intermediate", "advanced"
+  targetStudents: text("target_students").array(), // student IDs or "all"
+  aiSuggestions: text("ai_suggestions"),
+  isCompleted: boolean("is_completed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const lessonRecommendations = pgTable("lesson_recommendations", {
   id: serial("id").primaryKey(),
   studentId: integer("student_id").notNull(),
@@ -106,6 +135,18 @@ export const insertStudentScoreSchema = createInsertSchema(studentScores).omit({
   createdAt: true,
 });
 
+export const insertModuleSchema = createInsertSchema(modules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLessonPlanSchema = createInsertSchema(lessonPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertLessonRecommendationSchema = createInsertSchema(lessonRecommendations).omit({
   id: true,
   createdAt: true,
@@ -132,6 +173,12 @@ export type InsertAssessment = z.infer<typeof insertAssessmentSchema>;
 
 export type StudentScore = typeof studentScores.$inferSelect;
 export type InsertStudentScore = z.infer<typeof insertStudentScoreSchema>;
+
+export type Module = typeof modules.$inferSelect;
+export type InsertModule = z.infer<typeof insertModuleSchema>;
+
+export type LessonPlan = typeof lessonPlans.$inferSelect;
+export type InsertLessonPlan = z.infer<typeof insertLessonPlanSchema>;
 
 export type LessonRecommendation = typeof lessonRecommendations.$inferSelect;
 export type InsertLessonRecommendation = z.infer<typeof insertLessonRecommendationSchema>;

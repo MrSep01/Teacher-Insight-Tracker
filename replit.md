@@ -161,6 +161,14 @@ Changelog:
   * Updated student forms to focus on Chemistry curriculum with proper grade/level validation
   * Enhanced data export to include Chemistry topic performance breakdowns
   * Restructured student IDs to follow Chemistry-specific patterns (CHE10IGC001, CHE12AL002, etc.)
+- July 08, 2025. Implemented curriculum-based module system:
+  * Redesigned teacher profile setup to focus on curriculum selection (IGCSE vs A Level Chemistry Edexcel)
+  * Created comprehensive curriculum data with detailed topics for both IGCSE and A Level
+  * Added modules and lesson_plans database tables with proper relationships
+  * Built Modules page for creating curriculum-based modules with topic selection
+  * Implemented module management API with full CRUD operations
+  * Updated navigation from generic "Lessons" to curriculum-focused "Modules"
+  * Prepared foundation for AI-powered lesson plan suggestions within modules
 ```
 
 ## User Preferences

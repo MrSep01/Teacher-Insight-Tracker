@@ -9,6 +9,10 @@ import {
   InsertAssessment, 
   StudentScore, 
   InsertStudentScore, 
+  Module,
+  InsertModule,
+  LessonPlan,
+  InsertLessonPlan,
   LessonRecommendation, 
   InsertLessonRecommendation,
   StudentWithScores,
@@ -19,6 +23,8 @@ import {
   subjects,
   assessments,
   studentScores,
+  modules,
+  lessonPlans,
   lessonRecommendations
 } from "@shared/schema";
 import { db } from "./db";
@@ -63,6 +69,20 @@ export interface IStorage {
   createStudentScore(score: InsertStudentScore): Promise<StudentScore>;
   updateStudentScore(id: number, score: Partial<InsertStudentScore>): Promise<StudentScore | undefined>;
   deleteStudentScore(id: number): Promise<boolean>;
+
+  // Modules
+  getModulesByUserId(userId: number): Promise<Module[]>;
+  getModuleById(id: number): Promise<Module | undefined>;
+  createModule(module: InsertModule): Promise<Module>;
+  updateModule(id: number, module: Partial<InsertModule>): Promise<Module | undefined>;
+  deleteModule(id: number): Promise<boolean>;
+
+  // Lesson Plans
+  getLessonPlansByModuleId(moduleId: number): Promise<LessonPlan[]>;
+  getLessonPlanById(id: number): Promise<LessonPlan | undefined>;
+  createLessonPlan(lessonPlan: InsertLessonPlan): Promise<LessonPlan>;
+  updateLessonPlan(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined>;
+  deleteLessonPlan(id: number): Promise<boolean>;
 
   // Lesson Recommendations
   getLessonRecommendations(): Promise<LessonRecommendation[]>;
@@ -761,6 +781,64 @@ export class DatabaseStorage implements IStorage {
 
   async deleteLessonRecommendation(id: number): Promise<boolean> {
     const result = await db.delete(lessonRecommendations).where(eq(lessonRecommendations.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Modules implementation for DatabaseStorage
+  async getModulesByUserId(userId: number): Promise<Module[]> {
+    return await db.select().from(modules).where(eq(modules.userId, userId));
+  }
+
+  async getModuleById(id: number): Promise<Module | undefined> {
+    const [module] = await db.select().from(modules).where(eq(modules.id, id));
+    return module;
+  }
+
+  async createModule(module: InsertModule): Promise<Module> {
+    const [newModule] = await db.insert(modules).values(module).returning();
+    return newModule;
+  }
+
+  async updateModule(id: number, module: Partial<InsertModule>): Promise<Module | undefined> {
+    const [updatedModule] = await db
+      .update(modules)
+      .set(module)
+      .where(eq(modules.id, id))
+      .returning();
+    return updatedModule;
+  }
+
+  async deleteModule(id: number): Promise<boolean> {
+    const result = await db.delete(modules).where(eq(modules.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Lesson Plans implementation for DatabaseStorage
+  async getLessonPlansByModuleId(moduleId: number): Promise<LessonPlan[]> {
+    return await db.select().from(lessonPlans).where(eq(lessonPlans.moduleId, moduleId));
+  }
+
+  async getLessonPlanById(id: number): Promise<LessonPlan | undefined> {
+    const [lessonPlan] = await db.select().from(lessonPlans).where(eq(lessonPlans.id, id));
+    return lessonPlan;
+  }
+
+  async createLessonPlan(lessonPlan: InsertLessonPlan): Promise<LessonPlan> {
+    const [newLessonPlan] = await db.insert(lessonPlans).values(lessonPlan).returning();
+    return newLessonPlan;
+  }
+
+  async updateLessonPlan(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined> {
+    const [updatedLessonPlan] = await db
+      .update(lessonPlans)
+      .set(lessonPlan)
+      .where(eq(lessonPlans.id, id))
+      .returning();
+    return updatedLessonPlan;
+  }
+
+  async deleteLessonPlan(id: number): Promise<boolean> {
+    const result = await db.delete(lessonPlans).where(eq(lessonPlans.id, id));
     return (result.rowCount ?? 0) > 0;
   }
 

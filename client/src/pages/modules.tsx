@@ -1,0 +1,341 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
+import { getCurriculumTopics } from "@shared/curriculum-data";
+import { 
+  BookOpen, 
+  Plus, 
+  Clock, 
+  Users, 
+  Edit, 
+  Trash2,
+  FileText,
+  Target,
+  CheckCircle
+} from "lucide-react";
+
+interface Module {
+  id: number;
+  title: string;
+  description: string;
+  curriculumTopic: string;
+  gradeLevels: string[];
+  isActive: boolean;
+  lessonCount?: number;
+  createdAt: string;
+}
+
+export default function Modules() {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
+
+  const { data: modules, isLoading } = useQuery({
+    queryKey: ["/api/modules"],
+    enabled: !!user?.profileCompleted,
+  });
+
+  const createModuleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/modules", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Module created successfully",
+        description: "You can now add lesson plans to this module.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/modules"] });
+      setIsCreateModalOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error creating module",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const availableTopics = user?.curriculum ? getCurriculumTopics(user.curriculum) : [];
+
+  if (!user?.profileCompleted) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle>Complete Your Profile</CardTitle>
+            <CardDescription>
+              Please complete your teacher profile setup to access curriculum modules.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading modules...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Curriculum Modules</h1>
+          <p className="text-gray-600">
+            Create and manage modules based on {user.curriculum} topics
+          </p>
+        </div>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Module
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Module</DialogTitle>
+              <DialogDescription>
+                Create a module based on your curriculum topics
+              </DialogDescription>
+            </DialogHeader>
+            <CreateModuleForm
+              availableTopics={availableTopics}
+              userGradeLevels={user.gradeLevels || []}
+              onSubmit={(data) => createModuleMutation.mutate(data)}
+              isLoading={createModuleMutation.isPending}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Curriculum Info */}
+      <Card className="bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start space-x-3">
+            <BookOpen className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-blue-800">Your Curriculum</h3>
+              <p className="text-blue-700">{user.curriculum}</p>
+              <p className="text-sm text-blue-600 mt-1">
+                Teaching Grades: {user.gradeLevels?.join(", ")}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Modules Grid */}
+      {modules && modules.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {modules.map((module: Module) => (
+            <ModuleCard
+              key={module.id}
+              module={module}
+              onEdit={() => setSelectedModule(module)}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="text-center py-12">
+          <CardContent>
+            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Modules Yet</h3>
+            <p className="text-gray-600 mb-4">
+              Create your first curriculum module to start organizing lesson plans.
+            </p>
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First Module
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+interface CreateModuleFormProps {
+  availableTopics: any[];
+  userGradeLevels: string[];
+  onSubmit: (data: any) => void;
+  isLoading: boolean;
+}
+
+function CreateModuleForm({ availableTopics, userGradeLevels, onSubmit, isLoading }: CreateModuleFormProps) {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    curriculumTopic: "",
+    gradeLevels: [] as string[],
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.curriculumTopic || formData.gradeLevels.length === 0) {
+      return;
+    }
+    onSubmit(formData);
+  };
+
+  const handleGradeLevelToggle = (grade: string) => {
+    setFormData(prev => ({
+      ...prev,
+      gradeLevels: prev.gradeLevels.includes(grade)
+        ? prev.gradeLevels.filter(g => g !== grade)
+        : [...prev.gradeLevels, grade]
+    }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="curriculumTopic">Curriculum Topic</Label>
+        <Select
+          value={formData.curriculumTopic}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, curriculumTopic: value }))}
+        >
+          <SelectTrigger className="mt-2">
+            <SelectValue placeholder="Select a curriculum topic" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableTopics.map((topic) => (
+              <SelectItem key={topic.id} value={topic.id}>
+                {topic.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="title">Module Title</Label>
+        <Input
+          id="title"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          placeholder="Enter module title"
+          className="mt-2"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Describe this module's objectives and content"
+          className="mt-2"
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <Label>Target Grade Levels</Label>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {userGradeLevels.map((grade) => (
+            <Badge
+              key={grade}
+              variant={formData.gradeLevels.includes(grade) ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => handleGradeLevelToggle(grade)}
+            >
+              Grade {grade}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+          {isLoading ? "Creating..." : "Create Module"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+interface ModuleCardProps {
+  module: Module;
+  onEdit: () => void;
+}
+
+function ModuleCard({ module, onEdit }: ModuleCardProps) {
+  return (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="text-lg">{module.title}</CardTitle>
+            <CardDescription className="mt-1">
+              {module.description}
+            </CardDescription>
+          </div>
+          <Badge variant={module.isActive ? "default" : "secondary"}>
+            {module.isActive ? "Active" : "Inactive"}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Target className="h-4 w-4" />
+            <span>Topic: {module.curriculumTopic}</span>
+          </div>
+          
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Users className="h-4 w-4" />
+            <span>Grades: {module.gradeLevels.join(", ")}</span>
+          </div>
+          
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <FileText className="h-4 w-4" />
+            <span>{module.lessonCount || 0} lesson plans</span>
+          </div>
+          
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <Clock className="h-4 w-4" />
+            <span>Created {new Date(module.createdAt).toLocaleDateString()}</span>
+          </div>
+        </div>
+        
+        <div className="flex space-x-2 mt-4">
+          <Button variant="outline" size="sm" onClick={onEdit}>
+            <Edit className="h-4 w-4 mr-1" />
+            Edit
+          </Button>
+          <Button variant="outline" size="sm">
+            <FileText className="h-4 w-4 mr-1" />
+            Lessons
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

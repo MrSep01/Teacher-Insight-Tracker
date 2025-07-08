@@ -4,10 +4,14 @@ import { storage } from "./storage";
 import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
 import { setupAuth, requireAuth } from "./auth";
+import { registerModuleRoutes } from "./modules";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   await setupAuth(app);
+
+  // Register module routes
+  registerModuleRoutes(app);
 
   // Dashboard routes (protected)
   app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
