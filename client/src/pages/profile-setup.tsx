@@ -91,12 +91,10 @@ export default function ProfileSetup() {
 
   const setupProfileMutation = useMutation({
     mutationFn: async (data: ProfileSetupData) => {
-      const response = await apiRequest("POST", "/api/auth/setup-profile", data);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
+      return await apiRequest("/api/auth/setup-profile", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       toast({
