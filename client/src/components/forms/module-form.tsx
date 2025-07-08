@@ -108,6 +108,7 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
       estimatedHours: data.estimatedHours,
     };
     
+    console.log("Form submitting with data:", moduleData);
     onSubmit(moduleData);
   };
 
