@@ -97,18 +97,19 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
   };
 
   const handleSubmit = (data: ModuleFormData) => {
-    // Map form data to match database schema
+    // Map form data to match database schema - only include fields that exist in the modules table
     const moduleData = {
       title: data.name, // Map name to title
       description: data.description,
       curriculumTopic: data.curriculum, // Map curriculum to curriculumTopic
       gradeLevels: [data.gradeLevel], // Convert to array as expected by schema
-      topics: selectedTopics,
-      objectives: selectedObjectives,
-      estimatedHours: data.estimatedHours,
+      // Note: topics and objectives are stored separately, not in the modules table
+      // We'll handle them after module creation or store as JSON if needed
     };
     
     console.log("Form submitting with data:", moduleData);
+    console.log("Selected topics:", selectedTopics);
+    console.log("Selected objectives:", selectedObjectives);
     onSubmit(moduleData);
   };
 
