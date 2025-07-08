@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { getCurriculumTopics } from "@shared/curriculum-data";
+import { ModuleForm } from "@/components/forms/module-form";
 import { 
   BookOpen, 
   Plus, 
@@ -114,34 +115,39 @@ export default function Modules() {
               Create Module
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Module</DialogTitle>
               <DialogDescription>
-                Create a module based on your curriculum topics
+                Mix and match IGCSE and A Level topics to create flexible modules based on student abilities
               </DialogDescription>
             </DialogHeader>
-            <CreateModuleForm
-              availableTopics={availableTopics}
-              userGradeLevels={user.gradeLevels || []}
+            <ModuleForm
               onSubmit={(data) => createModuleMutation.mutate(data)}
               isLoading={createModuleMutation.isPending}
+              onClose={() => setIsCreateModalOpen(false)}
             />
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Curriculum Info */}
-      <Card className="bg-blue-50">
+      {/* Flexible Curriculum Info */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardContent className="pt-6">
           <div className="flex items-start space-x-3">
             <BookOpen className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-blue-800">Your Curriculum</h3>
-              <p className="text-blue-700">{user.curriculum}</p>
+            <div className="flex-1">
+              <h3 className="font-medium text-blue-800">Flexible Curriculum Approach</h3>
+              <p className="text-blue-700">Primary: {user.curriculum}</p>
               <p className="text-sm text-blue-600 mt-1">
                 Teaching Grades: {user.gradeLevels?.join(", ")}
               </p>
+              <div className="mt-3 p-3 bg-white/60 rounded-lg border border-blue-200">
+                <p className="text-sm text-gray-700">
+                  <Target className="inline h-4 w-4 mr-1 text-blue-600" />
+                  <strong>New:</strong> Mix and match IGCSE and A Level topics to create modules that adapt to different student abilities within the same class.
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>

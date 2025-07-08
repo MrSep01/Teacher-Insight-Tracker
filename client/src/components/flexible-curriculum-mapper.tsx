@@ -67,10 +67,12 @@ export function FlexibleCurriculumMapper({
   // Fetch both IGCSE and A Level curriculum data
   const { data: igcseData, isLoading: igcseLoading } = useQuery({
     queryKey: ["/api/curriculum", "IGCSE Chemistry Edexcel"],
+    queryFn: () => fetch("/api/curriculum/IGCSE Chemistry Edexcel").then(res => res.json()),
   });
 
   const { data: aLevelData, isLoading: aLevelLoading } = useQuery({
-    queryKey: ["/api/curriculum", "A Level Chemistry Edexcel"],
+    queryKey: ["/api/curriculum", "A Level Chemistry Edexcel"], 
+    queryFn: () => fetch("/api/curriculum/A Level Chemistry Edexcel").then(res => res.json()),
   });
 
   const isLoading = igcseLoading || aLevelLoading;

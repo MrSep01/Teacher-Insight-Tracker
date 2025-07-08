@@ -6,14 +6,30 @@ export function registerCurriculumRoutes(app: Express) {
   // Get all available curricula
   app.get("/api/curriculum", requireAuth, async (req, res) => {
     try {
-      const curricula = CurriculumService.getCurriculumByName("IGCSE Chemistry Edexcel") ? 
-        [
-          { name: "IGCSE Chemistry Edexcel", grades: ["10", "11"] },
-          { name: "A Level Chemistry Edexcel", grades: ["12"] }
-        ] : [];
+      const curricula = CurriculumService.getAllCurricula();
       res.json(curricula);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch curricula" });
+    }
+  });
+
+  // Get curriculum by name (with URL encoding support)
+  app.get("/api/curriculum/:name", requireAuth, async (req, res) => {
+    try {
+      const { name } = req.params;
+      const decodedName = decodeURIComponent(name);
+      const curriculum = CurriculumService.getCurriculumByName(decodedName);
+      
+      if (!curriculum) {
+        console.log(`Curriculum not found: ${decodedName}`);
+        console.log(`Available curricula: ${CurriculumService.getAllCurricula().map(c => c.name).join(', ')}`);
+        return res.status(404).json({ error: "Curriculum not found" });
+      }
+      
+      res.json(curriculum);
+    } catch (error) {
+      console.error("Error fetching curriculum:", error);
+      res.status(500).json({ error: "Failed to fetch curriculum" });
     }
   });
 
