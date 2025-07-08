@@ -1,4 +1,6 @@
 import { 
+  User,
+  InsertUser,
   Student, 
   InsertStudent, 
   Subject, 
@@ -12,6 +14,7 @@ import {
   StudentWithScores,
   AssessmentWithDetails,
   DashboardStats,
+  users,
   students,
   subjects,
   assessments,
@@ -22,6 +25,12 @@ import { db } from "./db";
 import { eq, and, desc, gte } from "drizzle-orm";
 
 export interface IStorage {
+  // Users
+  getUserById(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+
   // Students
   getStudents(): Promise<Student[]>;
   getStudentById(id: number): Promise<Student | undefined>;
@@ -417,6 +426,31 @@ export class MemStorage implements IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUserById(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
+  }
+
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ ...user, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
   async getStudents(): Promise<Student[]> {
     return await db.select().from(students);
   }

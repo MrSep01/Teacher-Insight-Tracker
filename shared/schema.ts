@@ -1,6 +1,29 @@
-import { pgTable, text, serial, integer, decimal, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, decimal, timestamp, boolean, varchar, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// User authentication tables
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: varchar("email").unique().notNull(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  provider: varchar("provider").notNull().default("local"), // local, google, microsoft, apple
+  providerId: varchar("provider_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userSessions = pgTable(
+  "user_sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: text("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_user_session_expire").on(table.expire)],
+);
 
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
@@ -72,7 +95,16 @@ export const insertLessonRecommendationSchema = createInsertSchema(lessonRecomme
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
 export type Student = typeof students.$inferSelect;
 export type InsertStudent = z.infer<typeof insertStudentSchema>;
 

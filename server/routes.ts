@@ -3,10 +3,14 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
+import { setupAuth, requireAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Dashboard routes
-  app.get("/api/dashboard/stats", async (req, res) => {
+  // Setup authentication
+  await setupAuth(app);
+
+  // Dashboard routes (protected)
+  app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);

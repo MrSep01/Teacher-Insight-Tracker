@@ -1,6 +1,10 @@
 import { Link, useLocation } from "wouter";
-import { GraduationCap, BarChart3, Users, Book, ClipboardCheck, FileText, Brain } from "lucide-react";
+import { GraduationCap, BarChart3, Users, Book, ClipboardCheck, FileText, Brain, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
@@ -54,21 +58,58 @@ export default function Sidebar() {
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-700">MJ</span>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">Ms. Johnson</p>
-            <p className="text-xs text-gray-500">Grade 5 Teacher</p>
-          </div>
-          <button className="text-gray-400 hover:text-gray-600">
-            <span className="sr-only">User menu</span>
-            ⋮
-          </button>
-        </div>
-      </div>
+      <UserProfile />
+    </div>
+  );
+}
+
+function UserProfile() {
+  const { user, logout, isLoggingOut } = useAuth();
+
+  if (!user) return null;
+
+  const userInitials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U';
+
+  return (
+    <div className="p-4 border-t border-gray-200">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="w-full h-auto p-2 justify-start">
+            <div className="flex items-center space-x-3 w-full">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user.profileImageUrl || undefined} alt={`${user.firstName} ${user.lastName}`} />
+                <AvatarFallback className="bg-primary text-white">
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-gray-900">
+                  {user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.email
+                  }
+                </p>
+                <p className="text-xs text-gray-500">Teacher</p>
+              </div>
+            </div>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuItem>
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem 
+            onClick={logout}
+            disabled={isLoggingOut}
+            className="text-red-600 focus:text-red-600"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            {isLoggingOut ? "Signing out..." : "Sign out"}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
