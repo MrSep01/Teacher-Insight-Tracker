@@ -169,6 +169,12 @@ Changelog:
   * Implemented module management API with full CRUD operations
   * Updated navigation from generic "Lessons" to curriculum-focused "Modules"
   * Prepared foundation for AI-powered lesson plan suggestions within modules
+- July 08, 2025. Fixed critical profile setup issues:
+  * Resolved infinite loop error caused by Radix UI Checkbox components with duplicate event handlers
+  * Replaced problematic checkboxes with custom UI elements using simple div styling
+  * Fixed API request authentication by correcting apiRequest function usage
+  * Enhanced error handling and validation for profile setup process
+  * Successfully enabled teachers to complete curriculum and grade level selection
 ```
 
 ## User Preferences
