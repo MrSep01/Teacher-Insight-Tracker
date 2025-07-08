@@ -95,8 +95,26 @@ export function registerModuleRoutes(app: Express) {
     }
   });
 
+  // Get lessons for a module
+  app.get("/api/modules/:id/lessons", requireAuth, async (req, res) => {
+    try {
+      const moduleId = parseInt(req.params.id);
+      const module = await storage.getModuleById(moduleId);
+      
+      if (!module || module.userId !== req.user.id) {
+        return res.status(404).json({ error: "Module not found" });
+      }
+      
+      const lessons = await storage.getLessonsByModule(moduleId);
+      res.json(lessons);
+    } catch (error) {
+      console.error("Error fetching lessons:", error);
+      res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
+
   // Create lesson plan within a module
-  app.post("/api/modules/:id/lesson-plans", requireAuth, async (req, res) => {
+  app.post("/api/modules/:id/lessons", requireAuth, async (req, res) => {
     try {
       const moduleId = parseInt(req.params.id);
       const module = await storage.getModuleById(moduleId);
@@ -115,6 +133,78 @@ export function registerModuleRoutes(app: Express) {
     } catch (error) {
       console.error("Error creating lesson plan:", error);
       res.status(500).json({ error: "Failed to create lesson plan" });
+    }
+  });
+
+  // Generate AI lesson plan
+  app.post("/api/modules/:id/lessons/generate", requireAuth, async (req, res) => {
+    try {
+      const moduleId = parseInt(req.params.id);
+      const module = await storage.getModuleById(moduleId);
+      
+      if (!module || module.userId !== req.user.id) {
+        return res.status(404).json({ error: "Module not found" });
+      }
+      
+      const { lessonType, topic, duration, difficulty } = req.body;
+      
+      // Import AI lesson generator
+      const { aiLessonGenerator } = await import("./ai-lesson-generator");
+      
+      const generatedLesson = await aiLessonGenerator.generateLesson({
+        moduleId,
+        lessonType,
+        topic,
+        duration,
+        difficulty,
+        curriculum: module.curriculumTopic,
+        gradeLevels: module.gradeLevels,
+        moduleTopics: module.topics,
+        moduleObjectives: module.objectives,
+      });
+      
+      res.status(201).json(generatedLesson);
+    } catch (error) {
+      console.error("Error generating AI lesson:", error);
+      res.status(500).json({ error: "Failed to generate lesson" });
+    }
+  });
+
+  // Update lesson plan
+  app.put("/api/modules/:id/lessons/:lessonId", requireAuth, async (req, res) => {
+    try {
+      const moduleId = parseInt(req.params.id);
+      const lessonId = parseInt(req.params.lessonId);
+      
+      const module = await storage.getModuleById(moduleId);
+      if (!module || module.userId !== req.user.id) {
+        return res.status(404).json({ error: "Module not found" });
+      }
+      
+      const updatedLesson = await storage.updateLessonPlan(lessonId, req.body);
+      res.json(updatedLesson);
+    } catch (error) {
+      console.error("Error updating lesson:", error);
+      res.status(500).json({ error: "Failed to update lesson" });
+    }
+  });
+
+  // Delete lesson plan
+  app.delete("/api/modules/:id/lessons/:lessonId", requireAuth, async (req, res) => {
+    try {
+      const moduleId = parseInt(req.params.id);
+      const lessonId = parseInt(req.params.lessonId);
+      
+      const module = await storage.getModuleById(moduleId);
+      if (!module || module.userId !== req.user.id) {
+        return res.status(404).json({ error: "Module not found" });
+      }
+      
+      await storage.deleteLessonPlan(lessonId);
+      res.json({ message: "Lesson deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting lesson:", error);
+      res.status(500).json({ error: "Failed to delete lesson" });
     }
   });
 

@@ -125,14 +125,23 @@ export const lessonPlans = pgTable("lesson_plans", {
   moduleId: integer("module_id").references(() => modules.id),
   title: varchar("title").notNull(),
   description: text("description"),
+  lessonType: varchar("lesson_type").notNull().default("lecture"), // "lecture", "practical", "project", "assessment", "discussion", "fieldwork"
   objectives: text("objectives").array(),
   activities: text("activities").array(),
   resources: text("resources").array(),
-  duration: varchar("duration"), // "45 minutes", "1.5 hours"
-  difficulty: varchar("difficulty"), // "beginner", "intermediate", "advanced"
+  equipment: text("equipment").array(), // For practical lessons
+  safetyNotes: text("safety_notes"), // For practical/fieldwork lessons
+  duration: integer("duration").default(45), // Duration in minutes
+  difficulty: varchar("difficulty").default("intermediate"), // "basic", "intermediate", "advanced"
   targetStudents: text("target_students").array(), // student IDs or "all"
+  prerequisites: text("prerequisites").array(), // Required prior knowledge
+  assessmentCriteria: text("assessment_criteria").array(), // How success is measured
+  differentiation: text("differentiation"), // How to adapt for different abilities
+  homework: text("homework"), // Follow-up work
+  aiGenerated: boolean("ai_generated").default(false),
   aiSuggestions: text("ai_suggestions"),
   isCompleted: boolean("is_completed").default(false),
+  sequenceOrder: integer("sequence_order").default(1), // Order within module
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

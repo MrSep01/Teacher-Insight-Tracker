@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { getCurriculumTopics } from "@shared/curriculum-data";
 import { ModuleForm } from "@/components/forms/module-form";
+import { LessonManagement } from "@/components/lesson-management";
 import { 
   BookOpen, 
   Plus, 
@@ -44,6 +45,7 @@ export default function Modules() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
 
   const { data: modules, isLoading } = useQuery({
@@ -69,6 +71,31 @@ export default function Modules() {
     onError: (error: Error) => {
       toast({
         title: "Error creating module",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateModuleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest(`/api/modules/${selectedModule?.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Module updated successfully",
+        description: "Your changes have been saved.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/modules"] });
+      setIsEditModalOpen(false);
+      setSelectedModule(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating module",
         description: error.message,
         variant: "destructive",
       });
@@ -134,6 +161,26 @@ export default function Modules() {
             />
           </DialogContent>
         </Dialog>
+
+        {/* Edit Module Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Module</DialogTitle>
+              <DialogDescription>
+                Update your module settings and curriculum topics
+              </DialogDescription>
+            </DialogHeader>
+            {selectedModule && (
+              <ModuleForm
+                module={selectedModule}
+                onSubmit={(data) => updateModuleMutation.mutate(data)}
+                isLoading={updateModuleMutation.isPending}
+                onClose={() => setIsEditModalOpen(false)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Flexible Curriculum Info */}
@@ -165,7 +212,10 @@ export default function Modules() {
             <ModuleCard
               key={module.id}
               module={module}
-              onEdit={() => setSelectedModule(module)}
+              onEdit={() => {
+                setSelectedModule(module);
+                setIsEditModalOpen(true);
+              }}
             />
           ))}
         </div>
@@ -298,6 +348,11 @@ interface ModuleCardProps {
 }
 
 function ModuleCard({ module, onEdit }: ModuleCardProps) {
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
+
+  const handleLessonsClick = () => {
+    setIsLessonModalOpen(true);
+  };
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -341,12 +396,28 @@ function ModuleCard({ module, onEdit }: ModuleCardProps) {
             <Edit className="h-4 w-4 mr-1" />
             Edit
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleLessonsClick}>
             <FileText className="h-4 w-4 mr-1" />
             Lessons
           </Button>
         </div>
       </CardContent>
+      
+      {/* Lesson Management Modal */}
+      <Dialog open={isLessonModalOpen} onOpenChange={setIsLessonModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Lesson Plans - {module.title}</DialogTitle>
+            <DialogDescription>
+              Create and manage lesson plans for this module
+            </DialogDescription>
+          </DialogHeader>
+          <LessonManagement 
+            module={module} 
+            onClose={() => setIsLessonModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

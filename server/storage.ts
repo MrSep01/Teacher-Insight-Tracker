@@ -88,6 +88,7 @@ export interface IStorage {
   deleteModule(id: number): Promise<boolean>;
 
   // Lesson Plans
+  getLessonsByModule(moduleId: number): Promise<LessonPlan[]>;
   getLessonPlansByModuleId(moduleId: number): Promise<LessonPlan[]>;
   getLessonPlanById(id: number): Promise<LessonPlan | undefined>;
   createLessonPlan(lessonPlan: InsertLessonPlan): Promise<LessonPlan>;
@@ -910,6 +911,19 @@ export class DatabaseStorage implements IStorage {
   async deleteLessonPlan(id: number): Promise<boolean> {
     const result = await db.delete(lessonPlans).where(eq(lessonPlans.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async getLessonsByModule(moduleId: number): Promise<LessonPlan[]> {
+    return await db.select().from(lessonPlans).where(eq(lessonPlans.moduleId, moduleId));
+  }
+
+  async updateLessonPlan(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined> {
+    const [updatedLessonPlan] = await db
+      .update(lessonPlans)
+      .set(lessonPlan)
+      .where(eq(lessonPlans.id, id))
+      .returning();
+    return updatedLessonPlan;
   }
 
   async getDashboardStats(): Promise<DashboardStats> {

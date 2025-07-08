@@ -33,6 +33,7 @@ const moduleSchema = z.object({
 type ModuleFormData = z.infer<typeof moduleSchema>;
 
 interface ModuleFormProps {
+  module?: any; // For editing existing modules
   onSubmit: (data: {
     title: string;
     description: string;
@@ -46,7 +47,7 @@ interface ModuleFormProps {
   onClose: () => void;
 }
 
-export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormProps) {
+export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: ModuleFormProps) {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
   const [autoCalculatedHours, setAutoCalculatedHours] = useState<number>(0);
@@ -55,15 +56,24 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
   const form = useForm<ModuleFormData>({
     resolver: zodResolver(moduleSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      curriculum: "",
-      gradeLevel: "",
-      topics: [],
-      objectives: [],
-      estimatedHours: 10,
+      name: module?.title || "",
+      description: module?.description || "",
+      curriculum: module?.curriculumTopic || "",
+      gradeLevel: module?.gradeLevels?.[0] || "",
+      topics: module?.topics || [],
+      objectives: module?.objectives || [],
+      estimatedHours: module?.estimatedHours || 10,
     },
   });
+
+  // Initialize form values when editing
+  useEffect(() => {
+    if (module) {
+      setSelectedTopics(module.topics || []);
+      setSelectedObjectives(module.objectives || []);
+      setAutoCalculatedHours(module.estimatedHours || 0);
+    }
+  }, [module]);
 
   // Set up global function for curriculum mapper to update hours
   useEffect(() => {
