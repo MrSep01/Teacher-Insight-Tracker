@@ -18,6 +18,10 @@ export function registerModuleRoutes(app: Express) {
 
   // Create a new module
   app.post("/api/modules", requireAuth, async (req, res) => {
+    console.log("\n=== MODULE POST REQUEST RECEIVED ===");
+    console.log("Request body:", req.body);
+    console.log("User authenticated:", !!req.user);
+    
     try {
       console.log("\n=== MODULE CREATION DEBUG ===");
       console.log("Received module data:", JSON.stringify(req.body, null, 2));

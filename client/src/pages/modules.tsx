@@ -53,14 +53,21 @@ export default function Modules() {
 
   const createModuleMutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log("Sending module data:", data);
-      const response = await apiRequest("POST", "/api/modules", data);
-      const result = await response.json();
-      if (!response.ok) {
-        console.error("Server response:", result);
-        throw new Error(result.error || "Failed to create module");
+      console.log("=== CLIENT: Sending module data ===", data);
+      try {
+        const response = await apiRequest("POST", "/api/modules", data);
+        console.log("=== CLIENT: Response received ===", response.status, response.statusText);
+        const result = await response.json();
+        console.log("=== CLIENT: Response data ===", result);
+        if (!response.ok) {
+          console.error("=== CLIENT: Server error response ===", result);
+          throw new Error(result.error || "Failed to create module");
+        }
+        return result;
+      } catch (error) {
+        console.error("=== CLIENT: Request failed ===", error);
+        throw error;
       }
-      return result;
     },
     onSuccess: () => {
       toast({
