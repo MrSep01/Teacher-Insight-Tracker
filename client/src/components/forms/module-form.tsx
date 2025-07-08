@@ -17,7 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, BookOpen, Target } from "lucide-react";
+import { X, BookOpen, Target, Clock } from "lucide-react";
 import { FlexibleCurriculumMapper } from "@/components/flexible-curriculum-mapper";
 
 const moduleSchema = z.object({
