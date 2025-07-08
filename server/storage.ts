@@ -393,9 +393,9 @@ export class MemStorage implements IStorage {
 
   // Dashboard
   async getDashboardStats(): Promise<DashboardStats> {
-    const students = Array.from(this.students.values());
-    const totalStudents = students.length;
-    const needsAttention = students.filter(s => s.status === "needs_attention").length;
+    const studentsWithScores = await this.getStudentsWithScores();
+    const totalStudents = studentsWithScores.length;
+    const needsAttention = studentsWithScores.filter(s => s.status === "needs_attention" || s.status === "at_risk").length;
     
     const allScores = Array.from(this.studentScores.values());
     const averageScore = allScores.length > 0 
@@ -530,6 +530,18 @@ export class DatabaseStorage implements IStorage {
       subjectAverages[subject] = percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
     });
 
+    // Calculate status based on overall percentage
+    let status: "on_track" | "needs_attention" | "excelling" | "at_risk";
+    if (overallPercentage >= 90) {
+      status = "excelling";
+    } else if (overallPercentage >= 70) {
+      status = "on_track";
+    } else if (overallPercentage >= 50) {
+      status = "needs_attention";
+    } else {
+      status = "at_risk";
+    }
+
     return { 
       ...student, 
       scores: scores.map(s => ({
@@ -538,7 +550,8 @@ export class DatabaseStorage implements IStorage {
         subject: s.subject
       })), 
       overallPercentage, 
-      subjectAverages 
+      subjectAverages,
+      status
     };
   }
 

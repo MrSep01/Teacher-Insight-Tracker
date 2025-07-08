@@ -154,6 +154,13 @@ Changelog:
   * Implemented protected routes with authentication guards for all dashboard features
   * Added user session management with PostgreSQL session storage
   * Created comprehensive login/signup interface with form validation and error handling
+- July 08, 2025. Restructured for IGCSE/A Level Edexcel Chemistry focus:
+  * Updated database schema to support grade levels (10, 11, 12) and education levels (IGCSE, A Level)
+  * Replaced generic subjects with Chemistry-specific topics (Atomic Structure, Bonding, Organic Chemistry, etc.)
+  * Implemented computed student status based on real assessment results instead of manual assignment
+  * Updated student forms to focus on Chemistry curriculum with proper grade/level validation
+  * Enhanced data export to include Chemistry topic performance breakdowns
+  * Restructured student IDs to follow Chemistry-specific patterns (CHE10IGC001, CHE12AL002, etc.)
 ```
 
 ## User Preferences

@@ -21,24 +21,29 @@ export default function Dashboard() {
   const exportStudentData = () => {
     if (!students) return;
     
-    const headers = ['Student Name', 'Grade', 'Student ID', 'Overall %', 'Math %', 'Science %', 'English %', 'Status'];
-    const rows = students.map(student => [
-      student.name,
-      student.grade,
-      student.studentId,
-      Math.round(student.overallPercentage).toString(),
-      Math.round(student.subjectAverages.Mathematics || 0).toString(),
-      Math.round(student.subjectAverages.Science || 0).toString(),
-      Math.round(student.subjectAverages.English || 0).toString(),
-      student.status
-    ]);
+    const headers = ['Student Name', 'Grade', 'Level', 'Student ID', 'Overall %', 'Chemistry Topics', 'Status'];
+    const rows = students.map(student => {
+      const topicAverages = Object.entries(student.subjectAverages)
+        .map(([topic, avg]) => `${topic}: ${Math.round(avg)}%`)
+        .join('; ') || 'No assessments yet';
+      
+      return [
+        student.name,
+        `Grade ${student.grade}`,
+        student.level,
+        student.studentId,
+        Math.round(student.overallPercentage).toString() + '%',
+        topicAverages,
+        student.status.replace('_', ' ').toUpperCase()
+      ];
+    });
     
     const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `student-performance-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `chemistry-student-performance-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };

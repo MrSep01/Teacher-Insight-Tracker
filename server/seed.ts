@@ -10,24 +10,29 @@ export async function seedDatabase() {
       return;
     }
 
-    // Seed subjects
+    // Seed Chemistry subjects for IGCSE/A Level Edexcel
     const subjectData = [
-      { name: "Mathematics", color: "#1976D2", icon: "fas fa-calculator" },
-      { name: "Science", color: "#388E3C", icon: "fas fa-leaf" },
-      { name: "English", color: "#FF9800", icon: "fas fa-book" },
-      { name: "History", color: "#9C27B0", icon: "fas fa-landmark" },
+      { name: "Atomic Structure & Bonding", grade: "10", level: "IGCSE", curriculum: "Edexcel", topicArea: "Atomic Structure", color: "#3b82f6", icon: "Atom" },
+      { name: "Periodicity", grade: "10", level: "IGCSE", curriculum: "Edexcel", topicArea: "Periodicity", color: "#10b981", icon: "Table" },
+      { name: "Chemical Bonding", grade: "10", level: "IGCSE", curriculum: "Edexcel", topicArea: "Bonding", color: "#f59e0b", icon: "Link" },
+      { name: "Organic Chemistry Basics", grade: "11", level: "IGCSE", curriculum: "Edexcel", topicArea: "Organic Chemistry", color: "#ef4444", icon: "Molecule" },
+      { name: "Energetics", grade: "11", level: "IGCSE", curriculum: "Edexcel", topicArea: "Energetics", color: "#8b5cf6", icon: "Flame" },
+      { name: "Advanced Organic Chemistry", grade: "12", level: "A Level", curriculum: "Edexcel", topicArea: "Advanced Organic", color: "#06b6d4", icon: "Beaker" },
+      { name: "Thermodynamics", grade: "12", level: "A Level", curriculum: "Edexcel", topicArea: "Thermodynamics", color: "#f97316", icon: "Thermometer" },
+      { name: "Kinetics", grade: "12", level: "A Level", curriculum: "Edexcel", topicArea: "Kinetics", color: "#84cc16", icon: "Clock" },
     ];
 
     const insertedSubjects = await db.insert(subjects).values(subjectData).returning();
     console.log("Seeded subjects:", insertedSubjects.length);
 
-    // Seed students
+    // Seed students for Chemistry grades 10-12
     const studentData = [
-      { name: "Alice Brown", grade: "Grade 5", studentId: "12345", status: "on_track" },
-      { name: "Bobby Johnson", grade: "Grade 5", studentId: "12346", status: "needs_attention" },
-      { name: "Carol Wilson", grade: "Grade 5", studentId: "12347", status: "excelling" },
-      { name: "David Smith", grade: "Grade 5", studentId: "12348", status: "on_track" },
-      { name: "Emma Davis", grade: "Grade 5", studentId: "12349", status: "on_track" },
+      { name: "Alice Brown", grade: "10", level: "IGCSE", studentId: "CHE10001" },
+      { name: "Bobby Johnson", grade: "10", level: "IGCSE", studentId: "CHE10002" },
+      { name: "Carol Wilson", grade: "11", level: "IGCSE", studentId: "CHE11001" },
+      { name: "David Smith", grade: "11", level: "IGCSE", studentId: "CHE11002" },
+      { name: "Emma Davis", grade: "12", level: "A Level", studentId: "CHE12001" },
+      { name: "Frank Miller", grade: "12", level: "A Level", studentId: "CHE12002" },
     ];
 
     const insertedStudents = await db.insert(students).values(studentData).returning();

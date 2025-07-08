@@ -33,14 +33,19 @@ export const userSessions = pgTable(
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  grade: text("grade").notNull(),
+  grade: text("grade").notNull(), // "10", "11", "12"
+  level: text("level").notNull(), // "IGCSE", "A Level"
   studentId: text("student_id").notNull().unique(),
-  status: text("status").notNull().default("on_track"), // on_track, needs_attention, excelling
+  // Status will be calculated from assessment results, not stored
 });
 
 export const subjects = pgTable("subjects", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  grade: text("grade").notNull(), // "10", "11", "12"
+  level: text("level").notNull(), // "IGCSE", "A Level"
+  curriculum: text("curriculum").notNull().default("Edexcel"), // Focus on Edexcel
+  topicArea: text("topic_area").notNull(), // e.g., "Atomic Structure", "Bonding", "Periodicity"
   color: text("color").notNull(),
   icon: text("icon").notNull(),
 });
@@ -130,6 +135,7 @@ export type StudentWithScores = Student & {
   scores: (StudentScore & { assessment: Assessment; subject: Subject })[];
   overallPercentage: number;
   subjectAverages: { [key: string]: number };
+  status: "on_track" | "needs_attention" | "excelling" | "at_risk"; // Computed based on results
 };
 
 export type AssessmentWithDetails = Assessment & {

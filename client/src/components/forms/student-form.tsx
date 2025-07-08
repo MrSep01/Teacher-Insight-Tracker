@@ -34,12 +34,13 @@ export default function StudentForm({ onSuccess }: StudentFormProps) {
     defaultValues: {
       name: "",
       grade: "",
+      level: "",
       studentId: "",
-      status: "on_track",
     },
   });
 
-  const selectedStatus = watch("status");
+  const selectedGrade = watch("grade");
+  const selectedLevel = watch("level");
 
   const createStudentMutation = useMutation({
     mutationFn: async (data: StudentFormData) => {
@@ -49,14 +50,13 @@ export default function StudentForm({ onSuccess }: StudentFormProps) {
     onSuccess: () => {
       toast({
         title: "Student added successfully",
-        description: "The student has been added to your roster.",
+        description: "The student has been added to your class.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/students"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/students"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       onSuccess();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Error adding student",
         description: error.message,
@@ -70,9 +70,16 @@ export default function StudentForm({ onSuccess }: StudentFormProps) {
   };
 
   const generateStudentId = () => {
-    const timestamp = Date.now().toString().slice(-6);
+    const grade = watch("grade");
+    const level = watch("level");
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    setValue("studentId", `STU${timestamp}${random}`);
+    
+    if (grade && level) {
+      const prefix = level === "IGCSE" ? "IGC" : "AL";
+      setValue("studentId", `CHE${grade}${prefix}${random}`);
+    } else {
+      setValue("studentId", `CHE${random}`);
+    }
   };
 
   return (
@@ -101,19 +108,9 @@ export default function StudentForm({ onSuccess }: StudentFormProps) {
               <SelectValue placeholder="Select grade" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Kindergarten">Kindergarten</SelectItem>
-              <SelectItem value="Grade 1">Grade 1</SelectItem>
-              <SelectItem value="Grade 2">Grade 2</SelectItem>
-              <SelectItem value="Grade 3">Grade 3</SelectItem>
-              <SelectItem value="Grade 4">Grade 4</SelectItem>
-              <SelectItem value="Grade 5">Grade 5</SelectItem>
-              <SelectItem value="Grade 6">Grade 6</SelectItem>
-              <SelectItem value="Grade 7">Grade 7</SelectItem>
-              <SelectItem value="Grade 8">Grade 8</SelectItem>
-              <SelectItem value="Grade 9">Grade 9</SelectItem>
-              <SelectItem value="Grade 10">Grade 10</SelectItem>
-              <SelectItem value="Grade 11">Grade 11</SelectItem>
-              <SelectItem value="Grade 12">Grade 12</SelectItem>
+              <SelectItem value="10">Grade 10</SelectItem>
+              <SelectItem value="11">Grade 11</SelectItem>
+              <SelectItem value="12">Grade 12</SelectItem>
             </SelectContent>
           </Select>
           {errors.grade && (
@@ -123,6 +120,25 @@ export default function StudentForm({ onSuccess }: StudentFormProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="level">Level</Label>
+          <Select
+            value={watch("level") || ""}
+            onValueChange={(value) => setValue("level", value)}
+          >
+            <SelectTrigger className="mt-2">
+              <SelectValue placeholder="Select level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="IGCSE">IGCSE</SelectItem>
+              <SelectItem value="A Level">A Level</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.level && (
+            <p className="text-sm text-red-600 mt-1">{errors.level.message}</p>
+          )}
+        </div>
+
         <div>
           <Label htmlFor="studentId">Student ID</Label>
           <div className="flex space-x-2 mt-2">
@@ -145,45 +161,28 @@ export default function StudentForm({ onSuccess }: StudentFormProps) {
             <p className="text-sm text-red-600 mt-1">{errors.studentId.message}</p>
           )}
         </div>
-
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Select
-            value={selectedStatus || "on_track"}
-            onValueChange={(value) => setValue("status", value)}
-          >
-            <SelectTrigger className="mt-2">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="on_track">On Track</SelectItem>
-              <SelectItem value="needs_attention">Needs Attention</SelectItem>
-              <SelectItem value="excelling">Excelling</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.status && (
-            <p className="text-sm text-red-600 mt-1">{errors.status.message}</p>
-          )}
-        </div>
       </div>
 
-      <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
+      <div className="text-center">
+        <p className="text-sm text-gray-600 mb-4">
+          Focus: <strong>Edexcel Chemistry</strong> curriculum for IGCSE (Grades 10-11) and A Level (Grade 12)
+        </p>
+        <p className="text-xs text-gray-500">
+          Student status will be automatically calculated based on assessment results
+        </p>
+      </div>
+
+      <div className="flex justify-end space-x-4">
         <Button type="button" variant="outline" onClick={onSuccess}>
           Cancel
         </Button>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={createStudentMutation.isPending}
-          className="bg-primary hover:bg-primary/90"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
-          {createStudentMutation.isPending ? (
-            "Adding..."
-          ) : (
-            <>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Student
-            </>
-          )}
+          <UserPlus className="h-4 w-4 mr-2" />
+          {createStudentMutation.isPending ? "Adding..." : "Add Student"}
         </Button>
       </div>
     </form>
