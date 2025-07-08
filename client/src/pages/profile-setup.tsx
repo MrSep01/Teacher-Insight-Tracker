@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -170,10 +170,15 @@ export default function ProfileSetup() {
                     onClick={() => handleCurriculumSelect(curriculum.id)}
                   >
                     <div className="flex items-start space-x-3">
-                      <Checkbox
-                        checked={selectedCurriculum === curriculum.id}
-                        className="mt-1 pointer-events-none"
-                      />
+                      <div className={`w-5 h-5 mt-1 rounded border-2 flex items-center justify-center ${
+                        selectedCurriculum === curriculum.id 
+                          ? 'bg-blue-600 border-blue-600' 
+                          : 'border-gray-300'
+                      }`}>
+                        {selectedCurriculum === curriculum.id && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </div>
                       <div className="flex-1">
                         <h4 className="font-medium text-lg">{curriculum.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">{curriculum.description}</p>
@@ -215,10 +220,15 @@ export default function ProfileSetup() {
                       onClick={() => handleGradeLevelToggle(grade)}
                     >
                       <div className="flex items-start space-x-3">
-                        <Checkbox
-                          checked={selectedGradeLevels.includes(grade)}
-                          className="mt-1 pointer-events-none"
-                        />
+                        <div className={`w-5 h-5 mt-1 rounded border-2 flex items-center justify-center ${
+                          selectedGradeLevels.includes(grade) 
+                            ? 'bg-blue-600 border-blue-600' 
+                            : 'border-gray-300'
+                        }`}>
+                          {selectedGradeLevels.includes(grade) && (
+                            <Check className="w-3 h-3 text-white" />
+                          )}
+                        </div>
                         <div>
                           <h4 className="font-medium">Grade {grade}</h4>
                           <p className="text-sm text-gray-600">
