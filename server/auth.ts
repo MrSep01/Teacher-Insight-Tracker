@@ -389,11 +389,39 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  app.get("/api/auth/user", (req, res) => {
+  app.get("/api/auth/user", async (req, res) => {
     if (req.isAuthenticated()) {
-      res.json(req.user);
+      const user = await storage.getUserById(req.user.id);
+      res.json(user);
     } else {
       res.status(401).json({ error: "Not authenticated" });
+    }
+  });
+
+  app.post("/api/auth/setup-profile", requireAuth, async (req, res) => {
+    try {
+      const { subjects, gradeLevels, educationLevels } = req.body;
+      
+      if (!subjects || !gradeLevels || !educationLevels) {
+        return res.status(400).json({ error: "All profile fields are required" });
+      }
+
+      const updatedUser = await storage.updateUser(req.user.id, {
+        subjects,
+        gradeLevels,
+        educationLevels,
+        curriculum: "Edexcel",
+        profileCompleted: true,
+      });
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ message: "Profile setup completed successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Profile setup error:", error);
+      res.status(500).json({ error: "Profile setup failed" });
     }
   });
 }

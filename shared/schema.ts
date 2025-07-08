@@ -16,6 +16,12 @@ export const users = pgTable("users", {
   emailVerificationToken: varchar("email_verification_token"),
   resetPasswordToken: varchar("reset_password_token"),
   resetPasswordExpires: timestamp("reset_password_expires"),
+  // Teacher profile fields
+  subjects: text("subjects").array(), // Chemistry topics they teach
+  gradeLevels: text("grade_levels").array(), // ["10", "11", "12"]
+  educationLevels: text("education_levels").array(), // ["IGCSE", "A Level"]
+  curriculum: varchar("curriculum").default("Edexcel"),
+  profileCompleted: boolean("profile_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
