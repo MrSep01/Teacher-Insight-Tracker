@@ -365,6 +365,30 @@ export async function setupAuth(app: Express) {
     }
   });
 
+  // Development helper endpoint to get verification token for testing
+  app.get("/api/auth/dev-get-token", async (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(404).json({ error: "Not found" });
+    }
+
+    try {
+      const { email } = req.query;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email as string);
+      if (!user || !user.emailVerificationToken) {
+        return res.status(404).json({ error: "No pending verification found for this email" });
+      }
+
+      res.json({ token: user.emailVerificationToken });
+    } catch (error) {
+      console.error("Dev token retrieval error:", error);
+      res.status(500).json({ error: "Failed to retrieve token" });
+    }
+  });
+
   app.get("/api/auth/user", (req, res) => {
     if (req.isAuthenticated()) {
       res.json(req.user);

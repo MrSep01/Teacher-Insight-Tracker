@@ -314,7 +314,7 @@ export default function Login() {
             </Button>
           </div>
 
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-600 space-y-2">
             <p>
               By signing in, you agree to our{" "}
               <a href="#" className="text-primary hover:underline">
@@ -323,6 +323,11 @@ export default function Login() {
               and{" "}
               <a href="#" className="text-primary hover:underline">
                 Privacy Policy
+              </a>
+            </p>
+            <p className="text-xs text-blue-600">
+              <a href="/dev-verify" className="hover:underline">
+                Development: Verify Email Tool
               </a>
             </p>
           </div>

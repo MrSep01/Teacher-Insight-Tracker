@@ -12,6 +12,7 @@ import Reports from "@/pages/reports";
 import AIRecommendations from "@/pages/ai-recommendations";
 import Login from "@/pages/login";
 import VerifyEmail from "@/pages/verify-email";
+import DevVerify from "@/pages/dev-verify";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/sidebar";
 
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/verify-email" component={VerifyEmail} />
+      <Route path="/dev-verify" component={DevVerify} />
       <Route>
         <AuthGuard>
           <div className="flex h-screen overflow-hidden">
