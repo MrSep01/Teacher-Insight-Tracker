@@ -97,11 +97,18 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
   };
 
   const handleSubmit = (data: ModuleFormData) => {
-    onSubmit({
-      ...data,
+    // Map form data to match database schema
+    const moduleData = {
+      title: data.name, // Map name to title
+      description: data.description,
+      curriculumTopic: data.curriculum, // Map curriculum to curriculumTopic
+      gradeLevels: [data.gradeLevel], // Convert to array as expected by schema
       topics: selectedTopics,
       objectives: selectedObjectives,
-    });
+      estimatedHours: data.estimatedHours,
+    };
+    
+    onSubmit(moduleData);
   };
 
   return (
