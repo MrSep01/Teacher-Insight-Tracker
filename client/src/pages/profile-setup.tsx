@@ -92,6 +92,10 @@ export default function ProfileSetup() {
   const setupProfileMutation = useMutation({
     mutationFn: async (data: ProfileSetupData) => {
       const response = await apiRequest("POST", "/api/auth/setup-profile", data);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -103,6 +107,7 @@ export default function ProfileSetup() {
       setLocation("/");
     },
     onError: (error: Error) => {
+      console.error("Profile setup error:", error);
       toast({
         title: "Setup failed",
         description: error.message,
@@ -112,11 +117,22 @@ export default function ProfileSetup() {
   });
 
   const onSubmit = (data: ProfileSetupData) => {
-    // Update form values with local state before submitting
+    // Validate that we have the required data
+    if (!selectedCurriculum || selectedGradeLevels.length === 0) {
+      toast({
+        title: "Missing information",
+        description: "Please select a curriculum and at least one grade level.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Submit the form data
     const formData = {
       curriculum: selectedCurriculum as ProfileSetupData["curriculum"],
       gradeLevels: selectedGradeLevels,
     };
+    console.log("Submitting profile setup data:", formData);
     setupProfileMutation.mutate(formData);
   };
 
