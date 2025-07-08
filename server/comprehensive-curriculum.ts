@@ -1,4 +1,4 @@
 import { CurriculumLevel } from './curriculum-data';
-import { COMPLETE_CHEMISTRY_CURRICULUM } from './complete-chemistry-curriculum';
+import { UPDATED_COMPLETE_CHEMISTRY_CURRICULUM } from './updated-complete-chemistry-curriculum';
 
-export const COMPREHENSIVE_CURRICULUM_DATA: CurriculumLevel[] = COMPLETE_CHEMISTRY_CURRICULUM;
+export const COMPREHENSIVE_CURRICULUM_DATA: CurriculumLevel[] = UPDATED_COMPLETE_CHEMISTRY_CURRICULUM;
