@@ -167,7 +167,7 @@ export default function ProfileSetup() {
                     <div className="flex items-start space-x-3">
                       <Checkbox
                         checked={selectedCurriculum === curriculum.id}
-                        onChange={() => handleCurriculumSelect(curriculum.id)}
+                        onCheckedChange={() => handleCurriculumSelect(curriculum.id)}
                         className="mt-1"
                       />
                       <div className="flex-1">
@@ -213,7 +213,7 @@ export default function ProfileSetup() {
                       <div className="flex items-start space-x-3">
                         <Checkbox
                           checked={selectedGradeLevels.includes(grade)}
-                          onChange={() => handleGradeLevelToggle(grade)}
+                          onCheckedChange={() => handleGradeLevelToggle(grade)}
                           className="mt-1"
                         />
                         <div>
