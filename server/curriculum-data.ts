@@ -53,138 +53,17 @@ export interface CurriculumLevel {
   examBoard: string; // "Edexcel"
 }
 
-// This is the structure you would fill with official Edexcel data
-export const CURRICULUM_DATA: CurriculumLevel[] = [
-  {
-    id: "igcse_chemistry_edexcel",
-    name: "IGCSE Chemistry Edexcel",
-    grades: ["10", "11"],
-    specificationYear: "2023",
-    examBoard: "Edexcel",
-    topics: [
-      {
-        id: "principles_of_chemistry",
-        name: "Principles of Chemistry",
-        description: "Fundamental concepts of chemistry including atomic structure, bonding, and chemical equations",
-        specificationCode: "Topic 1",
-        timeAllocation: 40,
-        assessmentNotes: "Tested across all papers with emphasis on practical applications",
-        subtopics: [
-          {
-            id: "states_of_matter",
-            name: "States of Matter",
-            description: "Properties and behavior of solids, liquids, and gases",
-            objectives: [
-              {
-                id: "1.1.1",
-                code: "1.1.1",
-                statement: "Students will be able to describe the arrangement and movement of particles in solids, liquids and gases",
-                bloomsLevel: "understand",
-                difficulty: "basic",
-                commandWords: ["describe", "explain", "compare"],
-                estimatedTeachingMinutes: 45,
-                assessmentWeight: 3,
-                prerequisiteObjectives: [],
-                keywords: ["particles", "kinetic theory", "states of matter", "temperature", "pressure"]
-              },
-              {
-                id: "1.1.2", 
-                code: "1.1.2",
-                statement: "Students will be able to explain changes of state in terms of particle movement and energy changes",
-                bloomsLevel: "understand",
-                difficulty: "intermediate",
-                commandWords: ["explain", "predict", "describe"],
-                estimatedTeachingMinutes: 60,
-                assessmentWeight: 4,
-                prerequisiteObjectives: ["1.1.1"],
-                keywords: ["melting", "boiling", "sublimation", "energy", "temperature"]
-              }
-            ],
-            practicalWork: ["Investigating changes of state", "Measuring melting and boiling points"],
-            mathematicalSkills: ["Plotting heating/cooling curves", "Converting temperature scales"]
-          },
-          {
-            id: "atomic_structure",
-            name: "Atomic Structure",
-            description: "Structure of atoms, isotopes, and arrangement of electrons",
-            objectives: [
-              {
-                id: "1.2.1",
-                code: "1.2.1", 
-                statement: "Students will be able to describe the structure of an atom in terms of protons, neutrons and electrons",
-                bloomsLevel: "understand",
-                difficulty: "basic",
-                commandWords: ["describe", "identify", "state"],
-                estimatedTeachingMinutes: 30,
-                assessmentWeight: 3,
-                prerequisiteObjectives: [],
-                keywords: ["proton", "neutron", "electron", "nucleus", "atomic number", "mass number"]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: "inorganic_chemistry",
-        name: "Inorganic Chemistry", 
-        description: "Properties and reactions of elements and compounds",
-        specificationCode: "Topic 2",
-        timeAllocation: 50,
-        assessmentNotes: "Heavy emphasis on practical work and reaction mechanisms",
-        subtopics: [
-          // This would be populated with official specification data
-        ]
-      }
-      // Additional topics would be added here
-    ],
-    overallAssessmentStructure: {
-      papers: [
-        {
-          paperNumber: 1,
-          name: "Chemistry",
-          duration: 120,
-          marks: 110,
-          questionTypes: ["multiple choice", "short answer", "structured questions"],
-          topicCoverage: ["principles_of_chemistry", "inorganic_chemistry", "physical_chemistry", "organic_chemistry"]
-        },
-        {
-          paperNumber: 2,
-          name: "Chemistry",
-          duration: 90,
-          marks: 70,
-          questionTypes: ["short answer", "extended writing"],
-          topicCoverage: ["principles_of_chemistry", "inorganic_chemistry", "physical_chemistry", "organic_chemistry"]
-        }
-      ]
-    }
-  },
-  {
-    id: "a_level_chemistry_edexcel",
-    name: "A Level Chemistry Edexcel",
-    grades: ["12"],
-    specificationYear: "2023",
-    examBoard: "Edexcel",
-    topics: [
-      // A Level topics would be populated here with more advanced content
-    ],
-    overallAssessmentStructure: {
-      papers: [
-        {
-          paperNumber: 1,
-          name: "Core Inorganic and Physical Chemistry",
-          duration: 105,
-          marks: 90,
-          questionTypes: ["structured questions", "extended writing"],
-          topicCoverage: ["atomic_structure", "bonding", "energetics", "kinetics", "equilibria", "redox"]
-        }
-        // Additional papers
-      ]
-    }
-  }
-];
+import { COMPREHENSIVE_CURRICULUM_DATA } from './comprehensive-curriculum';
+
+// Full IGCSE and A Level Edexcel specifications with comprehensive curriculum data
+export const CURRICULUM_DATA: CurriculumLevel[] = COMPREHENSIVE_CURRICULUM_DATA;
 
 // Helper functions to work with curriculum data
 export class CurriculumService {
+  static getAllCurricula(): CurriculumLevel[] {
+    return CURRICULUM_DATA;
+  }
+
   static getCurriculumByName(name: string): CurriculumLevel | undefined {
     return CURRICULUM_DATA.find(curriculum => curriculum.name === name);
   }
