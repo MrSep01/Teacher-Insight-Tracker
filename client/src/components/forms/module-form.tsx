@@ -33,7 +33,15 @@ const moduleSchema = z.object({
 type ModuleFormData = z.infer<typeof moduleSchema>;
 
 interface ModuleFormProps {
-  onSubmit: (data: ModuleFormData) => void;
+  onSubmit: (data: {
+    title: string;
+    description: string;
+    curriculumTopic: string;
+    gradeLevels: string[];
+    topics: string[];
+    objectives: string[];
+    estimatedHours: number;
+  }) => void;
   isLoading?: boolean;
   onClose: () => void;
 }
@@ -97,19 +105,18 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
   };
 
   const handleSubmit = (data: ModuleFormData) => {
-    // Map form data to match database schema - only include fields that exist in the modules table
+    // Map form data to match database schema - now includes all required fields
     const moduleData = {
       title: data.name, // Map name to title
       description: data.description,
       curriculumTopic: data.curriculum, // Map curriculum to curriculumTopic
       gradeLevels: [data.gradeLevel], // Convert to array as expected by schema
-      // Note: topics and objectives are stored separately, not in the modules table
-      // We'll handle them after module creation or store as JSON if needed
+      topics: selectedTopics, // Include selected topics
+      objectives: selectedObjectives, // Include selected objectives
+      estimatedHours: data.estimatedHours || autoCalculatedHours, // Include estimated hours
     };
     
     console.log("Form submitting with data:", moduleData);
-    console.log("Selected topics:", selectedTopics);
-    console.log("Selected objectives:", selectedObjectives);
     onSubmit(moduleData);
   };
 

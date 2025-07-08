@@ -31,6 +31,9 @@ interface Module {
   description: string;
   curriculumTopic: string;
   gradeLevels: string[];
+  topics: string[];
+  objectives: string[];
+  estimatedHours: number;
   isActive: boolean;
   lessonCount?: number;
   createdAt: string;

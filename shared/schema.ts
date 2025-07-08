@@ -110,6 +110,9 @@ export const modules = pgTable("modules", {
   description: text("description"),
   curriculumTopic: varchar("curriculum_topic").notNull(),
   gradeLevels: text("grade_levels").array(),
+  topics: text("topics").array(), // Selected curriculum topics
+  objectives: text("objectives").array(), // Selected learning objectives
+  estimatedHours: integer("estimated_hours").default(0), // Estimated teaching hours
   classId: integer("class_id").references(() => classes.id), // Optional class association
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
