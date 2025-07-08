@@ -1,9 +1,110 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LogIn, Mail, User, Lock, Eye, EyeOff } from "lucide-react";
 import { FaGoogle, FaMicrosoft, FaApple } from "react-icons/fa";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [registerData, setRegisterData] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+  });
+  const { toast } = useToast();
+
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await apiRequest("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Welcome back!",
+        description: "You've been logged in successfully.",
+      });
+      window.location.href = "/";
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: async (data: typeof registerData) => {
+      const response = await apiRequest("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
+      return response;
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Account created!",
+        description: data.message,
+      });
+      setRegisterData({ email: "", password: "", firstName: "", lastName: "" });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginData.email || !loginData.password) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    loginMutation.mutate(loginData);
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registerData.email || !registerData.password || !registerData.firstName || !registerData.lastName) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (registerData.password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+    registerMutation.mutate(registerData);
+  };
+
   const handleGoogleLogin = () => {
     window.location.href = "/api/auth/google";
   };
@@ -29,33 +130,133 @@ export default function Login() {
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="space-y-4">
-          <Button
-            onClick={handleGoogleLogin}
-            variant="outline"
-            className="w-full h-12 text-left justify-start gap-3"
-          >
-            <FaGoogle className="h-5 w-5 text-red-500" />
-            Continue with Google
-          </Button>
-
-          <Button
-            onClick={handleMicrosoftLogin}
-            variant="outline"
-            className="w-full h-12 text-left justify-start gap-3"
-          >
-            <FaMicrosoft className="h-5 w-5 text-blue-500" />
-            Continue with Microsoft
-          </Button>
-
-          <Button
-            onClick={handleAppleLogin}
-            variant="outline"
-            className="w-full h-12 text-left justify-start gap-3"
-          >
-            <FaApple className="h-5 w-5 text-gray-800" />
-            Continue with Apple
-          </Button>
+        <CardContent className="space-y-6">
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="register">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login" className="space-y-4 mt-6">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">Email</Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="register" className="space-y-4 mt-6">
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      placeholder="First name"
+                      value={registerData.firstName}
+                      onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      placeholder="Last name"
+                      value={registerData.lastName}
+                      onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="register-email">Email</Label>
+                  <Input
+                    id="register-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={registerData.email}
+                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="register-password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="register-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a password (min 6 characters)"
+                      value={registerData.password}
+                      onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={registerMutation.isPending}
+                >
+                  {registerMutation.isPending ? "Creating Account..." : "Create Account"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -66,19 +267,36 @@ export default function Login() {
             </div>
           </div>
 
-          <Button
-            variant="default"
-            className="w-full h-12 gap-3"
-            onClick={() => {
-              // For demo purposes, we'll implement email auth later
-              alert("Email authentication coming soon! Please use one of the social login options above.");
-            }}
-          >
-            <Mail className="h-5 w-5" />
-            Continue with Email
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={handleGoogleLogin}
+              variant="outline"
+              className="w-full h-12 text-left justify-start gap-3"
+            >
+              <FaGoogle className="h-5 w-5 text-red-500" />
+              Continue with Google
+            </Button>
 
-          <div className="text-center text-sm text-gray-600 mt-6">
+            <Button
+              onClick={handleMicrosoftLogin}
+              variant="outline"
+              className="w-full h-12 text-left justify-start gap-3"
+            >
+              <FaMicrosoft className="h-5 w-5 text-blue-500" />
+              Continue with Microsoft
+            </Button>
+
+            <Button
+              onClick={handleAppleLogin}
+              variant="outline"
+              className="w-full h-12 text-left justify-start gap-3"
+            >
+              <FaApple className="h-5 w-5 text-gray-800" />
+              Continue with Apple
+            </Button>
+          </div>
+
+          <div className="text-center text-sm text-gray-600">
             <p>
               By signing in, you agree to our{" "}
               <a href="#" className="text-primary hover:underline">
