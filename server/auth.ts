@@ -402,8 +402,16 @@ export async function setupAuth(app: Express) {
     try {
       const { curriculum, gradeLevels } = req.body;
       
+      console.log("Profile setup request:", { curriculum, gradeLevels, userId: req.user.id });
+      
       if (!curriculum || !gradeLevels || gradeLevels.length === 0) {
         return res.status(400).json({ error: "Curriculum and grade levels are required" });
+      }
+
+      // Validate curriculum value
+      const validCurriculums = ["IGCSE Chemistry Edexcel", "A Level Chemistry Edexcel"];
+      if (!validCurriculums.includes(curriculum)) {
+        return res.status(400).json({ error: "Invalid curriculum value" });
       }
 
       const updatedUser = await storage.updateUser(req.user.id, {
@@ -418,8 +426,10 @@ export async function setupAuth(app: Express) {
 
       res.json({ message: "Profile setup completed successfully", user: updatedUser });
     } catch (error) {
-      console.error("Profile setup error:", error);
-      res.status(500).json({ error: "Profile setup failed" });
+      console.error("Profile setup error details:", error);
+      // Send more specific error message to help debug
+      const errorMessage = error instanceof Error ? error.message : "Profile setup failed";
+      res.status(500).json({ error: errorMessage });
     }
   });
 }

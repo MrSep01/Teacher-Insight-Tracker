@@ -480,9 +480,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    // Handle array fields properly for PostgreSQL
+    const updateData = { ...user, updatedAt: new Date() };
+    
     const [updatedUser] = await db
       .update(users)
-      .set({ ...user, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
