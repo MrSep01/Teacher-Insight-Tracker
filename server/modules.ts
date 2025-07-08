@@ -225,4 +225,15 @@ export function registerModuleRoutes(app: Express) {
       res.status(500).json({ error: "Failed to fetch lesson plans" });
     }
   });
+
+  // Get all lessons (for assessment dashboard)
+  app.get("/api/lessons", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const lessons = await storage.getAllLessons();
+      res.json(lessons);
+    } catch (error) {
+      console.error("Error fetching all lessons:", error);
+      res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
 }

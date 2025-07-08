@@ -913,6 +913,10 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async getAllLessons(): Promise<LessonPlan[]> {
+    return await db.select().from(lessonPlans);
+  }
+
   async getLessonsByModule(moduleId: number): Promise<LessonPlan[]> {
     return await db.select().from(lessonPlans).where(eq(lessonPlans.moduleId, moduleId));
   }

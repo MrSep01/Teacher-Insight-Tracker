@@ -892,6 +892,8 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
             }}
             onSubmit={handleAssessmentSubmit}
             isLoading={false}
+            lessonObjectives={formData.objectives.filter(obj => obj.trim() !== "")}
+            lessonTopics={module.topics || []}
           />
         </TabsContent>
       </Tabs>

@@ -42,11 +42,14 @@ interface AssessmentFormProps {
   onSubmit: (data: AssessmentFormData) => void;
   isLoading?: boolean;
   className?: string;
+  lessonObjectives?: string[]; // Pass lesson objectives to pre-populate criteria
+  lessonTopics?: string[]; // Pass lesson topics for context
 }
 
-export function AssessmentForm({ initialData, onSubmit, isLoading = false, className }: AssessmentFormProps) {
+export function AssessmentForm({ initialData, onSubmit, isLoading = false, className, lessonObjectives = [], lessonTopics = [] }: AssessmentFormProps) {
   const [assessmentCriteria, setAssessmentCriteria] = useState<string[]>(
-    initialData?.assessmentCriteria || [""]
+    initialData?.assessmentCriteria || 
+    lessonObjectives.length > 0 ? lessonObjectives : [""]
   );
 
   const form = useForm<AssessmentFormData>({
@@ -262,6 +265,9 @@ export function AssessmentForm({ initialData, onSubmit, isLoading = false, class
                       <Label className="text-sm font-medium">Assessment Criteria</Label>
                       <p className="text-sm text-gray-600 mb-3">
                         Define what students need to demonstrate to succeed
+                        {lessonObjectives.length > 0 && (
+                          <span className="text-blue-600"> (Based on lesson objectives)</span>
+                        )}
                       </p>
                       
                       {assessmentCriteria.map((criteria, index) => (
@@ -294,6 +300,20 @@ export function AssessmentForm({ initialData, onSubmit, isLoading = false, class
                         <Plus className="h-4 w-4 mr-1" />
                         Add Criteria
                       </Button>
+                      
+                      {lessonObjectives.length > 0 && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <h5 className="text-sm font-medium text-blue-900 mb-2">Lesson Objectives:</h5>
+                          <ul className="text-sm text-blue-800 space-y-1">
+                            {lessonObjectives.map((objective, idx) => (
+                              <li key={idx} className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>{objective}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
 
