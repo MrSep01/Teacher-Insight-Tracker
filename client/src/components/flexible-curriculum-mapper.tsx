@@ -135,20 +135,7 @@ export function FlexibleCurriculumMapper({
     return { igcseTopics, aLevelTopics };
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading curriculum specifications...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const { igcseTopics, aLevelTopics } = getSelectedTopicsByLevel();
-
-  // Helper functions for time calculations
+  // Helper functions for time calculations (moved before conditional renders)
   const calculateTopicHours = (topicIds: string[], curriculumData: any) => {
     if (!curriculumData?.topics) return 0;
     return topicIds.reduce((total, topicId) => {
@@ -166,6 +153,8 @@ export function FlexibleCurriculumMapper({
     }, 0);
   };
 
+  const { igcseTopics, aLevelTopics } = getSelectedTopicsByLevel();
+
   // Calculate total estimated hours for parent component
   const totalEstimatedHours = Math.round(
     (calculateTopicHours(igcseTopics, igcseData) + 
@@ -179,6 +168,17 @@ export function FlexibleCurriculumMapper({
       window.updateEstimatedHours(totalEstimatedHours);
     }
   }, [totalEstimatedHours]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading curriculum specifications...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
