@@ -182,6 +182,14 @@ Changelog:
   * Built curriculum API endpoints for hierarchical data access (topics → subtopics → objectives)
   * Enhanced assessment schema to support AI-generated content with difficulty levels and question types
   * Prepared curriculum data structure for official Edexcel specification integration
+- July 08, 2025. Implemented flexible curriculum mapping system:
+  * Created comprehensive IGCSE and A Level Edexcel curriculum data with detailed topics, subtopics, and learning objectives
+  * Built FlexibleCurriculumMapper component allowing teachers to mix and match IGCSE and A Level topics based on student abilities
+  * Enhanced module creation with side-by-side curriculum selection enabling differentiated instruction within the same class
+  * Added detailed learning objectives with official specification codes, Bloom's taxonomy levels, and difficulty classifications
+  * Integrated practical work requirements and mathematical skills for each subtopic
+  * Created search and filtering capabilities for easy curriculum navigation with real-time selection tracking
+  * Added graceful fallback for OpenAI quota limitations to ensure system reliability
 ```
 
 ## User Preferences

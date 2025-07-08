@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, BookOpen, Target } from "lucide-react";
-import { CurriculumBrowser } from "@/components/curriculum-browser";
+import { FlexibleCurriculumMapper } from "@/components/flexible-curriculum-mapper";
 
 const moduleSchema = z.object({
   name: z.string().min(1, "Module name is required"),
@@ -254,14 +254,21 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
         </TabsContent>
 
         <TabsContent value="curriculum" className="space-y-4">
-          <CurriculumBrowser
-            selectedCurriculum={watchedCurriculum}
-            selectedGrade={watchedGradeLevel}
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <h4 className="font-medium mb-2">Flexible Curriculum Mapping</h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Mix and match IGCSE and A Level topics to create customized modules that adapt to different student abilities within the same class. 
+              This approach allows for differentiated learning while maintaining curriculum alignment.
+            </p>
+          </div>
+          
+          <FlexibleCurriculumMapper
             selectedTopics={selectedTopics}
             selectedObjectives={selectedObjectives}
             onTopicToggle={handleTopicToggle}
             onObjectiveToggle={handleObjectiveToggle}
             onSubtopicToggle={handleSubtopicToggle}
+            showLevelMixing={true}
           />
         </TabsContent>
       </Tabs>
