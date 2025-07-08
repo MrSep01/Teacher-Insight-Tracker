@@ -207,6 +207,16 @@ Changelog:
   * System now ensures teachers cannot write their own objectives during lesson/assessment creation
   * Simplified lesson creation interface to two options: manual creation and AI generation
   * Removed "From Objectives" bulk creation option to streamline the user experience
+- July 08, 2025. Implemented comprehensive chemistry curriculum with hierarchical selection:
+  * Created complete IGCSE and A Level Edexcel chemistry curriculum with all topics, subtopics, and objectives
+  * Built HierarchicalCurriculumMapper component with three-level selection system
+  * Implemented cascading selection: selecting topics auto-selects all subtopics and objectives
+  * Added individual subtopic and objective selection capabilities for granular control
+  * Enhanced curriculum data with official specification codes, Bloom's taxonomy levels, and difficulty classifications
+  * Integrated practical work requirements and mathematical skills for each subtopic
+  * Created visual indicators for selection state at all hierarchy levels (topics, subtopics, objectives)
+  * Added comprehensive search and filtering capabilities across all curriculum levels
+  * Implemented real-time hour calculation based on selected learning objectives
 ```
 
 ## User Preferences

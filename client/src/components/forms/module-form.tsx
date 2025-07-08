@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, BookOpen, Target, Clock } from "lucide-react";
-import { FlexibleCurriculumMapper } from "@/components/flexible-curriculum-mapper";
+import { HierarchicalCurriculumMapper } from "@/components/hierarchical-curriculum-mapper";
 
 const moduleSchema = z.object({
   name: z.string().min(1, "Module name is required"),
@@ -49,6 +49,7 @@ interface ModuleFormProps {
 
 export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: ModuleFormProps) {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
   const [autoCalculatedHours, setAutoCalculatedHours] = useState<number>(0);
   const [manuallyAdjusted, setManuallyAdjusted] = useState<boolean>(false);
@@ -91,27 +92,19 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
   const watchedCurriculum = form.watch("curriculum");
   const watchedGradeLevel = form.watch("gradeLevel");
 
-  const handleTopicToggle = (topicId: string) => {
-    const newTopics = selectedTopics.includes(topicId)
-      ? selectedTopics.filter(id => id !== topicId)
-      : [...selectedTopics, topicId];
+  // Handle selection changes from hierarchical curriculum mapper
+  const handleSelectionChange = (selection: {
+    topics: string[];
+    subtopics: string[];
+    objectives: string[];
+  }) => {
+    setSelectedTopics(selection.topics);
+    setSelectedSubtopics(selection.subtopics);
+    setSelectedObjectives(selection.objectives);
     
-    setSelectedTopics(newTopics);
-    form.setValue("topics", newTopics);
-  };
-
-  const handleObjectiveToggle = (objectiveId: string) => {
-    const newObjectives = selectedObjectives.includes(objectiveId)
-      ? selectedObjectives.filter(id => id !== objectiveId)
-      : [...selectedObjectives, objectiveId];
-    
-    setSelectedObjectives(newObjectives);
-    form.setValue("objectives", newObjectives);
-  };
-
-  const handleSubtopicToggle = (subtopicId: string) => {
-    // Handle subtopic selection (could auto-select related objectives)
-    handleTopicToggle(subtopicId);
+    // Update form values
+    form.setValue("topics", selection.topics);
+    form.setValue("objectives", selection.objectives);
   };
 
   const handleSubmit = (data: ModuleFormData) => {
@@ -371,12 +364,11 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
             </p>
           </div>
           
-          <FlexibleCurriculumMapper
+          <HierarchicalCurriculumMapper
             selectedTopics={selectedTopics}
+            selectedSubtopics={selectedSubtopics}
             selectedObjectives={selectedObjectives}
-            onTopicToggle={handleTopicToggle}
-            onObjectiveToggle={handleObjectiveToggle}
-            onSubtopicToggle={handleSubtopicToggle}
+            onSelectionChange={handleSelectionChange}
             showLevelMixing={true}
           />
         </TabsContent>
