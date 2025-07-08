@@ -105,6 +105,12 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
   };
 
   const handleSubmit = (data: ModuleFormData) => {
+    console.log("=== FORM SUBMIT START ===");
+    console.log("Raw form data:", data);
+    console.log("Selected topics:", selectedTopics);
+    console.log("Selected objectives:", selectedObjectives);
+    console.log("Auto calculated hours:", autoCalculatedHours);
+    
     // Map form data to match database schema - now includes all required fields
     const moduleData = {
       title: data.name, // Map name to title
@@ -116,9 +122,14 @@ export function ModuleForm({ onSubmit, isLoading = false, onClose }: ModuleFormP
       estimatedHours: data.estimatedHours || autoCalculatedHours || 10, // Include estimated hours
     };
     
-    console.log("Form submitting with data:", moduleData);
-    console.log("Form validation state:", data);
-    onSubmit(moduleData);
+    console.log("=== CALLING onSubmit ===");
+    console.log("Mapped module data:", moduleData);
+    
+    try {
+      onSubmit(moduleData);
+    } catch (error) {
+      console.error("=== ERROR IN onSubmit ===", error);
+    }
   };
 
   return (

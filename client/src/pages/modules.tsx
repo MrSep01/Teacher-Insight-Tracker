@@ -78,7 +78,9 @@ export default function Modules() {
       setIsCreateModalOpen(false);
     },
     onError: (error: Error) => {
-      console.error("Module creation error:", error);
+      console.error("=== CLIENT: Mutation error ===", error);
+      console.error("=== CLIENT: Error message ===", error.message);
+      console.error("=== CLIENT: Error stack ===", error.stack);
       toast({
         title: "Error creating module",
         description: error.message,
