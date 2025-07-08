@@ -202,10 +202,11 @@ Changelog:
   * Enhanced lesson creation workflow to use only pre-defined module objectives
   * Updated AI lesson generator to enforce module objectives constraint
   * Modified assessment dashboard with objective-based filtering and validation
-  * Created ObjectiveLessonCreator component for converting objectives to individual lessons
   * Added warning messages and disabled buttons when modules lack objectives
   * Implemented backend validation for lesson and assessment creation based on module objectives
   * System now ensures teachers cannot write their own objectives during lesson/assessment creation
+  * Simplified lesson creation interface to two options: manual creation and AI generation
+  * Removed "From Objectives" bulk creation option to streamline the user experience
 ```
 
 ## User Preferences

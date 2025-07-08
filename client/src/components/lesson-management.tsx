@@ -83,7 +83,7 @@ const LESSON_TYPES = [
 export function LessonManagement({ module, onClose }: LessonManagementProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<LessonPlan | null>(null);
-  const [creationMode, setCreationMode] = useState<"manual" | "ai" | "objectives">("manual");
+  const [creationMode, setCreationMode] = useState<"manual" | "ai">("manual");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -175,19 +175,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
     setIsCreateModalOpen(true);
   };
 
-  const handleCreateFromObjectives = () => {
-    if (!module.objectives || module.objectives.length === 0) {
-      toast({
-        title: "No objectives found",
-        description: "Please add at least one objective to the module before creating lessons.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setCreationMode("objectives");
-    setSelectedLesson(null);
-    setIsCreateModalOpen(true);
-  };
+
 
   const handleEditLesson = (lesson: LessonPlan) => {
     setSelectedLesson(lesson);
@@ -259,15 +247,6 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
         </div>
         <div className="flex space-x-2">
           <Button
-            onClick={handleCreateFromObjectives}
-            size="sm"
-            className="bg-green-600 hover:bg-green-700"
-            disabled={!module.objectives || module.objectives.length === 0}
-          >
-            <Target className="h-4 w-4 mr-2" />
-            From Objectives
-          </Button>
-          <Button
             onClick={handleCreateLesson}
             size="sm"
             className="bg-blue-600 hover:bg-blue-700"
@@ -300,15 +279,9 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
             </p>
             <div className="flex justify-center space-x-2">
               <Button
-                onClick={handleCreateFromObjectives}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Target className="h-4 w-4 mr-2" />
-                From Objectives
-              </Button>
-              <Button
                 onClick={handleCreateLesson}
                 className="bg-blue-600 hover:bg-blue-700"
+                disabled={!module.objectives || module.objectives.length === 0}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Manual Lesson
@@ -317,6 +290,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                 onClick={handleGenerateAILesson}
                 variant="outline"
                 className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                disabled={!module.objectives || module.objectives.length === 0}
               >
                 <Bot className="h-4 w-4 mr-2" />
                 Generate with AI
@@ -407,7 +381,6 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
             <DialogTitle>
               {selectedLesson ? 'Edit Lesson' : 
                creationMode === 'ai' ? 'Generate AI Lesson' : 
-               creationMode === 'objectives' ? 'Create Lessons from Objectives' : 
                'Create New Lesson'}
             </DialogTitle>
           </DialogHeader>
@@ -416,12 +389,6 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
               module={module}
               onGenerate={(data) => generateAILessonMutation.mutate(data)}
               isLoading={generateAILessonMutation.isPending}
-            />
-          ) : creationMode === 'objectives' ? (
-            <ObjectiveLessonCreator 
-              module={module}
-              onCreateLessons={(data) => createLessonMutation.mutate(data)}
-              isLoading={createLessonMutation.isPending}
             />
           ) : (
             <LessonForm 
@@ -997,178 +964,3 @@ function LessonForm({ lesson, module, onSubmit, isLoading }: LessonFormProps) {
   );
 }
 
-// Objective-based Lesson Creator Component
-interface ObjectiveLessonCreatorProps {
-  module: Module;
-  onCreateLessons: (data: any) => void;
-  isLoading: boolean;
-}
-
-function ObjectiveLessonCreator({ module, onCreateLessons, isLoading }: ObjectiveLessonCreatorProps) {
-  const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
-  const [lessonType, setLessonType] = useState("lecture");
-  const [difficulty, setDifficulty] = useState("intermediate");
-  const [duration, setDuration] = useState(45);
-  const [assessmentType, setAssessmentType] = useState<"formative" | "summative">("formative");
-  const [includeAssessment, setIncludeAssessment] = useState(false);
-
-  const handleObjectiveToggle = (objective: string) => {
-    setSelectedObjectives(prev => 
-      prev.includes(objective) 
-        ? prev.filter(obj => obj !== objective)
-        : [...prev, objective]
-    );
-  };
-
-  const handleCreateLessons = () => {
-    selectedObjectives.forEach((objective, index) => {
-      const lessonData = {
-        moduleId: module.id,
-        title: `Lesson: ${objective}`,
-        description: `Focused lesson on: ${objective}`,
-        lessonType,
-        objectives: [objective],
-        activities: [`Activity covering: ${objective}`],
-        resources: [`Resources for: ${objective}`],
-        duration,
-        difficulty,
-        sequenceOrder: index + 1,
-        hasAssessment: includeAssessment,
-        assessmentType: includeAssessment ? assessmentType : undefined,
-        assessmentDescription: includeAssessment ? `Assessment for: ${objective}` : undefined,
-        assessmentDuration: includeAssessment ? 15 : undefined,
-        assessmentPoints: includeAssessment ? 10 : undefined,
-        assessmentCriteriaLesson: includeAssessment ? [objective] : undefined,
-        prerequisites: [],
-        assessmentCriteria: [objective],
-        targetStudents: [],
-        aiGenerated: false,
-        isCompleted: false
-      };
-      
-      onCreateLessons(lessonData);
-    });
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h4 className="font-medium text-blue-900 mb-2">Create Individual Lessons</h4>
-        <p className="text-sm text-blue-800">
-          Select objectives to create focused lessons. Each objective will become a separate lesson.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="lessonType">Lesson Type</Label>
-          <Select value={lessonType} onValueChange={setLessonType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LESSON_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  <div className="flex items-center space-x-2">
-                    <type.icon className="h-4 w-4" />
-                    <span>{type.label}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="difficulty">Difficulty Level</Label>
-          <Select value={difficulty} onValueChange={setDifficulty}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="basic">Basic</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="duration">Duration (minutes)</Label>
-        <Input
-          id="duration"
-          type="number"
-          value={duration}
-          onChange={(e) => setDuration(parseInt(e.target.value))}
-          min="15"
-          max="180"
-          className="mt-2"
-        />
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="includeAssessment"
-            checked={includeAssessment}
-            onChange={(e) => setIncludeAssessment(e.target.checked)}
-            className="rounded border-gray-300"
-          />
-          <Label htmlFor="includeAssessment" className="text-sm">
-            Include assessment for each lesson
-          </Label>
-        </div>
-
-        {includeAssessment && (
-          <div>
-            <Label htmlFor="assessmentType">Assessment Type</Label>
-            <Select value={assessmentType} onValueChange={(value: "formative" | "summative") => setAssessmentType(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="formative">Formative (For Learning)</SelectItem>
-                <SelectItem value="summative">Summative (For Grading)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </div>
-
-      <div>
-        <Label>Select Objectives to Convert to Lessons</Label>
-        <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
-          {module.objectives.map((objective, index) => (
-            <div key={index} className="flex items-start space-x-2">
-              <input
-                type="checkbox"
-                id={`objective-${index}`}
-                checked={selectedObjectives.includes(objective)}
-                onChange={() => handleObjectiveToggle(objective)}
-                className="mt-1 rounded border-gray-300"
-              />
-              <Label htmlFor={`objective-${index}`} className="text-sm flex-1 cursor-pointer">
-                {objective}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex justify-between">
-        <div className="text-sm text-gray-600">
-          {selectedObjectives.length} objective{selectedObjectives.length !== 1 ? 's' : ''} selected
-        </div>
-        <Button 
-          onClick={handleCreateLessons}
-          disabled={selectedObjectives.length === 0 || isLoading}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          {isLoading ? 'Creating...' : `Create ${selectedObjectives.length} Lesson${selectedObjectives.length !== 1 ? 's' : ''}`}
-        </Button>
-      </div>
-    </div>
-  );
-}
