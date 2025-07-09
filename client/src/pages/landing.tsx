@@ -109,15 +109,15 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Transform Chemistry Education with 
-            <span className="text-blue-600"> AI-Powered Insights</span>
+            Transform IGCSE Education with 
+            <span className="text-blue-600"> AI-Powered Teaching</span>
           </h1>
           <p className="text-2xl text-blue-600 font-semibold mb-4">
-            "Empowering Educators, Inspiring Students"
+            "Focus on Teaching, Let AI Handle the Rest"
           </p>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Empower your chemistry teaching with comprehensive curriculum management, 
-            personalized student assessments, and intelligent lesson planning for IGCSE and A-Level programs.
+            Designed for new teachers: AI creates tailored lessons, instant assessments, and personalized feedback 
+            based on student progress. Join a community of educators sharing resources and best practices.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/login">
@@ -146,9 +146,9 @@ export default function Landing() {
                 <h2 className="text-3xl font-bold text-gray-900">Our Mission</h2>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">
-                To revolutionize chemistry education by providing teachers with intelligent tools 
-                that enhance student learning, streamline curriculum management, and deliver 
-                personalized educational experiences that inspire the next generation of scientists.
+                To empower new teachers with AI-powered tools that automatically create personalized 
+                lessons, assessments, and feedback based on student needs, while building a collaborative 
+                community where educators can share resources and grow together.
               </p>
             </div>
             <div>
@@ -157,9 +157,9 @@ export default function Landing() {
                 <h2 className="text-3xl font-bold text-gray-900">Our Vision</h2>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">
-                To become the leading platform for chemistry education worldwide, where every 
-                teacher has access to AI-powered insights and every student receives personalized 
-                learning experiences that unlock their full potential in science.
+                To become the go-to platform for IGCSE educators worldwide, where new teachers 
+                confidently deliver personalized education through AI assistance, and experienced 
+                teachers share their wisdom in a thriving collaborative community.
               </p>
             </div>
           </div>
@@ -171,10 +171,10 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need to Excel in Chemistry Teaching
+              Everything You Need to Excel in IGCSE Teaching
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive tools designed specifically for chemistry educators and institutions
+              AI-powered tools designed specifically for new teachers and IGCSE educators
             </p>
           </div>
           
@@ -182,43 +182,10 @@ export default function Landing() {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <Brain className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">AI-Powered Assessments</CardTitle>
+                <CardTitle className="text-xl">AI-Generated Lessons</CardTitle>
                 <CardDescription>
-                  Generate personalized chemistry assessments with intelligent question generation 
-                  and automated grading aligned with Edexcel curriculum standards.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <BookOpen className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Curriculum Management</CardTitle>
-                <CardDescription>
-                  Comprehensive IGCSE and A-Level chemistry curriculum mapping with topic-specific 
-                  lesson plans and learning objectives tracking.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <TrendingUp className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Performance Analytics</CardTitle>
-                <CardDescription>
-                  Real-time insights into student progress with detailed analytics, 
-                  trend analysis, and personalized learning recommendations.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <Users className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Student Management</CardTitle>
-                <CardDescription>
-                  Comprehensive student profiles with performance tracking, 
-                  individual learning paths, and progress monitoring.
+                  AI automatically creates tailored lesson plans based on student progress and curriculum 
+                  standards. Perfect for new teachers who want to focus on teaching, not planning.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -226,10 +193,43 @@ export default function Landing() {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <Zap className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Instant Feedback</CardTitle>
+                <CardTitle className="text-xl">Instant Student Feedback</CardTitle>
                 <CardDescription>
-                  Automated grading with detailed feedback and explanations 
-                  to help students understand complex chemistry concepts.
+                  AI provides immediate, personalized feedback to students on their work, 
+                  helping them understand mistakes and improve in real-time.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <TrendingUp className="h-12 w-12 text-blue-600 mb-4" />
+                <CardTitle className="text-xl">Progress-Based Adaptations</CardTitle>
+                <CardDescription>
+                  Lessons and assessments automatically adjust difficulty and content 
+                  based on individual student performance and learning patterns.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <BookOpen className="h-12 w-12 text-blue-600 mb-4" />
+                <CardTitle className="text-xl">IGCSE Curriculum Aligned</CardTitle>
+                <CardDescription>
+                  Complete IGCSE curriculum coverage with topic-specific resources, 
+                  learning objectives, and assessment criteria built right in.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <Users className="h-12 w-12 text-blue-600 mb-4" />
+                <CardTitle className="text-xl">Teacher Community</CardTitle>
+                <CardDescription>
+                  Connect with fellow IGCSE teachers to share lessons, assessments, 
+                  and teaching strategies in a collaborative community environment.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -237,10 +237,10 @@ export default function Landing() {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <Shield className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Secure & Reliable</CardTitle>
+                <CardTitle className="text-xl">Smart Assessments</CardTitle>
                 <CardDescription>
-                  Enterprise-grade security with data encryption, 
-                  regular backups, and compliance with educational data protection standards.
+                  AI creates assessments tailored to student needs and curriculum requirements, 
+                  with automatic grading and detailed performance insights.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -259,23 +259,23 @@ export default function Landing() {
           
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">For Teachers</h3>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-6">For New Teachers</h3>
               <ul className="space-y-4">
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Save 10+ hours per week on lesson planning and grading</span>
+                  <span className="text-gray-700">Focus on teaching while AI handles lesson planning and assessments</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Get AI-powered insights into student learning patterns</span>
+                  <span className="text-gray-700">Get instant feedback and progress tracking for all students</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Access comprehensive chemistry curriculum resources</span>
+                  <span className="text-gray-700">Access a supportive community of fellow IGCSE teachers</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Create personalized learning experiences for every student</span>
+                  <span className="text-gray-700">Share and discover proven teaching resources and strategies</span>
                 </li>
               </ul>
             </div>
@@ -285,22 +285,74 @@ export default function Landing() {
               <ul className="space-y-4">
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Improve student outcomes with data-driven insights</span>
+                  <span className="text-gray-700">Support new teachers with AI-powered guidance and resources</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Standardize chemistry curriculum across all classes</span>
+                  <span className="text-gray-700">Standardize IGCSE curriculum delivery across all classes</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Reduce administrative burden with automated reporting</span>
+                  <span className="text-gray-700">Improve student outcomes with personalized learning paths</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Enterprise-grade security and compliance</span>
+                  <span className="text-gray-700">Build a collaborative teaching community within your institution</span>
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Community Section */}
+      <section className="py-16 bg-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Join a Thriving Community of IGCSE Teachers
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Connect, share, and grow with fellow educators who understand your journey
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="text-center">
+                <BookOpen className="h-12 w-12 text-blue-600 mb-4 mx-auto" />
+                <CardTitle className="text-xl">Share Resources</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Upload and discover lesson plans, worksheets, and assessments created by experienced teachers
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="text-center">
+                <Users className="h-12 w-12 text-blue-600 mb-4 mx-auto" />
+                <CardTitle className="text-xl">Collaborate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Work together on curriculum planning, share teaching strategies, and support each other's growth
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="text-center">
+                <TrendingUp className="h-12 w-12 text-blue-600 mb-4 mx-auto" />
+                <CardTitle className="text-xl">Learn & Grow</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Access professional development resources and learn from the collective wisdom of the community
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -520,11 +572,11 @@ export default function Landing() {
                 <span className="text-2xl font-bold">EduTrack</span>
               </div>
               <p className="text-gray-400 mb-4">
-                Revolutionizing chemistry education with AI-powered insights and personalized learning experiences.
+                Empowering new teachers with AI-powered tools for personalized IGCSE education and collaborative learning.
               </p>
               <div className="flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-red-500" />
-                <span className="text-sm text-gray-400">Made with love for educators</span>
+                <span className="text-sm text-gray-400">Made with love for new teachers</span>
               </div>
             </div>
             
@@ -561,7 +613,7 @@ export default function Landing() {
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center">
             <p className="text-gray-400 text-sm">
-              © 2025 EduTrack. All rights reserved. | Empowering educators, inspiring students.
+              © 2025 EduTrack. All rights reserved. | Focus on Teaching, Let AI Handle the Rest.
             </p>
           </div>
         </div>

@@ -266,6 +266,14 @@ Changelog:
   * Added professional footer with company information and social media links
   * Updated routing to show landing page as homepage with proper authentication flow
   * Added call-to-action buttons throughout for user conversion
+- July 09, 2025. Refocused value proposition for new teachers and IGCSE education:
+  * Updated slogan to "Focus on Teaching, Let AI Handle the Rest" to emphasize core value
+  * Shifted from chemistry-specific to general IGCSE education focus
+  * Redesigned features to highlight AI-generated lessons, instant feedback, and progress-based adaptations
+  * Added teacher community section showcasing resource sharing and collaboration
+  * Updated benefits to emphasize support for new teachers and collaborative learning
+  * Refined mission and vision statements to focus on empowering new teachers with AI assistance
+  * Enhanced messaging around personalized learning and community-driven education
 ```
 
 ## User Preferences
