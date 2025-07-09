@@ -226,6 +226,13 @@ Changelog:
   * Included practical work requirements and mathematical skills for every subtopic
   * Added prerequisite mapping and estimated teaching minutes for proper curriculum sequencing
   * System now exclusively uses authentic Edexcel Pearson curriculum data with full specification compliance
+- July 09, 2025. Fixed critical module creation and deletion functionality:
+  * Resolved module form schema mismatch between frontend and backend (title vs name, curriculumTopic vs curriculum)
+  * Fixed field name inconsistencies that were preventing module creation from working
+  * Updated form validation to match backend InsertModule schema requirements
+  * Added proper grade level selection with multiple choice capability
+  * Implemented delete module functionality with confirmation dialog and proper authentication
+  * Successfully tested both module creation and deletion operations with proper data persistence
 ```
 
 ## User Preferences
