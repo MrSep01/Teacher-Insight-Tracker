@@ -44,7 +44,7 @@ export default function Login() {
         title: "Welcome back!",
         description: "You've been logged in successfully.",
       });
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     },
     onError: (error: Error) => {
       toast({

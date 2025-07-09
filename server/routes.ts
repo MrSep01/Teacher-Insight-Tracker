@@ -448,6 +448,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact form endpoint (public)
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, organization, message } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !message) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      // Here you would typically send an email or save to database
+      // For now, just log the contact request
+      console.log('Contact form submission:', {
+        name,
+        email,
+        organization,
+        message,
+        timestamp: new Date().toISOString()
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Thank you for contacting us! We'll get back to you soon." 
+      });
+    } catch (error) {
+      console.error('Contact form error:', error);
+      res.status(500).json({ error: "Failed to submit contact form" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

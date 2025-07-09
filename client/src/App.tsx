@@ -18,6 +18,7 @@ import VerifyEmail from "@/pages/verify-email";
 import DevVerify from "@/pages/dev-verify";
 import ProfileSetup from "@/pages/profile-setup";
 import NotFound from "@/pages/not-found";
+import Landing from "@/pages/landing";
 import Sidebar from "@/components/layout/sidebar";
 
 function Router() {
@@ -34,26 +35,99 @@ function Router() {
       <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/dev-verify" component={DevVerify} />
       <Route path="/profile-setup" component={ProfileSetup} />
-      <Route>
+      
+      {/* Protected Dashboard Routes */}
+      <Route path="/dashboard">
         <AuthGuard>
           <div className="flex h-screen overflow-hidden">
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
-              <Switch>
-                <Route path="/" component={Dashboard} />
-                <Route path="/students" component={Students} />
-                <Route path="/classes" component={Classes} />
-                <Route path="/modules" component={Modules} />
-                <Route path="/assessments" component={Assessments} />
-                <Route path="/reports" component={Reports} />
-                <Route path="/ai-recommendations" component={AIRecommendations} />
-                <Route path="/profile" component={Profile} />
-                <Route component={NotFound} />
-              </Switch>
+              <Dashboard />
             </div>
           </div>
         </AuthGuard>
       </Route>
+      
+      <Route path="/students">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Students />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/classes">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Classes />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/modules">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Modules />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/assessments">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Assessments />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/reports">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Reports />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/ai-recommendations">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <AIRecommendations />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/profile">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Profile />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      {/* Landing page as default */}
+      <Route path="/" component={Landing} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
