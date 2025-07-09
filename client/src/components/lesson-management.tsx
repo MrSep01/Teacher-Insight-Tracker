@@ -30,7 +30,8 @@ import {
   User,
   BookOpen,
   CheckCircle,
-  Circle
+  Circle,
+  Eye
 } from "lucide-react";
 import type { Module } from "@shared/schema";
 
@@ -180,6 +181,10 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
 
 
   const handleEditLesson = (lesson: LessonPlan) => {
+    toast({
+      title: "Edit Lesson",
+      description: `Opening editor for: ${lesson.title}`,
+    });
     setSelectedLesson(lesson);
     setCreationMode("manual");
     setIsCreateModalOpen(true);
@@ -190,6 +195,22 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
     toast({
       title: lesson.title,
       description: `${lesson.description} - ${lesson.duration} minutes, ${lesson.difficulty} difficulty`,
+    });
+  };
+
+  const handleViewAssessment = (assessment: Assessment) => {
+    // Show assessment details in a toast for now
+    toast({
+      title: assessment.title,
+      description: `${assessment.description} - ${assessment.estimatedDuration} minutes, ${assessment.questionCount} questions`,
+    });
+  };
+
+  const handleEditAssessment = (assessment: Assessment) => {
+    // Show edit assessment functionality
+    toast({
+      title: "Edit Assessment",
+      description: `Opening editor for: ${assessment.title}`,
     });
   };
 
@@ -320,16 +341,16 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
               {lessons.map((lesson, index) => {
                 const IconComponent = getLessonTypeIcon(lesson.lessonType);
                 return (
-                  <Card key={lesson.id} className="hover:shadow-md transition-shadow">
+                  <Card key={lesson.id} className="hover:shadow-md transition-shadow cursor-pointer">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
+                        <div className="flex items-start space-x-3" onClick={() => handleViewLesson(lesson)}>
                           <div className="mt-1">
                             <IconComponent className="h-5 w-5 text-blue-600" />
                           </div>
                           <div>
                             <div className="flex items-center space-x-2">
-                              <CardTitle className="text-lg">{lesson.title}</CardTitle>
+                              <CardTitle className="text-lg hover:text-blue-600 cursor-pointer">{lesson.title}</CardTitle>
                               <Badge className={getLessonTypeColor(lesson.lessonType)}>
                                 {LESSON_TYPES.find(t => t.value === lesson.lessonType)?.label}
                               </Badge>
@@ -352,21 +373,27 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleEditLesson(lesson)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewLesson(lesson);
+                            }}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => handleViewLesson(lesson)}
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditLesson(lesson);
+                            }}
                           >
-                            View
+                            <Edit className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent onClick={() => handleViewLesson(lesson)}>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div className="flex items-center space-x-2">
                           <Clock className="h-4 w-4 text-gray-500" />
@@ -546,16 +573,16 @@ function AssessmentManagement({ moduleId, moduleObjectives }: AssessmentManageme
       ) : (
         <div className="grid gap-4">
           {assessments.map((assessment) => (
-            <Card key={assessment.id} className="hover:shadow-md transition-shadow">
+            <Card key={assessment.id} className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start space-x-3" onClick={() => handleViewAssessment(assessment)}>
                     <div className="mt-1">
                       <FileText className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <CardTitle className="text-lg">{assessment.title}</CardTitle>
+                        <CardTitle className="text-lg hover:text-green-600 cursor-pointer">{assessment.title}</CardTitle>
                         <Badge className={getAssessmentTypeColor(assessment.assessmentType)}>
                           {assessment.assessmentType}
                         </Badge>
@@ -570,14 +597,27 @@ function AssessmentManagement({ moduleId, moduleObjectives }: AssessmentManageme
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => {/* Handle edit */}}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewAssessment(assessment);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditAssessment(assessment);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent onClick={() => handleViewAssessment(assessment)}>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-gray-500" />
