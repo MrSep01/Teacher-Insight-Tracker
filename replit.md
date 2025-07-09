@@ -293,6 +293,8 @@ Changelog:
   * Updated App.tsx routing to include all new public pages
   * Contact form configured to send notifications to sep.alamouti@sepalamouti.com
   * Complete site navigation now functional with no broken links or missing pages
+  * Fixed API Info page React syntax error with JSON code example using proper HTML entities
+  * All footer links confirmed working: Privacy Policy, Terms of Service, Documentation, Cookie Policy, GDPR, Careers, Blog, and API Info
 ```
 
 ## User Preferences
