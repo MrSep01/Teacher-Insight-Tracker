@@ -519,5 +519,1736 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
         ]
       }
     ]
+  },
+  {
+    id: "a-level-chemistry-edexcel",
+    name: "A Level Chemistry Edexcel",
+    grades: ["12", "13"],
+    specificationYear: "2024",
+    examBoard: "Edexcel",
+    overallAssessmentStructure: {
+      papers: [
+        {
+          paperNumber: 1,
+          name: "Paper 1: Core Inorganic and Physical Chemistry",
+          duration: 105,
+          marks: 90,
+          questionTypes: ["multiple choice", "short answer", "calculations"],
+          topicCoverage: ["topic-1", "topic-2", "topic-3", "topic-4", "topic-5", "topic-6", "topic-7", "topic-8", "topic-9", "topic-10"]
+        },
+        {
+          paperNumber: 2,
+          name: "Paper 2: Core Organic and Physical Chemistry",
+          duration: 105,
+          marks: 90,
+          questionTypes: ["multiple choice", "short answer", "calculations"],
+          topicCoverage: ["topic-1", "topic-11", "topic-12", "topic-13", "topic-14", "topic-15", "topic-16", "topic-17", "topic-18", "topic-19", "topic-20"]
+        },
+        {
+          paperNumber: 3,
+          name: "Paper 3: General and Practical Applications",
+          duration: 120,
+          marks: 120,
+          questionTypes: ["structured", "extended writing", "practical analysis"],
+          topicCoverage: ["topic-1", "topic-2", "topic-3", "topic-4", "topic-5", "topic-6", "topic-7", "topic-8", "topic-9", "topic-10", "topic-11", "topic-12", "topic-13", "topic-14", "topic-15", "topic-16", "topic-17", "topic-18", "topic-19", "topic-20"]
+        }
+      ]
+    },
+    topics: [
+      {
+        id: "a-level-topic-1",
+        name: "Atomic Structure and the Periodic Table",
+        description: "Advanced atomic theory, electron configuration, and periodic trends",
+        specificationCode: "1",
+        timeAllocation: 25,
+        assessmentNotes: "Foundation topic with mathematical calculations and trend analysis",
+        subtopics: [
+          {
+            id: "1.1",
+            name: "Atomic Structure",
+            description: "Advanced atomic theory including isotopes, mass spectrometry, and electron arrangement",
+            objectives: [
+              {
+                id: "1.1.1",
+                code: "1.1",
+                statement: "Know the structure of an atom in terms of protons, neutrons and electrons",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: [],
+                keywords: ["proton", "neutron", "electron", "nucleus", "atomic structure"]
+              },
+              {
+                id: "1.1.2",
+                code: "1.2",
+                statement: "Know the relative mass and relative charge of a proton, neutron and electron",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 20,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["1.1.1"],
+                keywords: ["relative mass", "relative charge", "subatomic particles"]
+              },
+              {
+                id: "1.1.3",
+                code: "1.3",
+                statement: "Understand the term isotope and be able to state the relative atomic mass of an element in terms of the weighted average mass of its isotopes",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "calculate"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["1.1.1", "1.1.2"],
+                keywords: ["isotope", "relative atomic mass", "weighted average", "mass spectrometry"]
+              }
+            ],
+            practicalWork: ["Mass spectrometry simulation", "Isotope calculations", "Atomic structure models"],
+            mathematicalSkills: ["Weighted averages", "Percentage abundance", "Mass calculations"]
+          },
+          {
+            id: "1.2",
+            name: "Electron Configuration",
+            description: "Electronic structure and orbital theory",
+            objectives: [
+              {
+                id: "1.2.1",
+                code: "1.4",
+                statement: "Know that electrons occupy orbitals and that these orbitals have different energy levels",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["1.1.1"],
+                keywords: ["orbital", "energy levels", "electron configuration", "quantum mechanics"]
+              },
+              {
+                id: "1.2.2",
+                code: "1.5",
+                statement: "Know the number of electrons that can occupy the first four energy levels",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 20,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["1.2.1"],
+                keywords: ["energy levels", "electron capacity", "2, 8, 18, 32 rule"]
+              },
+              {
+                id: "1.2.3",
+                code: "1.6",
+                statement: "Understand how to write electron configurations for atoms and ions up to Z=36",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["write", "determine"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["1.2.1", "1.2.2"],
+                keywords: ["electron configuration", "ions", "orbital notation", "aufbau principle"]
+              }
+            ],
+            practicalWork: ["Orbital models", "Electron configuration practice", "Spectroscopy demonstrations"],
+            mathematicalSkills: ["Electron counting", "Orbital filling", "Ion formation"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-2",
+        name: "Bonding and Structure",
+        description: "Chemical bonding, molecular geometry, and structure-property relationships",
+        specificationCode: "2",
+        timeAllocation: 30,
+        assessmentNotes: "Core topic with 3D visualization and property predictions",
+        subtopics: [
+          {
+            id: "2.1",
+            name: "Ionic Bonding",
+            description: "Ionic bonding theory, lattice structures, and properties",
+            objectives: [
+              {
+                id: "2.1.1",
+                code: "2.1",
+                statement: "Understand ionic bonding in terms of electrostatic attraction between oppositely charged ions",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.2.3"],
+                keywords: ["ionic bonding", "electrostatic attraction", "cation", "anion", "electron transfer"]
+              },
+              {
+                id: "2.1.2",
+                code: "2.2",
+                statement: "Know that ionic crystals are giant three-dimensional lattices of ions",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "describe"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["2.1.1"],
+                keywords: ["ionic crystals", "lattice", "three-dimensional", "structure"]
+              },
+              {
+                id: "2.1.3",
+                code: "2.3",
+                statement: "Understand the link between the charge on the ions and the lattice energy",
+                bloomsLevel: "understand",
+                difficulty: "advanced",
+                commandWords: ["understand", "relate"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["2.1.1", "2.1.2"],
+                keywords: ["lattice energy", "charge density", "ionic radius", "Born-Haber cycle"]
+              }
+            ],
+            practicalWork: ["Ionic compound formation", "Lattice structure models", "Conductivity tests"],
+            mathematicalSkills: ["Lattice energy calculations", "Charge density", "Ionic radius trends"]
+          },
+          {
+            id: "2.2",
+            name: "Covalent Bonding",
+            description: "Covalent bonding theory, molecular shapes, and intermolecular forces",
+            objectives: [
+              {
+                id: "2.2.1",
+                code: "2.4",
+                statement: "Understand covalent bonding in terms of shared pairs of electrons",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.2.3"],
+                keywords: ["covalent bonding", "shared electrons", "electron pair", "bond formation"]
+              },
+              {
+                id: "2.2.2",
+                code: "2.5",
+                statement: "Know that covalent bonds can be single, double or triple bonds",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "identify"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["2.2.1"],
+                keywords: ["single bond", "double bond", "triple bond", "bond order"]
+              },
+              {
+                id: "2.2.3",
+                code: "2.6",
+                statement: "Understand the shapes of molecules with up to 6 electron pairs using VSEPR theory",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["predict", "determine"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["2.2.1", "2.2.2"],
+                keywords: ["VSEPR theory", "molecular shape", "electron pairs", "geometry", "bond angles"]
+              }
+            ],
+            practicalWork: ["Molecular model building", "Bond angle measurement", "Polarity investigations"],
+            mathematicalSkills: ["Bond angle calculations", "Electron pair geometry", "Molecular modeling"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-3",
+        name: "States of Matter",
+        description: "Kinetic theory, phase changes, and intermolecular forces",
+        specificationCode: "3",
+        timeAllocation: 15,
+        assessmentNotes: "Foundation topic linking to thermodynamics and kinetics",
+        subtopics: [
+          {
+            id: "3.1",
+            name: "Kinetic Theory",
+            description: "Particle theory and behavior in different states",
+            objectives: [
+              {
+                id: "3.1.1",
+                code: "3.1",
+                statement: "Understand the kinetic theory of matter and its application to solids, liquids and gases",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "apply"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: [],
+                keywords: ["kinetic theory", "particle motion", "temperature", "energy distribution"]
+              },
+              {
+                id: "3.1.2",
+                code: "3.2",
+                statement: "Know that the average kinetic energy of particles is proportional to absolute temperature",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "relate"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["3.1.1"],
+                keywords: ["average kinetic energy", "absolute temperature", "Kelvin scale", "proportionality"]
+              }
+            ],
+            practicalWork: ["Temperature-motion demonstrations", "Phase change observations", "Kinetic theory models"],
+            mathematicalSkills: ["Temperature conversions", "Energy calculations", "Kinetic energy relationships"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-4",
+        name: "Energetics I",
+        description: "Enthalpy changes, Hess's law, and thermochemistry",
+        specificationCode: "4",
+        timeAllocation: 25,
+        assessmentNotes: "Mathematical topic with calculation-based questions",
+        subtopics: [
+          {
+            id: "4.1",
+            name: "Enthalpy Changes",
+            description: "Types of enthalpy changes and their measurement",
+            objectives: [
+              {
+                id: "4.1.1",
+                code: "4.1",
+                statement: "Know that enthalpy change is the heat change at constant pressure",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "define"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: [],
+                keywords: ["enthalpy change", "heat", "constant pressure", "thermodynamics"]
+              },
+              {
+                id: "4.1.2",
+                code: "4.2",
+                statement: "Know the standard conditions for measuring enthalpy changes",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 20,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["4.1.1"],
+                keywords: ["standard conditions", "298K", "1 bar", "standard states"]
+              },
+              {
+                id: "4.1.3",
+                code: "4.3",
+                statement: "Understand the terms: enthalpy of formation, combustion, fusion, and vaporization",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "define"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["4.1.1", "4.1.2"],
+                keywords: ["enthalpy of formation", "combustion", "fusion", "vaporization", "standard enthalpy"]
+              }
+            ],
+            practicalWork: ["Calorimetry experiments", "Enthalpy measurement", "Heat capacity determination"],
+            mathematicalSkills: ["Enthalpy calculations", "Heat capacity", "Energy conversions"]
+          },
+          {
+            id: "4.2",
+            name: "Hess's Law",
+            description: "Hess's law and enthalpy calculations",
+            objectives: [
+              {
+                id: "4.2.1",
+                code: "4.4",
+                statement: "Understand Hess's law and use it to calculate enthalpy changes",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["calculate", "apply"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["4.1.3"],
+                keywords: ["Hess's law", "enthalpy cycles", "indirect calculation", "conservation of energy"]
+              },
+              {
+                id: "4.2.2",
+                code: "4.5",
+                statement: "Use bond enthalpies to calculate enthalpy changes",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["calculate", "use"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["4.2.1"],
+                keywords: ["bond enthalpy", "bond breaking", "bond forming", "enthalpy calculation"]
+              }
+            ],
+            practicalWork: ["Hess's law verification", "Bond enthalpy experiments", "Enthalpy cycle construction"],
+            mathematicalSkills: ["Hess's law calculations", "Bond enthalpy arithmetic", "Energy cycle analysis"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-5",
+        name: "Kinetics I",
+        description: "Rates of reaction, collision theory, and factors affecting reaction rates",
+        specificationCode: "5",
+        timeAllocation: 25,
+        assessmentNotes: "Practical-based topic with graph analysis and rate calculations",
+        subtopics: [
+          {
+            id: "5.1",
+            name: "Reaction Rates",
+            description: "Measuring and calculating reaction rates",
+            objectives: [
+              {
+                id: "5.1.1",
+                code: "5.1",
+                statement: "Understand how to measure the rate of a reaction",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "measure"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: [],
+                keywords: ["reaction rate", "concentration", "time", "measurement", "monitoring"]
+              },
+              {
+                id: "5.1.2",
+                code: "5.2",
+                statement: "Know the factors that affect the rate of a reaction",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "list"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["5.1.1"],
+                keywords: ["concentration", "temperature", "surface area", "catalysts", "pressure"]
+              },
+              {
+                id: "5.1.3",
+                code: "5.3",
+                statement: "Understand collision theory and how it explains the effect of concentration, temperature, and surface area on reaction rates",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["5.1.1", "5.1.2"],
+                keywords: ["collision theory", "activation energy", "frequency", "energy distribution", "Maxwell-Boltzmann"]
+              }
+            ],
+            practicalWork: ["Rate measurement experiments", "Concentration effects", "Temperature effects", "Surface area investigations"],
+            mathematicalSkills: ["Rate calculations", "Graph analysis", "Concentration changes"]
+          },
+          {
+            id: "5.2",
+            name: "Catalysis",
+            description: "Catalysts and their effect on reaction rates",
+            objectives: [
+              {
+                id: "5.2.1",
+                code: "5.4",
+                statement: "Understand how catalysts work and their effect on activation energy",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["5.1.3"],
+                keywords: ["catalyst", "activation energy", "alternative pathway", "energy profile"]
+              },
+              {
+                id: "5.2.2",
+                code: "5.5",
+                statement: "Know the difference between homogeneous and heterogeneous catalysis",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "distinguish"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["5.2.1"],
+                keywords: ["homogeneous", "heterogeneous", "catalyst", "phase", "surface area"]
+              }
+            ],
+            practicalWork: ["Catalyst investigations", "Homogeneous catalysis", "Heterogeneous catalysis", "Enzyme catalysis"],
+            mathematicalSkills: ["Activation energy calculations", "Rate comparisons", "Catalyst efficiency"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-6",
+        name: "Equilibrium I",
+        description: "Dynamic equilibrium, Le Chatelier's principle, and equilibrium constants",
+        specificationCode: "6",
+        timeAllocation: 25,
+        assessmentNotes: "Mathematical topic with equilibrium calculations and principle applications",
+        subtopics: [
+          {
+            id: "6.1",
+            name: "Dynamic Equilibrium",
+            description: "Concept of dynamic equilibrium and equilibrium constants",
+            objectives: [
+              {
+                id: "6.1.1",
+                code: "6.1",
+                statement: "Understand what is meant by dynamic equilibrium",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "define"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: [],
+                keywords: ["dynamic equilibrium", "forward reaction", "reverse reaction", "constant concentration"]
+              },
+              {
+                id: "6.1.2",
+                code: "6.2",
+                statement: "Know the characteristics of a system in dynamic equilibrium",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "list"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["6.1.1"],
+                keywords: ["closed system", "constant temperature", "equal rates", "constant concentrations"]
+              },
+              {
+                id: "6.1.3",
+                code: "6.3",
+                statement: "Understand the equilibrium constant Kc and be able to calculate its value",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["calculate", "determine"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["6.1.1", "6.1.2"],
+                keywords: ["equilibrium constant", "Kc", "concentration", "equilibrium expression"]
+              }
+            ],
+            practicalWork: ["Equilibrium demonstrations", "Kc determinations", "Equilibrium position investigations"],
+            mathematicalSkills: ["Kc calculations", "Equilibrium expressions", "Concentration calculations"]
+          },
+          {
+            id: "6.2",
+            name: "Le Chatelier's Principle",
+            description: "Effect of changes in conditions on equilibrium position",
+            objectives: [
+              {
+                id: "6.2.1",
+                code: "6.4",
+                statement: "Understand Le Chatelier's principle and predict the effect of changes in conditions on equilibrium position",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["predict", "explain"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["6.1.3"],
+                keywords: ["Le Chatelier's principle", "concentration", "temperature", "pressure", "equilibrium shift"]
+              },
+              {
+                id: "6.2.2",
+                code: "6.5",
+                statement: "Know the effect of temperature on the equilibrium constant",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["6.2.1"],
+                keywords: ["temperature", "equilibrium constant", "endothermic", "exothermic", "enthalpy change"]
+              }
+            ],
+            practicalWork: ["Le Chatelier demonstrations", "Temperature effects", "Pressure effects", "Concentration changes"],
+            mathematicalSkills: ["Equilibrium calculations", "Yield predictions", "Condition optimization"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-7",
+        name: "Redox I",
+        description: "Oxidation and reduction, redox reactions, and electrochemical cells",
+        specificationCode: "7",
+        timeAllocation: 25,
+        assessmentNotes: "Practical topic with electrode potentials and cell calculations",
+        subtopics: [
+          {
+            id: "7.1",
+            name: "Oxidation and Reduction",
+            description: "Redox concepts and oxidation states",
+            objectives: [
+              {
+                id: "7.1.1",
+                code: "7.1",
+                statement: "Understand oxidation and reduction in terms of electron transfer",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "define"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: [],
+                keywords: ["oxidation", "reduction", "electron transfer", "redox", "OIL RIG"]
+              },
+              {
+                id: "7.1.2",
+                code: "7.2",
+                statement: "Know how to assign oxidation states to atoms in compounds and ions",
+                bloomsLevel: "apply",
+                difficulty: "basic",
+                commandWords: ["assign", "calculate"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["7.1.1"],
+                keywords: ["oxidation state", "oxidation number", "rules", "compounds", "ions"]
+              },
+              {
+                id: "7.1.3",
+                code: "7.3",
+                statement: "Understand how to balance redox equations using oxidation states",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["balance", "construct"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["7.1.1", "7.1.2"],
+                keywords: ["redox equations", "balancing", "half equations", "electron balance"]
+              }
+            ],
+            practicalWork: ["Redox titrations", "Oxidation state determination", "Redox reactions", "Electrochemical cells"],
+            mathematicalSkills: ["Oxidation state calculations", "Equation balancing", "Electron counting"]
+          },
+          {
+            id: "7.2",
+            name: "Electrochemical Cells",
+            description: "Electrode potentials and electrochemical cells",
+            objectives: [
+              {
+                id: "7.2.1",
+                code: "7.4",
+                statement: "Understand electrode potentials and how they are measured",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "measure"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["7.1.3"],
+                keywords: ["electrode potential", "standard hydrogen electrode", "cell potential", "voltage"]
+              },
+              {
+                id: "7.2.2",
+                code: "7.5",
+                statement: "Be able to calculate cell EMFs and predict the feasibility of redox reactions",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["calculate", "predict"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["7.2.1"],
+                keywords: ["EMF", "cell potential", "feasibility", "standard electrode potential", "electrochemical series"]
+              }
+            ],
+            practicalWork: ["Electrochemical cell construction", "EMF measurements", "Electrode potential determination"],
+            mathematicalSkills: ["EMF calculations", "Cell potential", "Feasibility predictions"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-8",
+        name: "Inorganic Chemistry I",
+        description: "Periodic trends, Group 1, Group 2, and Group 7 elements",
+        specificationCode: "8",
+        timeAllocation: 30,
+        assessmentNotes: "Pattern recognition topic with trend analysis and reactions",
+        subtopics: [
+          {
+            id: "8.1",
+            name: "Periodic Trends",
+            description: "Atomic radius, ionization energy, and electronegativity trends",
+            objectives: [
+              {
+                id: "8.1.1",
+                code: "8.1",
+                statement: "Understand the trends in atomic radius, ionization energy, and electronegativity across periods and down groups",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["1.2.3"],
+                keywords: ["atomic radius", "ionization energy", "electronegativity", "periodic trends", "shielding"]
+              },
+              {
+                id: "8.1.2",
+                code: "8.2",
+                statement: "Know the relationship between electron configuration and position in the periodic table",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "relate"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.2.3"],
+                keywords: ["electron configuration", "periodic table", "s-block", "p-block", "d-block"]
+              }
+            ],
+            practicalWork: ["Periodic trend investigations", "Ionization energy measurements", "Electronegativity comparisons"],
+            mathematicalSkills: ["Trend analysis", "Graph interpretation", "Data correlation"]
+          },
+          {
+            id: "8.2",
+            name: "Group 1 Elements",
+            description: "Alkali metals and their compounds",
+            objectives: [
+              {
+                id: "8.2.1",
+                code: "8.3",
+                statement: "Know the properties and reactions of Group 1 elements",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "describe"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["8.1.1"],
+                keywords: ["alkali metals", "Group 1", "reactivity", "reactions", "properties"]
+              },
+              {
+                id: "8.2.2",
+                code: "8.4",
+                statement: "Understand the trend in reactivity down Group 1",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["8.2.1"],
+                keywords: ["reactivity trend", "ionization energy", "atomic radius", "Group 1"]
+              }
+            ],
+            practicalWork: ["Group 1 element reactions", "Flame tests", "Reactivity demonstrations"],
+            mathematicalSkills: ["Reactivity trends", "Ionization energy calculations", "Reaction predictions"]
+          },
+          {
+            id: "8.3",
+            name: "Group 2 Elements",
+            description: "Alkaline earth metals and their compounds",
+            objectives: [
+              {
+                id: "8.3.1",
+                code: "8.5",
+                statement: "Know the properties and reactions of Group 2 elements",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "describe"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["8.1.1"],
+                keywords: ["alkaline earth metals", "Group 2", "reactivity", "reactions", "properties"]
+              },
+              {
+                id: "8.3.2",
+                code: "8.6",
+                statement: "Understand the trend in reactivity down Group 2",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["8.3.1"],
+                keywords: ["reactivity trend", "ionization energy", "atomic radius", "Group 2"]
+              }
+            ],
+            practicalWork: ["Group 2 element reactions", "Thermal decomposition", "Reactivity demonstrations"],
+            mathematicalSkills: ["Reactivity trends", "Thermal stability", "Reaction predictions"]
+          },
+          {
+            id: "8.4",
+            name: "Group 7 Elements",
+            description: "Halogens and their compounds",
+            objectives: [
+              {
+                id: "8.4.1",
+                code: "8.7",
+                statement: "Know the properties and reactions of Group 7 elements",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "describe"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["8.1.1"],
+                keywords: ["halogens", "Group 7", "reactivity", "reactions", "properties"]
+              },
+              {
+                id: "8.4.2",
+                code: "8.8",
+                statement: "Understand the trend in reactivity down Group 7 and displacement reactions",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["8.4.1"],
+                keywords: ["reactivity trend", "electronegativity", "displacement", "Group 7"]
+              }
+            ],
+            practicalWork: ["Halogen reactions", "Displacement reactions", "Halide tests"],
+            mathematicalSkills: ["Reactivity trends", "Electronegativity", "Reaction predictions"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-9",
+        name: "Organic Chemistry I",
+        description: "Introduction to organic chemistry, alkanes, and alkenes",
+        specificationCode: "9",
+        timeAllocation: 30,
+        assessmentNotes: "Foundation organic topic with nomenclature and basic reactions",
+        subtopics: [
+          {
+            id: "9.1",
+            name: "Introduction to Organic Chemistry",
+            description: "Basic concepts, nomenclature, and isomerism",
+            objectives: [
+              {
+                id: "9.1.1",
+                code: "9.1",
+                statement: "Understand the terms: molecular formula, structural formula, displayed formula, and skeletal formula",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "define"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: [],
+                keywords: ["molecular formula", "structural formula", "displayed formula", "skeletal formula"]
+              },
+              {
+                id: "9.1.2",
+                code: "9.2",
+                statement: "Know the IUPAC rules for naming organic compounds",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "name"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["9.1.1"],
+                keywords: ["IUPAC nomenclature", "naming rules", "functional groups", "prefixes", "suffixes"]
+              },
+              {
+                id: "9.1.3",
+                code: "9.3",
+                statement: "Understand structural isomerism and stereoisomerism",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "identify"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["9.1.1", "9.1.2"],
+                keywords: ["structural isomerism", "stereoisomerism", "optical isomerism", "geometric isomerism"]
+              }
+            ],
+            practicalWork: ["Molecular model building", "Isomer identification", "Nomenclature practice"],
+            mathematicalSkills: ["Formula calculations", "Isomer counting", "Structural analysis"]
+          },
+          {
+            id: "9.2",
+            name: "Alkanes",
+            description: "Saturated hydrocarbons and their reactions",
+            objectives: [
+              {
+                id: "9.2.1",
+                code: "9.4",
+                statement: "Know the general formula and properties of alkanes",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["9.1.1"],
+                keywords: ["alkanes", "general formula", "saturated", "properties", "CnH2n+2"]
+              },
+              {
+                id: "9.2.2",
+                code: "9.5",
+                statement: "Understand the combustion and substitution reactions of alkanes",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "describe"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["9.2.1"],
+                keywords: ["combustion", "substitution", "free radical", "halogenation", "methane"]
+              }
+            ],
+            practicalWork: ["Alkane combustion", "Halogenation reactions", "Free radical mechanisms"],
+            mathematicalSkills: ["Combustion calculations", "Yield calculations", "Stoichiometry"]
+          },
+          {
+            id: "9.3",
+            name: "Alkenes",
+            description: "Unsaturated hydrocarbons and their reactions",
+            objectives: [
+              {
+                id: "9.3.1",
+                code: "9.6",
+                statement: "Know the general formula and properties of alkenes",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["9.1.1"],
+                keywords: ["alkenes", "general formula", "unsaturated", "properties", "CnH2n"]
+              },
+              {
+                id: "9.3.2",
+                code: "9.7",
+                statement: "Understand the addition reactions of alkenes",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "describe"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["9.3.1"],
+                keywords: ["addition reactions", "hydrogenation", "halogenation", "hydration", "Markovnikov's rule"]
+              },
+              {
+                id: "9.3.3",
+                code: "9.8",
+                statement: "Know the mechanism of addition reactions",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "describe"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["9.3.2"],
+                keywords: ["addition mechanism", "electrophilic addition", "carbocation", "intermediate"]
+              }
+            ],
+            practicalWork: ["Alkene addition reactions", "Bromine water tests", "Hydrogenation demonstrations"],
+            mathematicalSkills: ["Addition calculations", "Yield predictions", "Mechanism analysis"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-10",
+        name: "Modern Analytical Techniques I",
+        description: "Spectroscopy and analytical methods",
+        specificationCode: "10",
+        timeAllocation: 20,
+        assessmentNotes: "Practical analysis topic with spectrum interpretation",
+        subtopics: [
+          {
+            id: "10.1",
+            name: "Mass Spectrometry",
+            description: "Principles and applications of mass spectrometry",
+            objectives: [
+              {
+                id: "10.1.1",
+                code: "10.1",
+                statement: "Understand the principles of mass spectrometry",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.1.3"],
+                keywords: ["mass spectrometry", "ionization", "fragmentation", "mass-to-charge ratio", "molecular ion"]
+              },
+              {
+                id: "10.1.2",
+                code: "10.2",
+                statement: "Be able to interpret mass spectra and identify molecular structures",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["interpret", "identify"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["10.1.1"],
+                keywords: ["mass spectrum", "molecular ion peak", "fragmentation pattern", "base peak", "isotope peaks"]
+              }
+            ],
+            practicalWork: ["Mass spectrum interpretation", "Molecular weight determination", "Fragmentation analysis"],
+            mathematicalSkills: ["Mass-to-charge calculations", "Molecular weight", "Isotope ratios"]
+          },
+          {
+            id: "10.2",
+            name: "Infrared Spectroscopy",
+            description: "IR spectroscopy principles and applications",
+            objectives: [
+              {
+                id: "10.2.1",
+                code: "10.3",
+                statement: "Understand the principles of infrared spectroscopy",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: [],
+                keywords: ["infrared spectroscopy", "vibrational energy", "wavenumber", "functional groups", "absorption"]
+              },
+              {
+                id: "10.2.2",
+                code: "10.4",
+                statement: "Be able to interpret IR spectra and identify functional groups",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["interpret", "identify"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["10.2.1"],
+                keywords: ["IR spectrum", "functional group identification", "characteristic peaks", "fingerprint region"]
+              }
+            ],
+            practicalWork: ["IR spectrum interpretation", "Functional group identification", "Spectral analysis"],
+            mathematicalSkills: ["Wavenumber analysis", "Peak identification", "Spectral correlation"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-11",
+        name: "Energetics II",
+        description: "Advanced thermodynamics, entropy, and Gibbs free energy",
+        specificationCode: "11",
+        timeAllocation: 25,
+        assessmentNotes: "Advanced mathematical topic with thermodynamic calculations",
+        subtopics: [
+          {
+            id: "11.1",
+            name: "Lattice Energy",
+            description: "Lattice energy calculations and Born-Haber cycles",
+            objectives: [
+              {
+                id: "11.1.1",
+                code: "11.1",
+                statement: "Know the definition of lattice energy and factors affecting its magnitude",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.1.3", "2.1.3"],
+                keywords: ["lattice energy", "ionic radius", "charge", "Coulomb's law", "lattice enthalpy"]
+              },
+              {
+                id: "11.1.2",
+                code: "11.2",
+                statement: "Be able to construct Born-Haber cycles and calculate lattice energies",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["construct", "calculate"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["11.1.1", "4.2.1"],
+                keywords: ["Born-Haber cycle", "enthalpy of formation", "ionization energy", "electron affinity", "enthalpy of atomization"]
+              }
+            ],
+            practicalWork: ["Born-Haber cycle construction", "Lattice energy calculations", "Enthalpy measurements"],
+            mathematicalSkills: ["Born-Haber calculations", "Enthalpy cycles", "Energy relationships"]
+          },
+          {
+            id: "11.2",
+            name: "Entropy and Gibbs Free Energy",
+            description: "Thermodynamic spontaneity and equilibrium",
+            objectives: [
+              {
+                id: "11.2.1",
+                code: "11.3",
+                statement: "Understand the concept of entropy and its relationship to disorder",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.1.1"],
+                keywords: ["entropy", "disorder", "randomness", "statistical mechanics", "second law"]
+              },
+              {
+                id: "11.2.2",
+                code: "11.4",
+                statement: "Know the Gibbs free energy equation and its use in predicting spontaneity",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["calculate", "predict"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["11.2.1"],
+                keywords: ["Gibbs free energy", "spontaneity", "entropy change", "enthalpy change", "temperature"]
+              }
+            ],
+            practicalWork: ["Entropy determinations", "Spontaneity predictions", "Gibbs free energy calculations"],
+            mathematicalSkills: ["Gibbs free energy calculations", "Entropy calculations", "Spontaneity predictions"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-12",
+        name: "Kinetics II",
+        description: "Advanced kinetics, rate equations, and reaction mechanisms",
+        specificationCode: "12",
+        timeAllocation: 30,
+        assessmentNotes: "Mathematical topic with rate equation derivation and mechanism analysis",
+        subtopics: [
+          {
+            id: "12.1",
+            name: "Rate Equations",
+            description: "Rate laws, order of reaction, and rate constants",
+            objectives: [
+              {
+                id: "12.1.1",
+                code: "12.1",
+                statement: "Understand the concept of order of reaction and rate equations",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "define"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["5.1.3"],
+                keywords: ["rate equation", "order of reaction", "rate constant", "concentration", "rate law"]
+              },
+              {
+                id: "12.1.2",
+                code: "12.2",
+                statement: "Be able to determine rate equations from experimental data",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["determine", "calculate"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["12.1.1"],
+                keywords: ["initial rates", "concentration-time graphs", "half-life", "integrated rate laws"]
+              }
+            ],
+            practicalWork: ["Rate equation determination", "Initial rate experiments", "Half-life measurements"],
+            mathematicalSkills: ["Rate law calculations", "Order determination", "Rate constant calculations"]
+          },
+          {
+            id: "12.2",
+            name: "Reaction Mechanisms",
+            description: "Elementary steps and multi-step mechanisms",
+            objectives: [
+              {
+                id: "12.2.1",
+                code: "12.3",
+                statement: "Understand the relationship between reaction mechanisms and rate equations",
+                bloomsLevel: "understand",
+                difficulty: "advanced",
+                commandWords: ["understand", "relate"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["12.1.2"],
+                keywords: ["reaction mechanism", "elementary steps", "rate-determining step", "intermediate"]
+              },
+              {
+                id: "12.2.2",
+                code: "12.4",
+                statement: "Be able to propose mechanisms consistent with rate equations",
+                bloomsLevel: "create",
+                difficulty: "advanced",
+                commandWords: ["propose", "construct"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["12.2.1"],
+                keywords: ["mechanism proposal", "pre-equilibrium", "steady-state approximation", "chain reactions"]
+              }
+            ],
+            practicalWork: ["Mechanism investigations", "Rate-determining step identification", "Multi-step reactions"],
+            mathematicalSkills: ["Mechanism analysis", "Rate equation derivation", "Kinetic modeling"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-13",
+        name: "Equilibrium II",
+        description: "Advanced equilibrium concepts and calculations",
+        specificationCode: "13",
+        timeAllocation: 25,
+        assessmentNotes: "Mathematical topic with complex equilibrium calculations",
+        subtopics: [
+          {
+            id: "13.1",
+            name: "Equilibrium Calculations",
+            description: "ICE tables and equilibrium problem solving",
+            objectives: [
+              {
+                id: "13.1.1",
+                code: "13.1",
+                statement: "Be able to perform complex equilibrium calculations using ICE tables",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["calculate", "solve"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["6.1.3"],
+                keywords: ["ICE tables", "equilibrium calculations", "initial concentrations", "change", "equilibrium concentrations"]
+              },
+              {
+                id: "13.1.2",
+                code: "13.2",
+                statement: "Understand the relationship between Kc and Kp",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "relate"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["13.1.1"],
+                keywords: ["Kc", "Kp", "partial pressure", "gas constant", "temperature"]
+              }
+            ],
+            practicalWork: ["Complex equilibrium calculations", "Kc and Kp determinations", "Equilibrium analysis"],
+            mathematicalSkills: ["ICE table calculations", "Kc and Kp relationships", "Equilibrium problem solving"]
+          },
+          {
+            id: "13.2",
+            name: "Heterogeneous Equilibria",
+            description: "Equilibria involving different phases",
+            objectives: [
+              {
+                id: "13.2.1",
+                code: "13.3",
+                statement: "Understand heterogeneous equilibria and their equilibrium expressions",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "write"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["6.1.3"],
+                keywords: ["heterogeneous equilibria", "solid-gas equilibria", "liquid-gas equilibria", "equilibrium expression"]
+              }
+            ],
+            practicalWork: ["Heterogeneous equilibrium demonstrations", "Phase equilibria", "Equilibrium expression writing"],
+            mathematicalSkills: ["Heterogeneous equilibrium calculations", "Phase equilibrium analysis"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-14",
+        name: "Acid-Base Equilibria",
+        description: "pH, buffer solutions, and acid-base titrations",
+        specificationCode: "14",
+        timeAllocation: 30,
+        assessmentNotes: "Mathematical topic with pH calculations and titration analysis",
+        subtopics: [
+          {
+            id: "14.1",
+            name: "pH and Acid-Base Calculations",
+            description: "pH, pOH, and acid-base equilibrium calculations",
+            objectives: [
+              {
+                id: "14.1.1",
+                code: "14.1",
+                statement: "Understand the pH scale and be able to calculate pH and pOH",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["calculate", "determine"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["6.1.3"],
+                keywords: ["pH", "pOH", "hydrogen ion concentration", "hydroxide ion concentration", "water constant"]
+              },
+              {
+                id: "14.1.2",
+                code: "14.2",
+                statement: "Know the definitions of strong and weak acids and bases",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "define"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["14.1.1"],
+                keywords: ["strong acid", "weak acid", "strong base", "weak base", "dissociation", "ionization"]
+              },
+              {
+                id: "14.1.3",
+                code: "14.3",
+                statement: "Be able to calculate pH for strong and weak acids and bases",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["calculate", "determine"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["14.1.1", "14.1.2"],
+                keywords: ["pH calculations", "Ka", "Kb", "acid dissociation constant", "base dissociation constant"]
+              }
+            ],
+            practicalWork: ["pH measurements", "Acid-base titrations", "pH calculations"],
+            mathematicalSkills: ["pH calculations", "Ka and Kb calculations", "Logarithmic calculations"]
+          },
+          {
+            id: "14.2",
+            name: "Buffer Solutions",
+            description: "Buffer systems and their applications",
+            objectives: [
+              {
+                id: "14.2.1",
+                code: "14.4",
+                statement: "Understand how buffer solutions work and their applications",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["14.1.3"],
+                keywords: ["buffer solution", "Henderson-Hasselbalch equation", "buffer capacity", "acid-base pair"]
+              },
+              {
+                id: "14.2.2",
+                code: "14.5",
+                statement: "Be able to calculate the pH of buffer solutions",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["calculate", "determine"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["14.2.1"],
+                keywords: ["buffer pH", "Henderson-Hasselbalch", "buffer calculations", "pKa"]
+              }
+            ],
+            practicalWork: ["Buffer preparation", "Buffer pH measurements", "Buffer capacity testing"],
+            mathematicalSkills: ["Buffer calculations", "Henderson-Hasselbalch equation", "pKa calculations"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-15",
+        name: "Redox II",
+        description: "Advanced redox chemistry and electrochemistry",
+        specificationCode: "15",
+        timeAllocation: 25,
+        assessmentNotes: "Advanced electrochemistry with practical applications",
+        subtopics: [
+          {
+            id: "15.1",
+            name: "Advanced Electrochemistry",
+            description: "Nernst equation and concentration cells",
+            objectives: [
+              {
+                id: "15.1.1",
+                code: "15.1",
+                statement: "Understand the Nernst equation and its applications",
+                bloomsLevel: "understand",
+                difficulty: "advanced",
+                commandWords: ["understand", "apply"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["7.2.2"],
+                keywords: ["Nernst equation", "concentration effects", "non-standard conditions", "cell potential"]
+              },
+              {
+                id: "15.1.2",
+                code: "15.2",
+                statement: "Be able to calculate cell potentials under non-standard conditions",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["calculate", "determine"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["15.1.1"],
+                keywords: ["cell potential calculations", "concentration effects", "equilibrium constant", "electrochemical equilibrium"]
+              }
+            ],
+            practicalWork: ["Nernst equation verification", "Concentration cell construction", "Non-standard cell potentials"],
+            mathematicalSkills: ["Nernst equation calculations", "Logarithmic calculations", "Cell potential predictions"]
+          },
+          {
+            id: "15.2",
+            name: "Electrolysis",
+            description: "Electrolytic cells and industrial processes",
+            objectives: [
+              {
+                id: "15.2.1",
+                code: "15.3",
+                statement: "Understand the principles of electrolysis and industrial applications",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["7.2.2"],
+                keywords: ["electrolysis", "electrolytic cell", "industrial processes", "metal extraction", "electroplating"]
+              },
+              {
+                id: "15.2.2",
+                code: "15.4",
+                statement: "Be able to calculate quantities in electrolysis using Faraday's laws",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["calculate", "determine"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["15.2.1"],
+                keywords: ["Faraday's laws", "electrochemical equivalent", "current", "time", "charge"]
+              }
+            ],
+            practicalWork: ["Electrolysis experiments", "Faraday's law verification", "Industrial process modeling"],
+            mathematicalSkills: ["Faraday's law calculations", "Electrochemical stoichiometry", "Current calculations"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-16",
+        name: "Inorganic Chemistry II",
+        description: "Transition metals and their properties",
+        specificationCode: "16",
+        timeAllocation: 30,
+        assessmentNotes: "Transition metal chemistry with complex ion formation",
+        subtopics: [
+          {
+            id: "16.1",
+            name: "Transition Metal Properties",
+            description: "Electronic structure and general properties",
+            objectives: [
+              {
+                id: "16.1.1",
+                code: "16.1",
+                statement: "Know the electronic structure of transition metals and their ions",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "write"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.2.3"],
+                keywords: ["d-block", "transition metals", "electronic structure", "d-orbitals", "oxidation states"]
+              },
+              {
+                id: "16.1.2",
+                code: "16.2",
+                statement: "Understand the general properties of transition metals",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["16.1.1"],
+                keywords: ["variable oxidation states", "colored compounds", "catalytic activity", "magnetic properties"]
+              }
+            ],
+            practicalWork: ["Transition metal compound preparation", "Color observations", "Oxidation state determination"],
+            mathematicalSkills: ["Electronic configuration", "Oxidation state calculations", "Magnetic moment calculations"]
+          },
+          {
+            id: "16.2",
+            name: "Complex Ions",
+            description: "Coordination compounds and their properties",
+            objectives: [
+              {
+                id: "16.2.1",
+                code: "16.3",
+                statement: "Understand the formation and structure of complex ions",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["16.1.2"],
+                keywords: ["complex ion", "ligand", "coordination number", "coordination compound", "chelate"]
+              },
+              {
+                id: "16.2.2",
+                code: "16.4",
+                statement: "Know the nomenclature of coordination compounds",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "name"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["16.2.1"],
+                keywords: ["coordination compound nomenclature", "ligand names", "oxidation state", "complex naming"]
+              }
+            ],
+            practicalWork: ["Complex ion formation", "Ligand exchange reactions", "Coordination compound synthesis"],
+            mathematicalSkills: ["Coordination number determination", "Ligand calculations", "Complex stability"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-17",
+        name: "Organic Chemistry II",
+        description: "Alcohols, carbonyl compounds, and their reactions",
+        specificationCode: "17",
+        timeAllocation: 30,
+        assessmentNotes: "Organic reaction mechanisms and synthetic pathways",
+        subtopics: [
+          {
+            id: "17.1",
+            name: "Alcohols",
+            description: "Alcohol structure, properties, and reactions",
+            objectives: [
+              {
+                id: "17.1.1",
+                code: "17.1",
+                statement: "Know the structure and classification of alcohols",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "classify"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["9.1.2"],
+                keywords: ["alcohol", "hydroxyl group", "primary", "secondary", "tertiary"]
+              },
+              {
+                id: "17.1.2",
+                code: "17.2",
+                statement: "Understand the reactions of alcohols including oxidation and substitution",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "describe"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["17.1.1"],
+                keywords: ["alcohol reactions", "oxidation", "substitution", "elimination", "esterification"]
+              }
+            ],
+            practicalWork: ["Alcohol oxidation", "Alcohol substitution", "Esterification reactions"],
+            mathematicalSkills: ["Oxidation calculations", "Yield calculations", "Reaction stoichiometry"]
+          },
+          {
+            id: "17.2",
+            name: "Carbonyl Compounds",
+            description: "Aldehydes and ketones",
+            objectives: [
+              {
+                id: "17.2.1",
+                code: "17.3",
+                statement: "Know the structure and properties of aldehydes and ketones",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "identify"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["9.1.2"],
+                keywords: ["aldehyde", "ketone", "carbonyl group", "structure", "properties"]
+              },
+              {
+                id: "17.2.2",
+                code: "17.4",
+                statement: "Understand the reactions of carbonyl compounds",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "describe"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["17.2.1"],
+                keywords: ["carbonyl reactions", "reduction", "oxidation", "nucleophilic addition", "condensation"]
+              }
+            ],
+            practicalWork: ["Carbonyl compound identification", "Reduction reactions", "Nucleophilic addition"],
+            mathematicalSkills: ["Reduction calculations", "Mechanism analysis", "Product predictions"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-18",
+        name: "Organic Chemistry III",
+        description: "Carboxylic acids, esters, and aromatic compounds",
+        specificationCode: "18",
+        timeAllocation: 30,
+        assessmentNotes: "Advanced organic chemistry with aromatic systems",
+        subtopics: [
+          {
+            id: "18.1",
+            name: "Carboxylic Acids and Esters",
+            description: "Carboxylic acid derivatives and their reactions",
+            objectives: [
+              {
+                id: "18.1.1",
+                code: "18.1",
+                statement: "Know the structure and properties of carboxylic acids",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "identify"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["9.1.2"],
+                keywords: ["carboxylic acid", "carboxyl group", "structure", "properties", "acidity"]
+              },
+              {
+                id: "18.1.2",
+                code: "18.2",
+                statement: "Understand the reactions of carboxylic acids and ester formation",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "describe"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["18.1.1"],
+                keywords: ["carboxylic acid reactions", "ester formation", "esterification", "hydrolysis", "acidity"]
+              }
+            ],
+            practicalWork: ["Ester synthesis", "Acid-base reactions", "Ester hydrolysis"],
+            mathematicalSkills: ["Esterification calculations", "Acid-base calculations", "Yield determinations"]
+          },
+          {
+            id: "18.2",
+            name: "Aromatic Compounds",
+            description: "Benzene and aromatic substitution reactions",
+            objectives: [
+              {
+                id: "18.2.1",
+                code: "18.3",
+                statement: "Know the structure of benzene and aromaticity",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "explain"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["2.2.1"],
+                keywords: ["benzene", "aromaticity", "delocalization", "resonance", "stability"]
+              },
+              {
+                id: "18.2.2",
+                code: "18.4",
+                statement: "Understand electrophilic substitution reactions of benzene",
+                bloomsLevel: "understand",
+                difficulty: "advanced",
+                commandWords: ["understand", "describe"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["18.2.1"],
+                keywords: ["electrophilic substitution", "halogenation", "nitration", "sulfonation", "Friedel-Crafts"]
+              }
+            ],
+            practicalWork: ["Aromatic substitution reactions", "Benzene derivatives", "Electrophilic substitution mechanisms"],
+            mathematicalSkills: ["Aromatic calculations", "Mechanism analysis", "Product predictions"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-19",
+        name: "Modern Analytical Techniques II",
+        description: "NMR spectroscopy and advanced analytical methods",
+        specificationCode: "19",
+        timeAllocation: 20,
+        assessmentNotes: "Advanced spectroscopy with structural determination",
+        subtopics: [
+          {
+            id: "19.1",
+            name: "NMR Spectroscopy",
+            description: "Principles and applications of NMR spectroscopy",
+            objectives: [
+              {
+                id: "19.1.1",
+                code: "19.1",
+                statement: "Understand the principles of NMR spectroscopy",
+                bloomsLevel: "understand",
+                difficulty: "advanced",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["10.1.1"],
+                keywords: ["NMR spectroscopy", "magnetic resonance", "chemical shift", "nuclear spin", "magnetic field"]
+              },
+              {
+                id: "19.1.2",
+                code: "19.2",
+                statement: "Be able to interpret 1H NMR and 13C NMR spectra",
+                bloomsLevel: "apply",
+                difficulty: "advanced",
+                commandWords: ["interpret", "analyze"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["19.1.1"],
+                keywords: ["1H NMR", "13C NMR", "chemical shift", "integration", "splitting patterns", "coupling"]
+              }
+            ],
+            practicalWork: ["NMR spectrum interpretation", "Structural determination", "Spectral analysis"],
+            mathematicalSkills: ["Chemical shift analysis", "Integration calculations", "Spectral correlation"]
+          },
+          {
+            id: "19.2",
+            name: "Combined Spectroscopic Analysis",
+            description: "Using multiple spectroscopic techniques",
+            objectives: [
+              {
+                id: "19.2.1",
+                code: "19.3",
+                statement: "Be able to combine information from different spectroscopic techniques to determine molecular structure",
+                bloomsLevel: "analyze",
+                difficulty: "advanced",
+                commandWords: ["analyze", "determine"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["10.1.2", "10.2.2", "19.1.2"],
+                keywords: ["spectroscopic analysis", "structural determination", "mass spectrometry", "IR spectroscopy", "NMR spectroscopy"]
+              }
+            ],
+            practicalWork: ["Combined spectroscopic analysis", "Unknown compound identification", "Structural determination"],
+            mathematicalSkills: ["Multi-technique analysis", "Structural correlation", "Data integration"]
+          }
+        ]
+      },
+      {
+        id: "a-level-topic-20",
+        name: "Chemical Synthesis and Analysis",
+        description: "Synthetic pathways and quantitative analysis",
+        specificationCode: "20",
+        timeAllocation: 25,
+        assessmentNotes: "Synthetic chemistry with multi-step reactions and analysis",
+        subtopics: [
+          {
+            id: "20.1",
+            name: "Synthetic Pathways",
+            description: "Designing and executing multi-step syntheses",
+            objectives: [
+              {
+                id: "20.1.1",
+                code: "20.1",
+                statement: "Be able to design synthetic pathways for organic compounds",
+                bloomsLevel: "create",
+                difficulty: "advanced",
+                commandWords: ["design", "plan"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["17.1.2", "17.2.2", "18.1.2", "18.2.2"],
+                keywords: ["synthetic pathway", "retrosynthesis", "multi-step synthesis", "functional group interconversion"]
+              },
+              {
+                id: "20.1.2",
+                code: "20.2",
+                statement: "Understand the principles of green chemistry and atom economy",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "calculate"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["20.1.1"],
+                keywords: ["green chemistry", "atom economy", "sustainability", "environmental impact", "efficiency"]
+              }
+            ],
+            practicalWork: ["Multi-step synthesis", "Atom economy calculations", "Green chemistry principles"],
+            mathematicalSkills: ["Atom economy calculations", "Yield calculations", "Efficiency analysis"]
+          },
+          {
+            id: "20.2",
+            name: "Quantitative Analysis",
+            description: "Analytical techniques and calculations",
+            objectives: [
+              {
+                id: "20.2.1",
+                code: "20.3",
+                statement: "Be able to perform quantitative analysis using titrations and gravimetric methods",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["perform", "calculate"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["14.1.3"],
+                keywords: ["quantitative analysis", "titration", "gravimetric analysis", "concentration", "purity"]
+              },
+              {
+                id: "20.2.2",
+                code: "20.4",
+                statement: "Understand the sources of error in analytical procedures and how to minimize them",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "evaluate"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["20.2.1"],
+                keywords: ["analytical error", "precision", "accuracy", "systematic error", "random error"]
+              }
+            ],
+            practicalWork: ["Quantitative titrations", "Gravimetric analysis", "Error analysis"],
+            mathematicalSkills: ["Analytical calculations", "Error calculations", "Statistical analysis"]
+          }
+        ]
+      }
+    ]
   }
 ];

@@ -308,6 +308,14 @@ Changelog:
   * Updated website landing page to highlight revolutionary differentiated lesson capabilities
   * Enhanced documentation to showcase AI-powered personalized teaching features
   * System focuses on letting teachers teach while AI handles complex lesson differentiation
+- July 09, 2025. Restored complete IGCSE and A Level curriculum specifications:
+  * Fixed missing A Level chemistry curriculum data that was truncated at 522 lines
+  * Restored complete A Level curriculum with all 20 topics covering comprehensive chemistry specification
+  * Added detailed subtopics and learning objectives for each A Level topic
+  * Curriculum file now contains 2,253 lines with complete IGCSE and A Level specifications
+  * Both curricula now fully accessible via API endpoints and module creation system
+  * Fixed authentication navigation: sign-out now redirects to landing page instead of login page
+  * Added "Back to Home" buttons to login/signup pages for easy navigation to landing page
 ```
 
 ## User Preferences
