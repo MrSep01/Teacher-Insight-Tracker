@@ -458,8 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing required fields" });
       }
       
-      // Here you would typically send an email or save to database
-      // For now, just log the contact request
+      // Log the contact request
       console.log('Contact form submission:', {
         name,
         email,
@@ -467,6 +466,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message,
         timestamp: new Date().toISOString()
       });
+      
+      // Send email notification to sep.alamouti@sepalamouti.com
+      try {
+        await emailService.sendContactFormNotification(
+          'sep.alamouti@sepalamouti.com',
+          { name, email, organization, message }
+        );
+      } catch (emailError) {
+        console.error('Failed to send contact form email:', emailError);
+        // Don't fail the request if email fails, just log it
+      }
       
       res.json({ 
         success: true, 
