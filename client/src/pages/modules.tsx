@@ -102,6 +102,28 @@ export default function Modules() {
     },
   });
 
+  const deleteModuleMutation = useMutation({
+    mutationFn: async (moduleId: number) => {
+      return await apiRequest(`/api/modules/${moduleId}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Module deleted successfully",
+        description: "The module and all its lesson plans have been removed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/modules"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting module",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const availableTopics = user?.curriculum ? getCurriculumTopics(user.curriculum) : [];
 
   if (!user?.profileCompleted) {
@@ -216,6 +238,8 @@ export default function Modules() {
                 setSelectedModule(module);
                 setIsEditModalOpen(true);
               }}
+              onDelete={() => deleteModuleMutation.mutate(module.id)}
+              isDeleting={deleteModuleMutation.isPending}
             />
           ))}
         </div>
@@ -345,13 +369,25 @@ function CreateModuleForm({ availableTopics, userGradeLevels, onSubmit, isLoadin
 interface ModuleCardProps {
   module: Module;
   onEdit: () => void;
+  onDelete: () => void;
+  isDeleting: boolean;
 }
 
-function ModuleCard({ module, onEdit }: ModuleCardProps) {
+function ModuleCard({ module, onEdit, onDelete, isDeleting }: ModuleCardProps) {
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleLessonsClick = () => {
     setIsLessonModalOpen(true);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete();
+    setShowDeleteConfirm(false);
   };
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -400,6 +436,16 @@ function ModuleCard({ module, onEdit }: ModuleCardProps) {
             <FileText className="h-4 w-4 mr-1" />
             Lessons
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            {isDeleting ? "Deleting..." : "Delete"}
+          </Button>
         </div>
       </CardContent>
       
@@ -416,6 +462,34 @@ function ModuleCard({ module, onEdit }: ModuleCardProps) {
             module={module} 
             onClose={() => setIsLessonModalOpen(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Module</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{module.title}"? This action cannot be undone and will also delete all associated lesson plans.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Module"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </Card>
