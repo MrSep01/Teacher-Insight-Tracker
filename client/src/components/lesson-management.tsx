@@ -482,10 +482,18 @@ interface Assessment {
   showCorrectAnswers: boolean;
   passingScore: number;
   createdAt: string;
+  instructions?: string;
+  objectives?: string[];
+  topics?: string[];
+  questionTypes?: string[];
+  markingScheme?: string;
+  aiGenerated?: boolean;
 }
 
 function AssessmentManagement({ moduleId, moduleObjectives }: AssessmentManagementProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewAssessmentModalOpen, setIsViewAssessmentModalOpen] = useState(false);
+  const [viewingAssessment, setViewingAssessment] = useState<Assessment | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -516,6 +524,18 @@ function AssessmentManagement({ moduleId, moduleObjectives }: AssessmentManageme
       mixed: "bg-indigo-100 text-indigo-800",
     };
     return colors[difficulty as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  };
+
+  const handleViewAssessment = (assessment: Assessment) => {
+    setViewingAssessment(assessment);
+    setIsViewAssessmentModalOpen(true);
+  };
+
+  const handleEditAssessment = (assessment: Assessment) => {
+    toast({
+      title: "Edit Assessment",
+      description: `Opening editor for: ${assessment.title}`,
+    });
   };
 
   if (isLoading) {
@@ -653,6 +673,126 @@ function AssessmentManagement({ moduleId, moduleObjectives }: AssessmentManageme
           ))}
         </div>
       )}
+
+      {/* Assessment View Modal */}
+      <Dialog open={isViewAssessmentModalOpen} onOpenChange={setIsViewAssessmentModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              {viewingAssessment && (
+                <>
+                  <FileText className="h-5 w-5 text-green-600" />
+                  <span>{viewingAssessment.title}</span>
+                  <Badge className={getAssessmentTypeColor(viewingAssessment.assessmentType)}>
+                    {viewingAssessment.assessmentType}
+                  </Badge>
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {viewingAssessment && (
+            <div className="space-y-6">
+              {/* Assessment Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Duration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.estimatedDuration} min</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Total Points</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Target className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.totalPoints}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Questions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <MessageSquare className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.questionCount}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Passing Score</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.passingScore}%</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Description */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700">{viewingAssessment.description}</p>
+                </CardContent>
+              </Card>
+
+              {/* Assessment Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Assessment Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className={`h-4 w-4 ${viewingAssessment.allowRetakes ? 'text-green-600' : 'text-gray-400'}`} />
+                      <span className="text-sm">Allow Retakes: {viewingAssessment.allowRetakes ? 'Yes' : 'No'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Eye className={`h-4 w-4 ${viewingAssessment.showCorrectAnswers ? 'text-green-600' : 'text-gray-400'}`} />
+                      <span className="text-sm">Show Correct Answers: {viewingAssessment.showCorrectAnswers ? 'Yes' : 'No'}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Difficulty Level */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Difficulty & Type</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-4">
+                    <Badge className={getDifficultyColor(viewingAssessment.difficulty)}>
+                      {viewingAssessment.difficulty}
+                    </Badge>
+                    <Badge className={getAssessmentTypeColor(viewingAssessment.assessmentType)}>
+                      {viewingAssessment.assessmentType}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Enhanced Assessment Creation Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
