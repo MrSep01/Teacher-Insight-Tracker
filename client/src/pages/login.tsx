@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogIn, Mail, User, Lock, Eye, EyeOff } from "lucide-react";
+import { LogIn, Mail, User, Lock, Eye, EyeOff, Home } from "lucide-react";
+import { Link } from "wouter";
 import { FaGoogle, FaMicrosoft, FaApple } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -146,6 +147,14 @@ export default function Login() {
           <CardDescription>
             Sign in to your teacher dashboard to track student progress and get AI-powered recommendations
           </CardDescription>
+          <div className="mt-4">
+            <Link href="/">
+              <Button variant="outline" size="sm" className="text-sm">
+                <Home className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -329,6 +338,11 @@ export default function Login() {
               <a href="/dev-verify" className="hover:underline">
                 Development: Verify Email Tool
               </a>
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              <Link href="/" className="hover:underline">
+                ← Back to EduTrack Home
+              </Link>
             </p>
           </div>
         </CardContent>

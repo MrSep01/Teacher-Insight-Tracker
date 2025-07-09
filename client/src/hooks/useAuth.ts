@@ -24,13 +24,13 @@ export function useAuth() {
     },
     onSuccess: () => {
       queryClient.clear();
-      window.location.href = "/login";
+      window.location.href = "/";
     },
     onError: (error) => {
       console.error("Logout failed:", error);
       // Force redirect even if logout fails
       queryClient.clear();
-      window.location.href = "/login";
+      window.location.href = "/";
     },
   });
 
