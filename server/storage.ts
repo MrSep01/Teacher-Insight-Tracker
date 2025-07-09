@@ -665,6 +665,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(assessments);
   }
 
+  async getAssessmentsByModuleId(moduleId: number): Promise<Assessment[]> {
+    return await db.select().from(assessments).where(eq(assessments.moduleId, moduleId));
+  }
+
   async getAssessmentById(id: number): Promise<Assessment | undefined> {
     const [assessment] = await db.select().from(assessments).where(eq(assessments.id, id));
     return assessment || undefined;

@@ -270,124 +270,348 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
         </div>
       </div>
 
-      {/* Lessons List */}
-      {lessons.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Lessons Yet</h3>
-            <p className="text-gray-600 mb-4">
-              Create your first lesson plan for this module.
-            </p>
-            <div className="flex justify-center space-x-2">
-              <Button
-                onClick={handleCreateLesson}
-                className="bg-blue-600 hover:bg-blue-700"
-                disabled={!module.objectives || module.objectives.length === 0}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Manual Lesson
-              </Button>
-              <Button
-                onClick={handleGenerateAILesson}
-                variant="outline"
-                className="border-purple-300 text-purple-700 hover:bg-purple-50"
-                disabled={!module.objectives || module.objectives.length === 0}
-              >
-                <Bot className="h-4 w-4 mr-2" />
-                Generate with AI
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {lessons.map((lesson, index) => {
-            const IconComponent = getLessonTypeIcon(lesson.lessonType);
-            return (
-              <Card key={lesson.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-1">
-                        <IconComponent className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <CardTitle className="text-lg">{lesson.title}</CardTitle>
-                          <Badge className={getLessonTypeColor(lesson.lessonType)}>
-                            {LESSON_TYPES.find(t => t.value === lesson.lessonType)?.label}
-                          </Badge>
-                          {lesson.aiGenerated && (
-                            <Badge variant="outline" className="border-purple-300 text-purple-700">
-                              <Bot className="h-3 w-3 mr-1" />
-                              AI Generated
-                            </Badge>
-                          )}
+      {/* Content Tabs */}
+      <Tabs defaultValue="lessons" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="lessons">Lessons ({lessons.length})</TabsTrigger>
+          <TabsTrigger value="assessments">Assessments</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="lessons">
+          {lessons.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Lessons Yet</h3>
+                <p className="text-gray-600 mb-4">
+                  Create your first lesson plan for this module.
+                </p>
+                <div className="flex justify-center space-x-2">
+                  <Button
+                    onClick={handleCreateLesson}
+                    className="bg-blue-600 hover:bg-blue-700"
+                    disabled={!module.objectives || module.objectives.length === 0}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Manual Lesson
+                  </Button>
+                  <Button
+                    onClick={handleGenerateAILesson}
+                    variant="outline"
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                    disabled={!module.objectives || module.objectives.length === 0}
+                  >
+                    <Bot className="h-4 w-4 mr-2" />
+                    Generate with AI
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {lessons.map((lesson, index) => {
+                const IconComponent = getLessonTypeIcon(lesson.lessonType);
+                return (
+                  <Card key={lesson.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3">
+                          <div className="mt-1">
+                            <IconComponent className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <CardTitle className="text-lg">{lesson.title}</CardTitle>
+                              <Badge className={getLessonTypeColor(lesson.lessonType)}>
+                                {LESSON_TYPES.find(t => t.value === lesson.lessonType)?.label}
+                              </Badge>
+                              {lesson.aiGenerated && (
+                                <Badge variant="outline" className="border-purple-300 text-purple-700">
+                                  <Bot className="h-3 w-3 mr-1" />
+                                  AI Generated
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">{lesson.description}</p>
+                          </div>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{lesson.description}</p>
+                        <div className="flex items-center space-x-2">
+                          {lesson.isCompleted ? (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-gray-400" />
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditLesson(lesson)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {lesson.isCompleted ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <Circle className="h-5 w-5 text-gray-400" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span>{lesson.duration} min</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Target className="h-4 w-4 text-gray-500" />
+                          <span className="capitalize">{lesson.difficulty}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Lightbulb className="h-4 w-4 text-gray-500" />
+                          <span>{lesson.objectives.length} objectives</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-gray-500" />
+                          <span>{lesson.activities?.length || 0} activities</span>
+                        </div>
+                      </div>
+                      
+                      {lesson.hasAssessment && (
+                        <div className="mt-4 pt-4 border-t">
+                          <AssessmentSummary assessment={lesson} />
+                        </div>
                       )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEditLesson(lesson)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      <span>{lesson.duration} min</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Target className="h-4 w-4 text-gray-500" />
-                      <span className="capitalize">{lesson.difficulty}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Lightbulb className="h-4 w-4 text-gray-500" />
-                      <span>{lesson.objectives.length} objectives</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4 text-gray-500" />
-                      <span>{lesson.activities?.length || 0} activities</span>
-                    </div>
-                  </div>
-                  
-                  {lesson.hasAssessment && (
-                    <div className="mt-4 pt-4 border-t">
-                      <AssessmentSummary assessment={lesson} />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="assessments">
+          <AssessmentManagement moduleId={module.id} moduleObjectives={module.objectives || []} />
+        </TabsContent>
+      </Tabs>
 
       {/* Enhanced Lesson Creation Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Create New Lesson Plan
+              {creationMode === "ai" ? "Generate AI Lesson" : "Create New Lesson Plan"}
             </DialogTitle>
           </DialogHeader>
-          <EnhancedLessonCreator 
-            moduleId={module.id}
-            moduleObjectives={module.objectives || []}
-            onLessonCreated={() => setIsCreateModalOpen(false)}
+          <Tabs defaultValue="lessons" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="lessons">Lessons</TabsTrigger>
+              <TabsTrigger value="assessments">Assessments</TabsTrigger>
+            </TabsList>
+            <TabsContent value="lessons">
+              <EnhancedLessonCreator 
+                moduleId={module.id}
+                moduleObjectives={module.objectives || []}
+                onLessonCreated={() => setIsCreateModalOpen(false)}
+                creationMode={creationMode}
+              />
+            </TabsContent>
+            <TabsContent value="assessments">
+              <EnhancedAssessmentCreator 
+                moduleId={module.id}
+                moduleObjectives={module.objectives || []}
+                onAssessmentCreated={() => setIsCreateModalOpen(false)}
+              />
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// Assessment Management Component
+interface AssessmentManagementProps {
+  moduleId: number;
+  moduleObjectives: string[];
+}
+
+interface Assessment {
+  id: number;
+  title: string;
+  description: string;
+  assessmentType: "formative" | "summative" | "diagnostic" | "practice";
+  totalPoints: number;
+  estimatedDuration: number;
+  difficulty: "basic" | "intermediate" | "advanced" | "mixed";
+  questionCount: number;
+  allowRetakes: boolean;
+  showCorrectAnswers: boolean;
+  passingScore: number;
+  createdAt: string;
+}
+
+function AssessmentManagement({ moduleId, moduleObjectives }: AssessmentManagementProps) {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch assessments for this module
+  const { data: assessments = [], isLoading } = useQuery({
+    queryKey: [`/api/modules/${moduleId}/assessments`],
+    queryFn: async () => {
+      const response = await apiRequest(`/api/modules/${moduleId}/assessments`);
+      return response as Assessment[];
+    },
+  });
+
+  const getAssessmentTypeColor = (type: string) => {
+    const colors = {
+      formative: "bg-green-100 text-green-800",
+      summative: "bg-blue-100 text-blue-800",
+      diagnostic: "bg-purple-100 text-purple-800",
+      practice: "bg-yellow-100 text-yellow-800",
+    };
+    return colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    const colors = {
+      basic: "bg-emerald-100 text-emerald-800",
+      intermediate: "bg-amber-100 text-amber-800",
+      advanced: "bg-red-100 text-red-800",
+      mixed: "bg-indigo-100 text-indigo-800",
+    };
+    return colors[difficulty as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading assessments...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h4 className="text-lg font-semibold text-gray-900">Assessments</h4>
+          <p className="text-sm text-gray-600">
+            {assessments.length} assessment{assessments.length !== 1 ? 's' : ''} in this module
+          </p>
+        </div>
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          size="sm"
+          className="bg-green-600 hover:bg-green-700"
+          disabled={!moduleObjectives || moduleObjectives.length === 0}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Assessment
+        </Button>
+      </div>
+
+      {assessments.length === 0 ? (
+        <Card className="text-center py-12">
+          <CardContent>
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Assessments Yet</h3>
+            <p className="text-gray-600 mb-4">
+              Create your first assessment for this module.
+            </p>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700"
+              disabled={!moduleObjectives || moduleObjectives.length === 0}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Assessment
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {assessments.map((assessment) => (
+            <Card key={assessment.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <div className="mt-1">
+                      <FileText className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <CardTitle className="text-lg">{assessment.title}</CardTitle>
+                        <Badge className={getAssessmentTypeColor(assessment.assessmentType)}>
+                          {assessment.assessmentType}
+                        </Badge>
+                        <Badge className={getDifficultyColor(assessment.difficulty)}>
+                          {assessment.difficulty}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{assessment.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {/* Handle edit */}}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4 text-gray-500" />
+                    <span>{assessment.estimatedDuration} min</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Target className="h-4 w-4 text-gray-500" />
+                    <span>{assessment.totalPoints} points</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <MessageSquare className="h-4 w-4 text-gray-500" />
+                    <span>{assessment.questionCount} questions</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-gray-500" />
+                    <span>{assessment.passingScore}% pass</span>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t">
+                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                    <div className="flex items-center space-x-1">
+                      <span className={assessment.allowRetakes ? "text-green-600" : "text-red-600"}>
+                        {assessment.allowRetakes ? "Retakes Allowed" : "No Retakes"}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <span className={assessment.showCorrectAnswers ? "text-green-600" : "text-red-600"}>
+                        {assessment.showCorrectAnswers ? "Answers Shown" : "Answers Hidden"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Enhanced Assessment Creation Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Assessment</DialogTitle>
+          </DialogHeader>
+          <EnhancedAssessmentCreator 
+            moduleId={moduleId}
+            moduleObjectives={moduleObjectives}
+            onAssessmentCreated={() => setIsCreateModalOpen(false)}
           />
         </DialogContent>
       </Dialog>

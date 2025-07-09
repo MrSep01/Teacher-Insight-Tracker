@@ -449,6 +449,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Module-specific assessments endpoint
+  app.get("/api/modules/:id/assessments", requireAuth, async (req, res) => {
+    try {
+      const moduleId = parseInt(req.params.id);
+      const assessments = await storage.getAssessmentsByModuleId(moduleId);
+      res.json(assessments);
+    } catch (error) {
+      console.error('Error fetching module assessments:', error);
+      res.status(500).json({ error: "Failed to fetch module assessments" });
+    }
+  });
+
   // AI Recommendations routes
   app.get("/api/ai-recommendations/:studentId", async (req, res) => {
     try {
