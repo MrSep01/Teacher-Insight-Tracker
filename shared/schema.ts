@@ -98,15 +98,23 @@ export const assessments = pgTable("assessments", {
   rubric: text("rubric"), // JSON string of detailed rubric
   passingScore: integer("passing_score").default(70), // Percentage
   
+  // Additional fields from actual database
+  topics: text("topics").array(), // Assessment topics
+  questionTypes: text("question_types").array(), // Types of questions
+  questionCount: integer("question_count").default(0), // Number of questions
+  
   // AI and automation
   aiGenerated: boolean("ai_generated").default(false),
-  aiSuggestions: text("ai_suggestions"),
-  autoGrading: boolean("auto_grading").default(true),
+  // aiSuggestions: text("ai_suggestions"), // Not in current DB structure
+  // autoGrading: boolean("auto_grading").default(true), // Not in current DB structure
   
   // Status and timing
-  status: varchar("status").default("draft"), // draft, published, archived
-  publishedAt: timestamp("published_at"),
-  dueDate: timestamp("due_date"),
+  // status: varchar("status").default("draft"), // draft, published, archived - Not in current DB structure
+  // publishedAt: timestamp("published_at"), // Not in current DB structure
+  // dueDate: timestamp("due_date"), // Not in current DB structure
+  
+  // Missing date field from original schema
+  date: timestamp("date").notNull().defaultNow(),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
