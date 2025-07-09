@@ -19,6 +19,9 @@ import DevVerify from "@/pages/dev-verify";
 import ProfileSetup from "@/pages/profile-setup";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import TermsOfService from "@/pages/terms-of-service";
+import Documentation from "@/pages/documentation";
 import Sidebar from "@/components/layout/sidebar";
 
 function Router() {
@@ -124,6 +127,11 @@ function Router() {
           </div>
         </AuthGuard>
       </Route>
+      
+      {/* Public pages */}
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/documentation" component={Documentation} />
       
       {/* Landing page as default */}
       <Route path="/" component={Landing} />
