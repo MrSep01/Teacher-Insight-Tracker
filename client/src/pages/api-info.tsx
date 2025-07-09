@@ -132,9 +132,9 @@ export default function APIInfo() {
               <div className="bg-gray-50 p-4 rounded-lg mb-4">
                 <code className="text-sm">
                   curl -X POST https://api.edutrack.com/v1/assessments \<br />
-                  &nbsp;&nbsp;-H "Authorization: Bearer YOUR_API_KEY" \<br />
-                  &nbsp;&nbsp;-H "Content-Type: application/json" \<br />
-                  &nbsp;&nbsp;-d '{{"curriculum": "IGCSE Chemistry", "difficulty": "intermediate"}}'
+                  &nbsp;&nbsp;-H &quot;Authorization: Bearer YOUR_API_KEY&quot; \<br />
+                  &nbsp;&nbsp;-H &quot;Content-Type: application/json&quot; \<br />
+                  &nbsp;&nbsp;-d &apos;&#123;&quot;curriculum&quot;: &quot;IGCSE Chemistry&quot;, &quot;difficulty&quot;: &quot;intermediate&quot;&#125;&apos;
                 </code>
               </div>
               
