@@ -118,8 +118,9 @@ export default function Landing() {
             "Focus on Teaching, Let AI Handle the Rest"
           </p>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Designed for new teachers: AI creates tailored lessons, instant assessments, and personalized feedback 
-            based on student progress. Join a community of educators sharing resources and best practices.
+            Revolutionary differentiated lesson system: AI analyzes every student's assessment data to create 
+            personalized lesson plans with activities for struggling, on-track, and advanced learners. 
+            Transform your teaching while students get exactly what they need.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/login">
@@ -148,9 +149,9 @@ export default function Landing() {
                 <h2 className="text-3xl font-bold text-gray-900">Our Mission</h2>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">
-                To empower new teachers with AI-powered tools that automatically create personalized 
-                lessons, assessments, and feedback based on student needs, while building a collaborative 
-                community where educators can share resources and grow together.
+                To revolutionize education by providing teachers with AI-powered differentiated lessons 
+                that automatically adapt to every student's unique needs, strengths, and learning style. 
+                We believe every student deserves personalized education, and every teacher deserves the tools to deliver it.
               </p>
             </div>
             <div>
@@ -184,10 +185,11 @@ export default function Landing() {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <Brain className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">AI-Generated Lessons</CardTitle>
+                <CardTitle className="text-xl">Differentiated Lessons</CardTitle>
                 <CardDescription>
-                  AI automatically creates tailored lesson plans based on student progress and curriculum 
-                  standards. Perfect for new teachers who want to focus on teaching, not planning.
+                  AI analyzes each student's assessment data to create personalized lesson plans with 
+                  specific activities for struggling, on-track, and advanced learners. Every student gets 
+                  exactly what they need to succeed.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -195,10 +197,10 @@ export default function Landing() {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <Zap className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Instant Student Feedback</CardTitle>
+                <CardTitle className="text-xl">Smart Student Grouping</CardTitle>
                 <CardDescription>
-                  AI provides immediate, personalized feedback to students on their work, 
-                  helping them understand mistakes and improve in real-time.
+                  AI automatically suggests optimal student pairings and ability-based groupings 
+                  based on assessment data, learning styles, and individual needs for maximum learning outcomes.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -206,10 +208,10 @@ export default function Landing() {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <TrendingUp className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle className="text-xl">Progress-Based Adaptations</CardTitle>
+                <CardTitle className="text-xl">Individual Student Adaptations</CardTitle>
                 <CardDescription>
-                  Lessons and assessments automatically adjust difficulty and content 
-                  based on individual student performance and learning patterns.
+                  AI creates specific strategies and activities for each student based on their 
+                  strengths, weaknesses, and learning style - from struggling to advanced learners.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -250,6 +252,74 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Differentiated Lesson Showcase */}
+      <section className="py-16 bg-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Revolutionary Differentiated Lessons
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              AI analyzes every student's assessment data to create personalized lesson plans that adapt to individual needs
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <Card className="border-0 shadow-lg bg-white">
+              <CardHeader className="text-center">
+                <div className="bg-red-100 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                  <span className="text-red-600 font-bold text-xl">📚</span>
+                </div>
+                <CardTitle className="text-xl text-red-700">Struggling Students</CardTitle>
+                <CardDescription>
+                  Simplified activities, visual aids, step-by-step guides, and scaffolded support 
+                  to help students catch up and build confidence.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg bg-white">
+              <CardHeader className="text-center">
+                <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                  <span className="text-green-600 font-bold text-xl">🎯</span>
+                </div>
+                <CardTitle className="text-xl text-green-700">On-Track Students</CardTitle>
+                <CardDescription>
+                  Grade-level activities, collaborative work, and standard practice exercises 
+                  to maintain steady progress and engagement.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg bg-white">
+              <CardHeader className="text-center">
+                <div className="bg-purple-100 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                  <span className="text-purple-600 font-bold text-xl">🚀</span>
+                </div>
+                <CardTitle className="text-xl text-purple-700">Advanced Students</CardTitle>
+                <CardDescription>
+                  Complex problem-solving, independent research, peer teaching, and extension 
+                  activities to challenge and accelerate learning.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="text-center">
+            <p className="text-lg text-gray-600 mb-6">
+              <strong>Every lesson includes:</strong> Individual student strategies • Smart grouping suggestions • 
+              Differentiated assessments • Learning style adaptations
+            </p>
+            <Link href="/login">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                See It In Action
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Benefits Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
@@ -265,11 +335,11 @@ export default function Landing() {
               <ul className="space-y-4">
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Focus on teaching while AI handles lesson planning and assessments</span>
+                  <span className="text-gray-700">Get complete differentiated lessons with activities for struggling, on-track, and advanced students</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />
-                  <span className="text-gray-700">Get instant feedback and progress tracking for all students</span>
+                  <span className="text-gray-700">AI analyzes each student's assessment data to create personalized strategies and activities</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5" />

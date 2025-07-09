@@ -62,17 +62,18 @@ export default function Documentation() {
             <Card>
               <CardHeader>
                 <Brain className="h-8 w-8 text-blue-600 mb-2" />
-                <CardTitle>AI Features</CardTitle>
+                <CardTitle>Differentiated Lessons</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
-                  Discover how to leverage AI for personalized teaching and assessment.
+                  AI analyzes student assessment data to create personalized lesson plans for every learner.
                 </p>
                 <ul className="space-y-2 text-sm">
-                  <li>• AI-generated lesson plans</li>
-                  <li>• Automated assessment creation</li>
-                  <li>• Personalized student feedback</li>
-                  <li>• Progress-based recommendations</li>
+                  <li>• Activities for struggling, on-track, and advanced students</li>
+                  <li>• Individual student strategies and adaptations</li>
+                  <li>• Smart grouping and pairing suggestions</li>
+                  <li>• Differentiated assessments and homework</li>
+                  <li>• Learning style-based recommendations</li>
                 </ul>
               </CardContent>
             </Card>
