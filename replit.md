@@ -295,6 +295,9 @@ Changelog:
   * Complete site navigation now functional with no broken links or missing pages
   * Fixed API Info page React syntax error with JSON code example using proper HTML entities
   * All footer links confirmed working: Privacy Policy, Terms of Service, Documentation, Cookie Policy, GDPR, Careers, Blog, and API Info
+  * Implemented scroll-to-top functionality for all page navigation links
+  * Made logo and slogan clickable in headers and footers to return to homepage
+  * All page transitions now automatically scroll to top for improved user experience
 ```
 
 ## User Preferences

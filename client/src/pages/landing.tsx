@@ -83,10 +83,12 @@ export default function Landing() {
       <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <FlaskConical className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">EduTrack</span>
-            </div>
+            <Link href="/">
+              <div className="flex items-center space-x-2 cursor-pointer">
+                <FlaskConical className="h-8 w-8 text-blue-600" />
+                <span className="text-2xl font-bold text-gray-900">EduTrack</span>
+              </div>
+            </Link>
             <nav className="hidden md:flex space-x-6">
               <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
               <a href="#about" className="text-gray-600 hover:text-blue-600 transition-colors">About</a>
@@ -585,8 +587,8 @@ export default function Landing() {
               <ul className="space-y-2">
                 <li><a href="#features" className="text-gray-400 hover:text-white">Features</a></li>
                 <li><a href="#pricing" className="text-gray-400 hover:text-white">Pricing</a></li>
-                <li><Link href="/documentation" className="text-gray-400 hover:text-white">Documentation</Link></li>
-                <li><Link href="/api-info" className="text-gray-400 hover:text-white">API</Link></li>
+                <li><Link href="/documentation" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>Documentation</Link></li>
+                <li><Link href="/api-info" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>API</Link></li>
               </ul>
             </div>
             
@@ -594,8 +596,8 @@ export default function Landing() {
               <h4 className="text-lg font-semibold mb-4">Company</h4>
               <ul className="space-y-2">
                 <li><a href="#about" className="text-gray-400 hover:text-white">About</a></li>
-                <li><Link href="/careers" className="text-gray-400 hover:text-white">Careers</Link></li>
-                <li><Link href="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
+                <li><Link href="/careers" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>Careers</Link></li>
+                <li><Link href="/blog" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>Blog</Link></li>
                 <li><a href="#contact" className="text-gray-400 hover:text-white">Contact</a></li>
               </ul>
             </div>
@@ -603,10 +605,10 @@ export default function Landing() {
             <div>
               <h4 className="text-lg font-semibold mb-4">Legal</h4>
               <ul className="space-y-2">
-                <li><Link href="/privacy-policy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
-                <li><Link href="/terms-of-service" className="text-gray-400 hover:text-white">Terms of Service</Link></li>
-                <li><Link href="/cookie-policy" className="text-gray-400 hover:text-white">Cookie Policy</Link></li>
-                <li><Link href="/gdpr" className="text-gray-400 hover:text-white">GDPR</Link></li>
+                <li><Link href="/privacy-policy" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>Privacy Policy</Link></li>
+                <li><Link href="/terms-of-service" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>Terms of Service</Link></li>
+                <li><Link href="/cookie-policy" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>Cookie Policy</Link></li>
+                <li><Link href="/gdpr" className="text-gray-400 hover:text-white" onClick={() => window.scrollTo(0, 0)}>GDPR</Link></li>
               </ul>
             </div>
           </div>

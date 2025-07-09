@@ -8,6 +8,10 @@ interface PageHeaderProps {
   backButtonHref?: string;
 }
 
+const scrollToTop = () => {
+  window.scrollTo(0, 0);
+};
+
 export default function PageHeader({ 
   showBackButton = true, 
   backButtonText = "Back to Home", 
@@ -17,14 +21,14 @@ export default function PageHeader({
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/">
+          <Link href="/" onClick={scrollToTop}>
             <div className="flex items-center space-x-2 cursor-pointer">
               <FlaskConical className="h-8 w-8 text-blue-600" />
               <span className="text-2xl font-bold text-gray-900">EduTrack</span>
             </div>
           </Link>
           {showBackButton && (
-            <Link href={backButtonHref}>
+            <Link href={backButtonHref} onClick={scrollToTop}>
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {backButtonText}
