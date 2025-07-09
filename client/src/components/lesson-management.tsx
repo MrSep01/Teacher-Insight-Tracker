@@ -87,6 +87,10 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<LessonPlan | null>(null);
   const [creationMode, setCreationMode] = useState<"manual" | "ai">("manual");
+  const [isViewLessonModalOpen, setIsViewLessonModalOpen] = useState(false);
+  const [isViewAssessmentModalOpen, setIsViewAssessmentModalOpen] = useState(false);
+  const [viewingLesson, setViewingLesson] = useState<LessonPlan | null>(null);
+  const [viewingAssessment, setViewingAssessment] = useState<Assessment | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -191,23 +195,16 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
   };
 
   const handleViewLesson = (lesson: LessonPlan) => {
-    // Show lesson details in a toast for now
-    toast({
-      title: lesson.title,
-      description: `${lesson.description} - ${lesson.duration} minutes, ${lesson.difficulty} difficulty`,
-    });
+    setViewingLesson(lesson);
+    setIsViewLessonModalOpen(true);
   };
 
   const handleViewAssessment = (assessment: Assessment) => {
-    // Show assessment details in a toast for now
-    toast({
-      title: assessment.title,
-      description: `${assessment.description} - ${assessment.estimatedDuration} minutes, ${assessment.questionCount} questions`,
-    });
+    setViewingAssessment(assessment);
+    setIsViewAssessmentModalOpen(true);
   };
 
   const handleEditAssessment = (assessment: Assessment) => {
-    // Show edit assessment functionality
     toast({
       title: "Edit Assessment",
       description: `Opening editor for: ${assessment.title}`,
@@ -668,6 +665,394 @@ function AssessmentManagement({ moduleId, moduleObjectives }: AssessmentManageme
             moduleObjectives={moduleObjectives}
             onAssessmentCreated={() => setIsCreateModalOpen(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Lesson View Modal */}
+      <Dialog open={isViewLessonModalOpen} onOpenChange={setIsViewLessonModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              {viewingLesson && (
+                <>
+                  {(() => {
+                    const IconComponent = getLessonTypeIcon(viewingLesson.lessonType);
+                    return <IconComponent className="h-5 w-5 text-blue-600" />;
+                  })()}
+                  <span>{viewingLesson.title}</span>
+                  <Badge className={getLessonTypeColor(viewingLesson.lessonType)}>
+                    {LESSON_TYPES.find(t => t.value === viewingLesson.lessonType)?.label}
+                  </Badge>
+                  {viewingLesson.aiGenerated && (
+                    <Badge variant="outline" className="border-purple-300 text-purple-700">
+                      <Bot className="h-3 w-3 mr-1" />
+                      AI Generated
+                    </Badge>
+                  )}
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {viewingLesson && (
+            <div className="space-y-6">
+              {/* Lesson Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Duration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingLesson.duration} min</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Difficulty</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Target className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium capitalize">{viewingLesson.difficulty}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Objectives</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Lightbulb className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingLesson.objectives.length}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Description */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700">{viewingLesson.description}</p>
+                </CardContent>
+              </Card>
+
+              {/* Learning Objectives */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Learning Objectives</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {viewingLesson.objectives.map((objective, index) => (
+                      <li key={index} className="flex items-start space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                        <span className="text-sm">{objective}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Activities */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Activities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {viewingLesson.activities.map((activity, index) => (
+                      <li key={index} className="flex items-start space-x-2">
+                        <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium mt-0.5">
+                          {index + 1}
+                        </div>
+                        <span className="text-sm">{activity}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Resources */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Resources</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {viewingLesson.resources.map((resource, index) => (
+                      <li key={index} className="flex items-start space-x-2">
+                        <FileText className="h-4 w-4 text-gray-500 mt-0.5" />
+                        <span className="text-sm">{resource}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Equipment (if applicable) */}
+              {viewingLesson.equipment && viewingLesson.equipment.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Equipment Needed</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {viewingLesson.equipment.map((item, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <FlaskConical className="h-4 w-4 text-orange-500 mt-0.5" />
+                          <span className="text-sm">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Safety Notes (if applicable) */}
+              {viewingLesson.safetyNotes && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-red-600">Safety Notes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-red-700 bg-red-50 p-3 rounded">{viewingLesson.safetyNotes}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Assessment Criteria */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Assessment Criteria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {viewingLesson.assessmentCriteria.map((criteria, index) => (
+                      <li key={index} className="flex items-start space-x-2">
+                        <Target className="h-4 w-4 text-green-600 mt-0.5" />
+                        <span className="text-sm">{criteria}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Homework (if applicable) */}
+              {viewingLesson.homework && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Homework</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{viewingLesson.homework}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Assessment View Modal */}
+      <Dialog open={isViewAssessmentModalOpen} onOpenChange={setIsViewAssessmentModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              {viewingAssessment && (
+                <>
+                  <FileText className="h-5 w-5 text-green-600" />
+                  <span>{viewingAssessment.title}</span>
+                  <Badge className={
+                    viewingAssessment.assessmentType === "formative" ? "bg-blue-100 text-blue-800" :
+                    viewingAssessment.assessmentType === "summative" ? "bg-purple-100 text-purple-800" :
+                    "bg-gray-100 text-gray-800"
+                  }>
+                    {viewingAssessment.assessmentType}
+                  </Badge>
+                  {viewingAssessment.aiGenerated && (
+                    <Badge variant="outline" className="border-purple-300 text-purple-700">
+                      <Bot className="h-3 w-3 mr-1" />
+                      AI Generated
+                    </Badge>
+                  )}
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {viewingAssessment && (
+            <div className="space-y-6">
+              {/* Assessment Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Duration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.estimatedDuration} min</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Total Points</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Target className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.totalPoints}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Questions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <MessageSquare className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.questionCount}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Passing Score</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-gray-500" />
+                      <span className="text-lg font-medium">{viewingAssessment.passingScore}%</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Description */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700">{viewingAssessment.description}</p>
+                </CardContent>
+              </Card>
+
+              {/* Instructions */}
+              {viewingAssessment.instructions && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Instructions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-700">{viewingAssessment.instructions}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Assessment Objectives */}
+              {viewingAssessment.objectives && viewingAssessment.objectives.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Learning Objectives Assessed</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {viewingAssessment.objectives.map((objective, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                          <span className="text-sm">{objective}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Topics Covered */}
+              {viewingAssessment.topics && viewingAssessment.topics.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Topics Covered</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {viewingAssessment.topics.map((topic, index) => (
+                        <Badge key={index} variant="outline" className="text-sm">
+                          {topic}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Question Types */}
+              {viewingAssessment.questionTypes && viewingAssessment.questionTypes.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Question Types</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {viewingAssessment.questionTypes.map((type, index) => (
+                        <Badge key={index} variant="outline" className="text-sm">
+                          {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Assessment Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Assessment Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className={`h-4 w-4 ${viewingAssessment.allowRetakes ? 'text-green-600' : 'text-gray-400'}`} />
+                      <span className="text-sm">Allow Retakes: {viewingAssessment.allowRetakes ? 'Yes' : 'No'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Eye className={`h-4 w-4 ${viewingAssessment.showCorrectAnswers ? 'text-green-600' : 'text-gray-400'}`} />
+                      <span className="text-sm">Show Correct Answers: {viewingAssessment.showCorrectAnswers ? 'Yes' : 'No'}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Marking Scheme */}
+              {viewingAssessment.markingScheme && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Marking Scheme</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="text-sm bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                      {viewingAssessment.markingScheme}
+                    </pre>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
