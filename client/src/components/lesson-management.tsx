@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { AssessmentForm, AssessmentTypeBadge, AssessmentSummary } from "@/components/assessment-form";
+import { EnhancedLessonCreator } from "@/components/enhanced-lesson-creator";
+import { EnhancedAssessmentCreator } from "@/components/enhanced-assessment-creator";
 import { 
   Plus, 
   Edit, 
@@ -374,30 +376,19 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
         </div>
       )}
 
-      {/* Create/Edit Lesson Modal */}
+      {/* Enhanced Lesson Creation Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {selectedLesson ? 'Edit Lesson' : 
-               creationMode === 'ai' ? 'Generate AI Lesson' : 
-               'Create New Lesson'}
+              Create New Lesson Plan
             </DialogTitle>
           </DialogHeader>
-          {creationMode === 'ai' ? (
-            <AILessonGenerator 
-              module={module}
-              onGenerate={(data) => generateAILessonMutation.mutate(data)}
-              isLoading={generateAILessonMutation.isPending}
-            />
-          ) : (
-            <LessonForm 
-              lesson={selectedLesson}
-              module={module}
-              onSubmit={(data) => createLessonMutation.mutate(data)}
-              isLoading={createLessonMutation.isPending}
-            />
-          )}
+          <EnhancedLessonCreator 
+            moduleId={module.id}
+            moduleObjectives={module.objectives || []}
+            onLessonCreated={() => setIsCreateModalOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>

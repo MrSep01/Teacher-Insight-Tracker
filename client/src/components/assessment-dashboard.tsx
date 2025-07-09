@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { AssessmentTypeBadge } from "@/components/assessment-form";
+import { EnhancedAssessmentCreator } from "@/components/enhanced-assessment-creator";
 import { 
   Plus, 
   Edit, 
@@ -67,6 +68,7 @@ interface LessonPlan {
 export function AssessmentDashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<number | null>(null);
   const [filterType, setFilterType] = useState<"all" | "formative" | "summative">("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -313,23 +315,81 @@ export function AssessmentDashboard() {
 
       {/* Create Assessment Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Assessment</DialogTitle>
           </DialogHeader>
-          <AssessmentCreationForm
-            modules={modules || []}
-            lessons={lessons || []}
-            subjects={subjects || []}
-            onSubmit={(data) => createAssessmentMutation.mutate(data)}
-            isLoading={createAssessmentMutation.isPending}
-          />
+          {selectedModuleId ? (
+            <EnhancedAssessmentCreator
+              moduleId={selectedModuleId}
+              moduleObjectives={modules?.find(m => m.id === selectedModuleId)?.objectives || []}
+              onAssessmentCreated={() => {
+                setIsCreateModalOpen(false);
+                setSelectedModuleId(null);
+              }}
+            />
+          ) : (
+            <ModuleSelection 
+              modules={modules || []}
+              onModuleSelect={setSelectedModuleId}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
   );
 }
 
+interface ModuleSelectionProps {
+  modules: Module[];
+  onModuleSelect: (moduleId: number) => void;
+}
+
+function ModuleSelection({ modules, onModuleSelect }: ModuleSelectionProps) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center">
+        <h3 className="text-lg font-medium mb-2">Select a Module</h3>
+        <p className="text-gray-600">Choose which module this assessment should be created for</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {modules.map((module) => (
+          <Card 
+            key={module.id} 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onModuleSelect(module.id)}
+          >
+            <CardHeader>
+              <CardTitle className="text-base">{module.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Target className="h-4 w-4 text-blue-600" />
+                  <span>{module.objectives?.length || 0} objectives</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-green-600" />
+                  <span>{module.topics?.length || 0} topics</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {modules.length === 0 && (
+        <div className="text-center py-8">
+          <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">No modules available. Please create a module first.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Legacy Assessment Form (now unused)
 interface AssessmentCreationFormProps {
   modules: Module[];
   lessons: LessonPlan[];

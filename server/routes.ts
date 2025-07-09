@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
 import { aiAssessmentGenerator } from "./ai-assessment-generator";
+import { enhancedLessonGenerator } from "./enhanced-lesson-generator";
+import { enhancedAssessmentGenerator } from "./enhanced-assessment-generator";
 import { setupAuth, requireAuth } from "./auth";
 import { registerModuleRoutes } from "./modules";
 import { registerCurriculumRoutes } from "./curriculum-api";
@@ -392,6 +394,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(recommendation);
     } catch (error) {
       res.status(400).json({ error: "Invalid recommendation data" });
+    }
+  });
+
+  // Enhanced Lesson Creation Routes
+  app.post("/api/lessons/ai-generate", requireAuth, async (req, res) => {
+    try {
+      const result = await enhancedLessonGenerator.generateAILesson(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error('Error generating AI lesson:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/lessons/manual-create", requireAuth, async (req, res) => {
+    try {
+      const result = await enhancedLessonGenerator.createManualLesson(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error('Error creating manual lesson:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Enhanced Assessment Creation Routes
+  app.post("/api/assessments/ai-generate", requireAuth, async (req, res) => {
+    try {
+      const result = await enhancedAssessmentGenerator.generateAIAssessment(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error('Error generating AI assessment:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/assessments/manual-create", requireAuth, async (req, res) => {
+    try {
+      const result = await enhancedAssessmentGenerator.createManualAssessment(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error('Error creating manual assessment:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/assessments/question-types", requireAuth, async (req, res) => {
+    try {
+      const questionTypes = enhancedAssessmentGenerator.getAvailableQuestionTypes();
+      res.json(questionTypes);
+    } catch (error) {
+      console.error('Error fetching question types:', error);
+      res.status(500).json({ error: "Failed to fetch question types" });
     }
   });
 

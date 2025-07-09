@@ -70,6 +70,7 @@ export const subjects = pgTable("subjects", {
   icon: text("icon").notNull(),
 });
 
+// Enhanced assessments with Formative.com-inspired features
 export const assessments = pgTable("assessments", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -77,17 +78,36 @@ export const assessments = pgTable("assessments", {
   subjectId: integer("subject_id").notNull(),
   moduleId: integer("module_id").references(() => modules.id), // Link to module
   classId: integer("class_id").references(() => classes.id), // Link to class
-  topics: text("topics").array(), // Topics covered in assessment
-  objectives: text("objectives").array(), // Learning objectives
+  lessonId: integer("lesson_id").references(() => lessonPlans.id), // Link to lesson
+  
+  // Assessment metadata
+  objectives: text("objectives").array(), // Learning objectives from module
   assessmentType: text("assessment_type").notNull().default("summative"), // formative, summative, diagnostic, practice
   difficulty: text("difficulty").default("intermediate"), // basic, intermediate, advanced, mixed
-  questionTypes: text("question_types").array(), // Types of questions included
   totalPoints: integer("total_points").notNull(),
   estimatedDuration: integer("estimated_duration").default(60), // minutes
+  
+  // Instructions and feedback
   instructions: text("instructions"),
+  feedbackType: varchar("feedback_type").default("immediate"), // immediate, delayed, manual
+  allowRetakes: boolean("allow_retakes").default(false),
+  showCorrectAnswers: boolean("show_correct_answers").default(true),
+  
+  // Grading and analytics
   markingScheme: text("marking_scheme"), // JSON string of marking criteria
+  rubric: text("rubric"), // JSON string of detailed rubric
+  passingScore: integer("passing_score").default(70), // Percentage
+  
+  // AI and automation
   aiGenerated: boolean("ai_generated").default(false),
-  date: timestamp("date").notNull(),
+  aiSuggestions: text("ai_suggestions"),
+  autoGrading: boolean("auto_grading").default(true),
+  
+  // Status and timing
+  status: varchar("status").default("draft"), // draft, published, archived
+  publishedAt: timestamp("published_at"),
+  dueDate: timestamp("due_date"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -119,37 +139,168 @@ export const modules = pgTable("modules", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Lesson plans within modules
+// Enhanced lesson plans with industry-standard components
 export const lessonPlans = pgTable("lesson_plans", {
   id: serial("id").primaryKey(),
   moduleId: integer("module_id").references(() => modules.id),
   title: varchar("title").notNull(),
   description: text("description"),
   lessonType: varchar("lesson_type").notNull().default("lecture"), // "lecture", "practical", "project", "assessment", "discussion", "fieldwork"
-  objectives: text("objectives").array(),
-  activities: text("activities").array(),
-  resources: text("resources").array(),
-  equipment: text("equipment").array(), // For practical lessons
-  safetyNotes: text("safety_notes"), // For practical/fieldwork lessons
+  
+  // Core lesson structure
+  objectives: text("objectives").array(), // Selected from module objectives
   duration: integer("duration").default(45), // Duration in minutes
   difficulty: varchar("difficulty").default("intermediate"), // "basic", "intermediate", "advanced"
   targetStudents: text("target_students").array(), // student IDs or "all"
   prerequisites: text("prerequisites").array(), // Required prior knowledge
-  assessmentCriteria: text("assessment_criteria").array(), // How success is measured
-  differentiation: text("differentiation"), // How to adapt for different abilities
-  homework: text("homework"), // Follow-up work
-  // Assessment components for this lesson
+  
+  // Lesson components based on best practices
+  lessonStructure: text("lesson_structure"), // JSON: { starter: {}, main: {}, plenary: {} }
+  activities: text("activities").array(), // Legacy support
+  resources: text("resources").array(),
+  equipment: text("equipment").array(), // For practical lessons
+  safetyNotes: text("safety_notes"), // For practical/fieldwork lessons
+  
+  // Assessment integration
   hasAssessment: boolean("has_assessment").default(false),
   assessmentType: varchar("assessment_type"), // "formative" | "summative" 
   assessmentDescription: text("assessment_description"),
   assessmentDuration: integer("assessment_duration"), // in minutes
   assessmentPoints: integer("assessment_points"),
-  assessmentCriteriaLesson: text("assessment_criteria_lesson").array(), // Specific lesson assessment criteria
+  assessmentCriteria: text("assessment_criteria").array(), // How success is measured
   rubric: text("rubric"), // JSON string of detailed rubric
+  
+  // Differentiation and adaptations
+  differentiation: text("differentiation"), // How to adapt for different abilities
+  homework: text("homework"), // Follow-up work
+  
+  // Metadata
+  creationMethod: varchar("creation_method").default("manual"), // "manual", "ai", "template"
+  templateId: integer("template_id"), // Reference to lesson template
   aiGenerated: boolean("ai_generated").default(false),
   aiSuggestions: text("ai_suggestions"),
   isCompleted: boolean("is_completed").default(false),
   sequenceOrder: integer("sequence_order").default(1), // Order within module
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Assessment questions with 20+ question types (Formative.com-inspired)
+export const assessmentQuestions = pgTable("assessment_questions", {
+  id: serial("id").primaryKey(),
+  assessmentId: integer("assessment_id").references(() => assessments.id).notNull(),
+  questionNumber: integer("question_number").notNull(),
+  questionType: varchar("question_type").notNull(), // multiple_choice, true_false, short_answer, essay, numeric, fill_blank, matching, drag_drop, show_work, drawing, etc.
+  
+  // Question content
+  questionText: text("question_text").notNull(),
+  questionHtml: text("question_html"), // Rich text formatting
+  mediaUrl: text("media_url"), // Images, videos, audio
+  
+  // Answer configuration
+  correctAnswer: text("correct_answer"),
+  possibleAnswers: text("possible_answers").array(), // For multiple choice, matching, etc.
+  answerExplanation: text("answer_explanation"),
+  
+  // Grading and feedback
+  points: integer("points").default(1),
+  allowPartialCredit: boolean("allow_partial_credit").default(false),
+  hints: text("hints").array(), // AI-generated or manual hints
+  
+  // Advanced features
+  timeLimit: integer("time_limit"), // seconds
+  isRequired: boolean("is_required").default(true),
+  randomizeOptions: boolean("randomize_options").default(false),
+  
+  // AI integration
+  aiGenerated: boolean("ai_generated").default(false),
+  aiPrompt: text("ai_prompt"), // Original prompt used to generate question
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Student responses to assessment questions
+export const studentResponses = pgTable("student_responses", {
+  id: serial("id").primaryKey(),
+  studentId: integer("student_id").notNull(),
+  assessmentId: integer("assessment_id").references(() => assessments.id).notNull(),
+  questionId: integer("question_id").references(() => assessmentQuestions.id).notNull(),
+  
+  // Response data
+  response: text("response"), // Student's answer
+  responseData: text("response_data"), // JSON for complex responses (drawings, drag-drop, etc.)
+  isCorrect: boolean("is_correct"),
+  pointsEarned: decimal("points_earned", { precision: 5, scale: 2 }).default("0"),
+  
+  // Timing and attempts
+  timeSpent: integer("time_spent"), // seconds
+  attemptNumber: integer("attempt_number").default(1),
+  
+  // Feedback and grading
+  feedback: text("feedback"),
+  teacherComment: text("teacher_comment"),
+  autoGraded: boolean("auto_graded").default(true),
+  
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  gradedAt: timestamp("graded_at"),
+});
+
+// Lesson activity components (industry-standard)
+export const lessonActivities = pgTable("lesson_activities", {
+  id: serial("id").primaryKey(),
+  lessonId: integer("lesson_id").references(() => lessonPlans.id).notNull(),
+  
+  // Activity metadata
+  title: varchar("title").notNull(),
+  description: text("description"),
+  activityType: varchar("activity_type").notNull(), // starter, main, plenary, homework, assessment
+  componentType: varchar("component_type").notNull(), // teacher_led, student_led, group_work, individual_work, discussion, practical, etc.
+  
+  // Structure and timing
+  duration: integer("duration").default(10), // minutes
+  sequenceOrder: integer("sequence_order").notNull(),
+  
+  // Content and instructions
+  instructions: text("instructions"),
+  materials: text("materials").array(),
+  resources: text("resources").array(),
+  
+  // Differentiation
+  difficultyLevel: varchar("difficulty_level").default("mixed"), // basic, intermediate, advanced, mixed
+  learningStyles: text("learning_styles").array(), // visual, auditory, kinesthetic, reading
+  adaptations: text("adaptations"), // JSON with adaptations for different student needs
+  
+  // Assessment integration
+  hasAssessment: boolean("has_assessment").default(false),
+  assessmentCriteria: text("assessment_criteria").array(),
+  successCriteria: text("success_criteria").array(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Lesson templates for reusability
+export const lessonTemplates = pgTable("lesson_templates", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  
+  // Template metadata
+  title: varchar("title").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(), // starter, main_lesson, practical, assessment, etc.
+  subject: varchar("subject"),
+  gradeLevel: varchar("grade_level"),
+  
+  // Template structure
+  structure: text("structure"), // JSON with template structure
+  activities: text("activities").array(),
+  duration: integer("duration").default(45),
+  
+  // Sharing and access
+  isPublic: boolean("is_public").default(false),
+  useCount: integer("use_count").default(0),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -214,6 +365,30 @@ export const insertClassSchema = createInsertSchema(classes).omit({
   updatedAt: true,
 });
 
+// New schemas for enhanced lesson and assessment system
+export const insertAssessmentQuestionSchema = createInsertSchema(assessmentQuestions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStudentResponseSchema = createInsertSchema(studentResponses).omit({
+  id: true,
+  submittedAt: true,
+});
+
+export const insertLessonActivitySchema = createInsertSchema(lessonActivities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLessonTemplateSchema = createInsertSchema(lessonTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -228,6 +403,19 @@ export type Subject = typeof subjects.$inferSelect;
 export type InsertSubject = z.infer<typeof insertSubjectSchema>;
 
 export type Assessment = typeof assessments.$inferSelect;
+export type InsertAssessment = z.infer<typeof insertAssessmentSchema>;
+
+export type AssessmentQuestion = typeof assessmentQuestions.$inferSelect;
+export type InsertAssessmentQuestion = z.infer<typeof insertAssessmentQuestionSchema>;
+
+export type StudentResponse = typeof studentResponses.$inferSelect;
+export type InsertStudentResponse = z.infer<typeof insertStudentResponseSchema>;
+
+export type LessonActivity = typeof lessonActivities.$inferSelect;
+export type InsertLessonActivity = z.infer<typeof insertLessonActivitySchema>;
+
+export type LessonTemplate = typeof lessonTemplates.$inferSelect;
+export type InsertLessonTemplate = z.infer<typeof insertLessonTemplateSchema>;
 export type InsertAssessment = z.infer<typeof insertAssessmentSchema>;
 
 export type StudentScore = typeof studentScores.$inferSelect;
