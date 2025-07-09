@@ -78,7 +78,7 @@ export const assessments = pgTable("assessments", {
   subjectId: integer("subject_id").notNull(),
   moduleId: integer("module_id").references(() => modules.id), // Link to module
   classId: integer("class_id").references(() => classes.id), // Link to class
-  lessonId: integer("lesson_id").references(() => lessonPlans.id), // Link to lesson
+  // lessonId: integer("lesson_id").references(() => lessonPlans.id), // Link to lesson - removed to fix schema
   
   // Assessment metadata
   objectives: text("objectives").array(), // Learning objectives from module

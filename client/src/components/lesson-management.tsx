@@ -185,6 +185,14 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
     setIsCreateModalOpen(true);
   };
 
+  const handleViewLesson = (lesson: LessonPlan) => {
+    // Show lesson details in a toast for now
+    toast({
+      title: lesson.title,
+      description: `${lesson.description} - ${lesson.duration} minutes, ${lesson.difficulty} difficulty`,
+    });
+  };
+
   const getLessonTypeIcon = (type: string) => {
     const lessonType = LESSON_TYPES.find(t => t.value === type);
     return lessonType ? lessonType.icon : BookOpen;
@@ -347,6 +355,13 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                             onClick={() => handleEditLesson(lesson)}
                           >
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewLesson(lesson)}
+                          >
+                            View
                           </Button>
                         </div>
                       </div>
