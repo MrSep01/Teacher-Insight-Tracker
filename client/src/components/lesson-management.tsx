@@ -360,7 +360,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                     </div>
                     <div className="flex items-center space-x-2">
                       <FileText className="h-4 w-4 text-gray-500" />
-                      <span>{lesson.activities.length} activities</span>
+                      <span>{lesson.activities?.length || 0} activities</span>
                     </div>
                   </div>
                   
