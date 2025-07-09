@@ -29,7 +29,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
     },
     topics: [
       {
-        id: "topic-1",
+        id: "igcse-topic-1",
         name: "Principles of Chemistry",
         description: "Fundamental concepts of chemistry including atomic structure, bonding, and basic principles",
         specificationCode: "1",
@@ -495,7 +495,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
         ]
       },
       {
-        id: "topic-2",
+        id: "igcse-topic-2",
         name: "Inorganic Chemistry",
         description: "Chemistry of elements and compounds, focusing on groups in the periodic table",
         specificationCode: "2",
@@ -949,7 +949,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
         ]
       },
       {
-        id: "topic-3",
+        id: "igcse-topic-3",
         name: "Physical Chemistry",
         description: "Energy changes, reaction rates, and equilibrium",
         specificationCode: "3",
@@ -1094,7 +1094,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
         ]
       },
       {
-        id: "topic-4",
+        id: "igcse-topic-4",
         name: "Organic Chemistry",
         description: "Carbon compounds and their reactions",
         specificationCode: "4",
