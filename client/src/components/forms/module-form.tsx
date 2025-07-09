@@ -21,10 +21,10 @@ import { X, BookOpen, Target, Clock } from "lucide-react";
 import { HierarchicalCurriculumMapper } from "@/components/hierarchical-curriculum-mapper";
 
 const moduleSchema = z.object({
-  name: z.string().min(1, "Module name is required"),
+  title: z.string().min(1, "Module title is required"),
   description: z.string().min(1, "Description is required"),
-  curriculum: z.string().min(1, "Curriculum is required"),
-  gradeLevel: z.string().min(1, "Grade level is required"),
+  curriculumTopic: z.string().min(1, "Curriculum topic is required"),
+  gradeLevels: z.array(z.string()).min(1, "At least one grade level is required"),
   topics: z.array(z.string()).min(1, "At least one topic is required"),
   objectives: z.array(z.string()).optional(),
   estimatedHours: z.number().min(1, "Estimated hours must be greater than 0"),
@@ -34,15 +34,7 @@ type ModuleFormData = z.infer<typeof moduleSchema>;
 
 interface ModuleFormProps {
   module?: any; // For editing existing modules
-  onSubmit: (data: {
-    title: string;
-    description: string;
-    curriculumTopic: string;
-    gradeLevels: string[];
-    topics: string[];
-    objectives: string[];
-    estimatedHours: number;
-  }) => void;
+  onSubmit: (data: ModuleFormData) => void;
   isLoading?: boolean;
   onClose: () => void;
 }
@@ -57,10 +49,10 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
   const form = useForm<ModuleFormData>({
     resolver: zodResolver(moduleSchema),
     defaultValues: {
-      name: module?.title || "",
+      title: module?.title || "",
       description: module?.description || "",
-      curriculum: module?.curriculumTopic || "",
-      gradeLevel: module?.gradeLevels?.[0] || "",
+      curriculumTopic: module?.curriculumTopic || "",
+      gradeLevels: module?.gradeLevels || [],
       topics: module?.topics || [],
       objectives: module?.objectives || [],
       estimatedHours: module?.estimatedHours || 10,
@@ -89,8 +81,8 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
     };
   }, [manuallyAdjusted, form]);
 
-  const watchedCurriculum = form.watch("curriculum");
-  const watchedGradeLevel = form.watch("gradeLevel");
+  const watchedCurriculumTopic = form.watch("curriculumTopic");
+  const watchedGradeLevels = form.watch("gradeLevels");
 
   // Handle selection changes from hierarchical curriculum mapper
   const handleSelectionChange = (selection: {
@@ -109,13 +101,9 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
 
   const handleSubmit = (data: ModuleFormData) => {
     const moduleData = {
-      title: data.name,
-      description: data.description,
-      curriculumTopic: data.curriculum,
-      gradeLevels: [data.gradeLevel],
-      topics: selectedTopics.length > 0 ? selectedTopics : [],
-      objectives: selectedObjectives.length > 0 ? selectedObjectives : [],
-      estimatedHours: data.estimatedHours || autoCalculatedHours || 10,
+      ...data,
+      topics: selectedTopics.length > 0 ? selectedTopics : data.topics,
+      objectives: selectedObjectives.length > 0 ? selectedObjectives : data.objectives,
     };
     
     onSubmit(moduleData);
@@ -134,10 +122,10 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Module Name</FormLabel>
+                    <FormLabel>Module Title</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Introduction to Organic Chemistry" {...field} />
                     </FormControl>
@@ -168,14 +156,14 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="curriculum"
+                  name="curriculumTopic"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Curriculum</FormLabel>
+                      <FormLabel>Curriculum Topic</FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select curriculum" />
+                            <SelectValue placeholder="Select curriculum topic" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -190,22 +178,28 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
 
                 <FormField
                   control={form.control}
-                  name="gradeLevel"
+                  name="gradeLevels"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Grade Level</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select grade" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="10">Grade 10</SelectItem>
-                          <SelectItem value="11">Grade 11</SelectItem>
-                          <SelectItem value="12">Grade 12</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Grade Levels</FormLabel>
+                      <div className="flex flex-wrap gap-2">
+                        {["10", "11", "12"].map((grade) => (
+                          <Button
+                            key={grade}
+                            type="button"
+                            variant={field.value.includes(grade) ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              const newValue = field.value.includes(grade)
+                                ? field.value.filter(g => g !== grade)
+                                : [...field.value, grade];
+                              field.onChange(newValue);
+                            }}
+                          >
+                            Grade {grade}
+                          </Button>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
