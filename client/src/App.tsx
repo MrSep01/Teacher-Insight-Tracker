@@ -22,6 +22,11 @@ import Landing from "@/pages/landing";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import Documentation from "@/pages/documentation";
+import CookiePolicy from "@/pages/cookie-policy";
+import GDPR from "@/pages/gdpr";
+import Careers from "@/pages/careers";
+import Blog from "@/pages/blog";
+import APIInfo from "@/pages/api-info";
 import Sidebar from "@/components/layout/sidebar";
 
 function Router() {
@@ -132,6 +137,11 @@ function Router() {
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/documentation" component={Documentation} />
+      <Route path="/cookie-policy" component={CookiePolicy} />
+      <Route path="/gdpr" component={GDPR} />
+      <Route path="/careers" component={Careers} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/api-info" component={APIInfo} />
       
       {/* Landing page as default */}
       <Route path="/" component={Landing} />

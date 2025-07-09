@@ -1,30 +1,14 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FlaskConical, BookOpen, Users, Brain, FileText } from "lucide-react";
+import { BookOpen, Users, Brain, FileText } from "lucide-react";
+import PageHeader from "@/components/layout/page-header";
+import Footer from "@/components/layout/footer";
 
 export default function Documentation() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/">
-              <div className="flex items-center space-x-2 cursor-pointer">
-                <FlaskConical className="h-8 w-8 text-blue-600" />
-                <span className="text-2xl font-bold text-gray-900">EduTrack</span>
-              </div>
-            </Link>
-            <Link href="/">
-              <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PageHeader />
 
       {/* Content */}
       <div className="container mx-auto px-4 py-12">
@@ -132,6 +116,8 @@ export default function Documentation() {
           </Card>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

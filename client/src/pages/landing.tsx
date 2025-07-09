@@ -586,7 +586,7 @@ export default function Landing() {
                 <li><a href="#features" className="text-gray-400 hover:text-white">Features</a></li>
                 <li><a href="#pricing" className="text-gray-400 hover:text-white">Pricing</a></li>
                 <li><Link href="/documentation" className="text-gray-400 hover:text-white">Documentation</Link></li>
-                <li><a href="mailto:api@edutrack.com" className="text-gray-400 hover:text-white">API</a></li>
+                <li><Link href="/api-info" className="text-gray-400 hover:text-white">API</Link></li>
               </ul>
             </div>
             
@@ -594,8 +594,8 @@ export default function Landing() {
               <h4 className="text-lg font-semibold mb-4">Company</h4>
               <ul className="space-y-2">
                 <li><a href="#about" className="text-gray-400 hover:text-white">About</a></li>
-                <li><a href="mailto:careers@edutrack.com" className="text-gray-400 hover:text-white">Careers</a></li>
-                <li><a href="mailto:blog@edutrack.com" className="text-gray-400 hover:text-white">Blog</a></li>
+                <li><Link href="/careers" className="text-gray-400 hover:text-white">Careers</Link></li>
+                <li><Link href="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
                 <li><a href="#contact" className="text-gray-400 hover:text-white">Contact</a></li>
               </ul>
             </div>
@@ -605,8 +605,8 @@ export default function Landing() {
               <ul className="space-y-2">
                 <li><Link href="/privacy-policy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
                 <li><Link href="/terms-of-service" className="text-gray-400 hover:text-white">Terms of Service</Link></li>
-                <li><a href="mailto:legal@edutrack.com" className="text-gray-400 hover:text-white">Cookie Policy</a></li>
-                <li><a href="mailto:legal@edutrack.com" className="text-gray-400 hover:text-white">GDPR</a></li>
+                <li><Link href="/cookie-policy" className="text-gray-400 hover:text-white">Cookie Policy</Link></li>
+                <li><Link href="/gdpr" className="text-gray-400 hover:text-white">GDPR</Link></li>
               </ul>
             </div>
           </div>
