@@ -11,13 +11,16 @@ export async function apiRequest(
   url: string,
   options: RequestInit = {}
 ): Promise<any> {
+  const { body, ...restOptions } = options;
+  
   const res = await fetch(url, {
-    ...options,
+    ...restOptions,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
+    body: body ? JSON.stringify(body) : undefined,
   });
 
   if (!res.ok) {
