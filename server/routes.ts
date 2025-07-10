@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema, insertCourseSchema } from "@shared/schema";
+import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema, insertCourseSchema, insertCourseModuleSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
 import { aiAssessmentGenerator } from "./ai-assessment-generator";
 import { enhancedLessonGenerator } from "./enhanced-lesson-generator";
@@ -116,6 +116,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ error: "Failed to delete course" });
+    }
+  });
+
+  // Course module management routes (protected)
+  app.get("/api/courses/:id/modules", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const modules = await storage.getCourseModules(courseId);
+      res.json(modules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch course modules" });
+    }
+  });
+
+  app.post("/api/courses/:id/modules", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const { moduleId, sequenceOrder } = req.body;
+      const courseModuleData = insertCourseModuleSchema.parse({
+        courseId,
+        moduleId,
+        sequenceOrder: sequenceOrder || 1
+      });
+      
+      const newCourseModule = await storage.addModuleToCourse(courseModuleData);
+      res.json(newCourseModule);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to add module to course" });
+    }
+  });
+
+  app.get("/api/courses/:id/available-modules", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const availableModules = await storage.getAvailableModulesForCourse(courseId, teacherId);
+      res.json(availableModules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch available modules" });
+    }
+  });
+
+  app.delete("/api/courses/:id/modules/:moduleId", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const moduleId = parseInt(req.params.moduleId);
+      const teacherId = req.user.id;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const deleted = await storage.removeModuleFromCourse(courseId, moduleId);
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Module not found in course" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to remove module from course" });
+    }
+  });
+
+  app.get("/api/courses/:id/available-modules", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const availableModules = await storage.getAvailableModulesForCourse(courseId, teacherId);
+      res.json(availableModules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch available modules" });
     }
   });
 

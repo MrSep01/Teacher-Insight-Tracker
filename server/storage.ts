@@ -35,8 +35,34 @@ import {
 type Course = Class;
 type InsertCourse = InsertClass;
 
+// CourseModule types - simplified for now
+type CourseModule = {
+  id: number;
+  courseId: number;
+  moduleId: number;
+  sequenceOrder: number | null;
+  createdAt: Date | null;
+};
+
+type InsertCourseModule = {
+  courseId: number;
+  moduleId: number;
+  sequenceOrder?: number;
+};
+
 // Use courses table directly (it exists in the database)
 const courses = classes;
+
+// Define courseModules table directly since it's not exported from schema
+import { pgTable, serial, integer, timestamp } from "drizzle-orm/pg-core";
+const courseModules = pgTable("course_modules", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull(),
+  moduleId: integer("module_id").notNull(),
+  sequenceOrder: integer("sequence_order").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 import { db } from "./db";
 import { eq, and, desc, gte } from "drizzle-orm";
 
@@ -62,6 +88,12 @@ export interface IStorage {
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course | undefined>;
   deleteCourse(id: number): Promise<boolean>;
+
+  // Course Modules
+  getCourseModules(courseId: number): Promise<Module[]>;
+  addModuleToCourse(courseModule: InsertCourseModule): Promise<CourseModule>;
+  removeModuleFromCourse(courseId: number, moduleId: number): Promise<boolean>;
+  getAvailableModulesForCourse(courseId: number, teacherId: number): Promise<Module[]>;
 
   // Students
   getStudents(): Promise<Student[]>;
@@ -998,6 +1030,58 @@ export class DatabaseStorage implements IStorage {
       })
     );
     return studentsWithScores;
+  }
+
+  // Course module management implementation
+  async getCourseModules(courseId: number): Promise<Module[]> {
+    const courseModuleRecords = await db
+      .select({
+        module: modules,
+        courseModule: courseModules
+      })
+      .from(courseModules)
+      .innerJoin(modules, eq(courseModules.moduleId, modules.id))
+      .where(eq(courseModules.courseId, courseId))
+      .orderBy(courseModules.sequenceOrder);
+    
+    return courseModuleRecords.map(record => record.module);
+  }
+
+  async addModuleToCourse(courseModule: InsertCourseModule): Promise<CourseModule> {
+    const [newCourseModule] = await db
+      .insert(courseModules)
+      .values(courseModule)
+      .returning();
+    return newCourseModule;
+  }
+
+  async removeModuleFromCourse(courseId: number, moduleId: number): Promise<boolean> {
+    const result = await db
+      .delete(courseModules)
+      .where(and(
+        eq(courseModules.courseId, courseId),
+        eq(courseModules.moduleId, moduleId)
+      ));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getAvailableModulesForCourse(courseId: number, teacherId: number): Promise<Module[]> {
+    // Get all modules created by the teacher
+    const allTeacherModules = await db
+      .select()
+      .from(modules)
+      .where(eq(modules.userId, teacherId));
+
+    // Get modules already assigned to this course
+    const assignedModuleIds = await db
+      .select({ moduleId: courseModules.moduleId })
+      .from(courseModules)
+      .where(eq(courseModules.courseId, courseId));
+
+    const assignedIds = assignedModuleIds.map(record => record.moduleId);
+    
+    // Filter out already assigned modules
+    return allTeacherModules.filter(module => !assignedIds.includes(module.id));
   }
 }
 

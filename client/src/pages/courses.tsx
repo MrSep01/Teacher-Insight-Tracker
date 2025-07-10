@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Users, BookOpen, Clock, Edit, Trash2, Archive, MoreVertical } from "lucide-react";
+import { Plus, Users, BookOpen, Clock, Edit, Trash2, Archive, MoreVertical, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { CourseModuleManager } from "@/components/forms/course-module-manager";
 import type { Course, InsertCourse } from "@shared/schema";
 
 export default function Courses() {
   const [open, setOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [moduleManagerOpen, setModuleManagerOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,6 +101,11 @@ export default function Courses() {
     if (confirm("Are you sure you want to delete this course? This will also remove all associated students and data.")) {
       deleteCourseMutation.mutate(courseId);
     }
+  };
+
+  const openModuleManager = (course: Course) => {
+    setSelectedCourse(course);
+    setModuleManagerOpen(true);
   };
 
   if (isLoading) {
@@ -226,7 +234,8 @@ export default function Courses() {
                   <Button variant="outline" size="sm" className="flex-1">
                     View Details
                   </Button>
-                  <Button size="sm" className="flex-1">
+                  <Button size="sm" className="flex-1" onClick={() => openModuleManager(course)}>
+                    <Settings className="h-4 w-4 mr-2" />
                     Manage Modules
                   </Button>
                 </div>
@@ -341,6 +350,15 @@ export default function Courses() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Course Module Manager */}
+      {selectedCourse && (
+        <CourseModuleManager
+          course={selectedCourse}
+          open={moduleManagerOpen}
+          onOpenChange={setModuleManagerOpen}
+        />
+      )}
     </div>
   );
 }
