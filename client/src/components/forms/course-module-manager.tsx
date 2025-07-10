@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, X, BookOpen, Clock, Users, Search, ChevronRight, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { Search, BookOpen, Plus, Trash2, Users, Clock, ChevronRight } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Module, Course } from "@shared/schema";
 
 interface CourseModuleManagerProps {
@@ -19,10 +19,9 @@ interface CourseModuleManagerProps {
 }
 
 export function CourseModuleManager({ course, open, onOpenChange }: CourseModuleManagerProps) {
-  const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"assigned" | "available">("assigned");
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Fetch modules assigned to this course
   const { data: assignedModules = [], isLoading: assignedLoading } = useQuery<Module[]>({
@@ -80,13 +79,13 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
   };
 
   const filteredAssignedModules = assignedModules.filter(module =>
-    module.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module.curriculum?.toLowerCase().includes(searchTerm.toLowerCase())
+    module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    module.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredAvailableModules = availableModules.filter(module =>
-    module.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module.curriculum?.toLowerCase().includes(searchTerm.toLowerCase())
+    module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    module.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -166,9 +165,9 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-base leading-tight">{module.name}</CardTitle>
+                            <CardTitle className="text-base leading-tight">{module.title}</CardTitle>
                             <CardDescription className="mt-1">
-                              {module.grade} • {module.level} • {module.curriculum}
+                              {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
                           </div>
                           <Button
@@ -184,10 +183,10 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                       <CardContent className="pt-0">
                         <div className="flex flex-wrap gap-2 mb-3">
                           <Badge variant="outline" className="text-xs">
-                            {module.topicArea}
+                            {module.topics?.length || 0} topics
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {module.estimatedHours}h
+                            {module.estimatedHours || 0}h
                           </Badge>
                         </div>
                         
@@ -199,7 +198,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              <span>{module.estimatedHours}h</span>
+                              <span>{module.estimatedHours || 0}h</span>
                             </div>
                           </div>
                           <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -240,9 +239,9 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-base leading-tight">{module.name}</CardTitle>
+                            <CardTitle className="text-base leading-tight">{module.title}</CardTitle>
                             <CardDescription className="mt-1">
-                              {module.grade} • {module.level} • {module.curriculum}
+                              {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
                           </div>
                           <Button
@@ -260,10 +259,10 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                       <CardContent className="pt-0">
                         <div className="flex flex-wrap gap-2 mb-3">
                           <Badge variant="outline" className="text-xs">
-                            {module.topicArea}
+                            {module.topics?.length || 0} topics
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {module.estimatedHours}h
+                            {module.estimatedHours || 0}h
                           </Badge>
                         </div>
                         
@@ -275,7 +274,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              <span>{module.estimatedHours}h</span>
+                              <span>{module.estimatedHours || 0}h</span>
                             </div>
                           </div>
                           <ChevronRight className="h-4 w-4 text-gray-400" />
