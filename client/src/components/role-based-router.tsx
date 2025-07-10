@@ -11,42 +11,34 @@ import SignUpPage from "@/components/auth/signup-page";
 import NotFound from "@/components/pages/not-found";
 
 // Placeholder components for teacher dashboard
-import { Link } from "wouter";
-
 const Dashboard = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">Teacher Dashboard</h1>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Link href="/students">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle>Students</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Manage your students and track their progress</p>
-          </CardContent>
-        </Card>
-      </Link>
-      <Link href="/modules">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle>Modules</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Create and manage curriculum modules</p>
-          </CardContent>
-        </Card>
-      </Link>
-      <Link href="/assessments">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle>Assessments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Design and grade assessments</p>
-          </CardContent>
-        </Card>
-      </Link>
+      <Card>
+        <CardHeader>
+          <CardTitle>Students</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Manage your students and track their progress</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Modules</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Create and manage curriculum modules</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Assessments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Design and grade assessments</p>
+        </CardContent>
+      </Card>
     </div>
   </div>
 );
@@ -54,186 +46,42 @@ const Dashboard = () => (
 const Students = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">Students</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <p className="text-gray-600 dark:text-gray-300 mb-4">
-        Student management system - Create classes, enroll students, and track their progress through your curriculum.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Create Class</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Set up a new class for your students</p>
-            <Button className="mt-2" size="sm">Create Class</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Manage Students</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">View and manage enrolled students</p>
-            <Button className="mt-2" size="sm">View Students</Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <p>Student management coming soon...</p>
   </div>
 );
 
 const Assessments = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">Assessments</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <p className="text-gray-600 dark:text-gray-300 mb-4">
-        AI-powered assessment creation and management system for IGCSE and A-Level Chemistry.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Create Assessment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Generate AI-powered assessments</p>
-            <Button className="mt-2" size="sm">Create Assessment</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">View Results</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Review student performance</p>
-            <Button className="mt-2" size="sm">View Results</Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <p>Assessment management coming soon...</p>
   </div>
 );
 
 const Modules = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">Modules</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <p className="text-gray-600 dark:text-gray-300 mb-4">
-        Curriculum module management based on official Edexcel specifications for IGCSE and A-Level Chemistry.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Create Module</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Build curriculum modules with learning objectives</p>
-            <Button className="mt-2" size="sm">Create Module</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Manage Modules</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Edit and organize your modules</p>
-            <Button className="mt-2" size="sm">View Modules</Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <p>Module management coming soon...</p>
   </div>
 );
 
 const Lessons = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">Lessons</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <p className="text-gray-600 dark:text-gray-300 mb-4">
-        AI-powered lesson generation with comprehensive teaching materials and multimedia content.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Create Lesson</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Generate complete lessons with AI</p>
-            <Button className="mt-2" size="sm">Create Lesson</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Lesson Library</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Browse and manage your lessons</p>
-            <Button className="mt-2" size="sm">View Lessons</Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <p>Lesson management coming soon...</p>
   </div>
 );
 
 const Reports = () => (
   <div className="p-6">
-    <h1 className="text-2xl font-bold mb-4">Reports & Analytics</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <p className="text-gray-600 dark:text-gray-300 mb-4">
-        Comprehensive reporting and analytics to track student progress and performance.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Student Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Track individual student progress</p>
-            <Button className="mt-2" size="sm">View Progress</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Class Analytics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Analyze class performance</p>
-            <Button className="mt-2" size="sm">View Analytics</Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <h1 className="text-2xl font-bold mb-4">Reports</h1>
+    <p>Reports coming soon...</p>
   </div>
 );
 
 const AIRecommendations = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">AI Recommendations</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <p className="text-gray-600 dark:text-gray-300 mb-4">
-        Intelligent recommendations based on student performance data and learning patterns.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Student Recommendations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Personalized learning suggestions</p>
-            <Button className="mt-2" size="sm">View Recommendations</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Teaching Insights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">AI-powered teaching strategies</p>
-            <Button className="mt-2" size="sm">View Insights</Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <p>AI recommendations coming soon...</p>
   </div>
 );
 
@@ -355,30 +203,8 @@ export default function RoleBasedRouter() {
       <nav className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-8">
-              <Link href="/">
-                <span className="text-xl font-bold text-gray-900 dark:text-white cursor-pointer">EduTrack</span>
-              </Link>
-              <nav className="hidden md:flex space-x-8">
-                <Link href="/students">
-                  <span className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">Students</span>
-                </Link>
-                <Link href="/modules">
-                  <span className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">Modules</span>
-                </Link>
-                <Link href="/assessments">
-                  <span className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">Assessments</span>
-                </Link>
-                <Link href="/lessons">
-                  <span className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">Lessons</span>
-                </Link>
-                <Link href="/reports">
-                  <span className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">Reports</span>
-                </Link>
-                <Link href="/ai-recommendations">
-                  <span className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">AI Recommendations</span>
-                </Link>
-              </nav>
+            <div className="flex items-center">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">EduTrack</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="outline" onClick={() => window.location.href = "/api/auth/logout"}>
