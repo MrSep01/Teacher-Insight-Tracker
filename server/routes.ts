@@ -70,11 +70,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/courses", requireAuth, async (req, res) => {
     try {
       const teacherId = req.user.id;
+      console.log("Creating course with data:", req.body);
       const courseData = insertCourseSchema.parse({ ...req.body, teacherId });
       const newCourse = await storage.createCourse(courseData);
       res.json(newCourse);
     } catch (error) {
-      res.status(400).json({ error: "Failed to create course" });
+      console.error("Course creation error:", error);
+      res.status(400).json({ error: "Failed to create course", details: error.message });
     }
   });
 
