@@ -183,7 +183,7 @@ export default function CourseDetail() {
   );
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6 min-h-screen">
       {/* Course Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -411,7 +411,8 @@ export default function CourseDetail() {
                                       
                                       <CollapsibleContent>
                                         <CardContent className="pt-0">
-                                          <div className="space-y-4">
+                                          <div className="relative">
+                                            <div className="max-h-96 overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 border border-gray-100 rounded-lg p-4 bg-gray-50/50">
                                             {/* Lesson Details */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                               <div>
@@ -433,17 +434,12 @@ export default function CourseDetail() {
                                                 <h6 className="font-medium text-gray-900 mb-2">Activities</h6>
                                                 {lesson.activities && lesson.activities.length > 0 ? (
                                                   <div className="space-y-1">
-                                                    {lesson.activities.slice(0, 3).map((activity, index) => (
+                                                    {lesson.activities.map((activity, index) => (
                                                       <div key={index} className="flex items-start space-x-2">
                                                         <Play className="h-3 w-3 text-blue-600 mt-0.5 flex-shrink-0" />
                                                         <span className="text-xs text-gray-600">{activity}</span>
                                                       </div>
                                                     ))}
-                                                    {lesson.activities.length > 3 && (
-                                                      <p className="text-xs text-gray-500">
-                                                        +{lesson.activities.length - 3} more activities
-                                                      </p>
-                                                    )}
                                                   </div>
                                                 ) : (
                                                   <p className="text-sm text-gray-500">No activities defined</p>
@@ -510,6 +506,7 @@ export default function CourseDetail() {
                                                   Start Lesson
                                                 </Button>
                                               </Link>
+                                            </div>
                                             </div>
                                           </div>
                                         </CardContent>
