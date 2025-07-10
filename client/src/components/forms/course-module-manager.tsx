@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,8 @@ import {
   Trash2, 
   Users, 
   Clock, 
-  ChevronRight 
+  ChevronRight,
+  ExternalLink
 } from "lucide-react";
 import type { Course, Module } from "@shared/schema";
 
@@ -28,6 +30,7 @@ interface CourseModuleManagerProps {
 export function CourseModuleManager({ course, open, onOpenChange }: CourseModuleManagerProps) {
   const [activeTab, setActiveTab] = useState<"assigned" | "available">("assigned");
   const [searchTerm, setSearchTerm] = useState("");
+  const [, setLocation] = useLocation();
 
   // Fetch assigned modules for the course
   const { data: assignedModules = [], isLoading: assignedLoading } = useQuery<Module[]>({
@@ -82,6 +85,11 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
     if (confirm("Are you sure you want to remove this module from the course?")) {
       removeModuleMutation.mutate(moduleId);
     }
+  };
+
+  const handleModuleClick = (moduleId: number) => {
+    onOpenChange(false); // Close the modal
+    setLocation(`/modules/${moduleId}`); // Navigate to module detail page
   };
 
   const filteredAssignedModules = assignedModules.filter(module =>
@@ -167,26 +175,41 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                   </div>
                 ) : (
                   filteredAssignedModules.map((module) => (
-                    <Card key={module.id} className="hover:shadow-md transition-shadow">
+                    <Card key={module.id} className="hover:shadow-md transition-shadow cursor-pointer">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
+                          <div className="flex-1" onClick={() => handleModuleClick(module.id)}>
                             <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
                               {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveModule(module.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleModuleClick(module.id)}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              title="View Module"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveModule(module.id);
+                              }}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              title="Remove from Course"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="pt-0">
+                      <CardContent className="pt-0" onClick={() => handleModuleClick(module.id)}>
                         <div className="flex flex-wrap gap-2 mb-3">
                           <Badge variant="outline" className="text-xs">
                             {module.topics?.length || 0} topics
@@ -207,7 +230,10 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                               <span>{module.estimatedHours || 0}h</span>
                             </div>
                           </div>
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                          <div className="flex items-center gap-1 text-blue-600">
+                            <span className="text-xs font-medium">View Details</span>
+                            <ChevronRight className="h-4 w-4" />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -241,26 +267,41 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                   </div>
                 ) : (
                   filteredAvailableModules.map((module) => (
-                    <Card key={module.id} className="hover:shadow-md transition-shadow">
+                    <Card key={module.id} className="hover:shadow-md transition-shadow cursor-pointer">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
+                          <div className="flex-1" onClick={() => handleModuleClick(module.id)}>
                             <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
                               {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAddModule(module.id)}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleModuleClick(module.id)}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              title="View Module"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddModule(module.id);
+                              }}
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                              title="Add to Course"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="pt-0">
+                      <CardContent className="pt-0" onClick={() => handleModuleClick(module.id)}>
                         <div className="flex flex-wrap gap-2 mb-3">
                           <Badge variant="outline" className="text-xs">
                             {module.topics?.length || 0} topics
@@ -281,7 +322,10 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                               <span>{module.estimatedHours || 0}h</span>
                             </div>
                           </div>
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                          <div className="flex items-center gap-1 text-blue-600">
+                            <span className="text-xs font-medium">View Details</span>
+                            <ChevronRight className="h-4 w-4" />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
