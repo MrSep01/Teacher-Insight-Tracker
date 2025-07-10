@@ -1,16 +1,23 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, BookOpen, Plus, Trash2, Users, Clock, ChevronRight } from "lucide-react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import type { Module, Course } from "@shared/schema";
+import { toast } from "@/hooks/use-toast";
+import { 
+  BookOpen, 
+  Plus, 
+  Search, 
+  Trash2, 
+  Users, 
+  Clock, 
+  ChevronRight 
+} from "lucide-react";
+import type { Course, Module } from "@shared/schema";
 
 interface CourseModuleManagerProps {
   course: Course;
@@ -21,17 +28,16 @@ interface CourseModuleManagerProps {
 export function CourseModuleManager({ course, open, onOpenChange }: CourseModuleManagerProps) {
   const [activeTab, setActiveTab] = useState<"assigned" | "available">("assigned");
   const [searchTerm, setSearchTerm] = useState("");
-  const { toast } = useToast();
 
-  // Fetch modules assigned to this course
+  // Fetch assigned modules for the course
   const { data: assignedModules = [], isLoading: assignedLoading } = useQuery<Module[]>({
-    queryKey: ["/api/courses", course.id, "modules"],
-    enabled: open,
+    queryKey: [`/api/courses/${course.id}/modules`],
+    enabled: open && activeTab === "assigned",
   });
 
   // Fetch available modules that can be added to the course
   const { data: availableModules = [], isLoading: availableLoading } = useQuery<Module[]>({
-    queryKey: ["/api/courses", course.id, "available-modules"],
+    queryKey: [`/api/courses/${course.id}/available-modules`],
     enabled: open && activeTab === "available",
   });
 
@@ -43,8 +49,8 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
         body: { moduleId, sequenceOrder },
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/courses", course.id, "modules"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/courses", course.id, "available-modules"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${course.id}/modules`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${course.id}/available-modules`] });
       toast({ title: "Module added to course successfully" });
     },
     onError: () => {
@@ -59,8 +65,8 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
         method: "DELETE",
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/courses", course.id, "modules"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/courses", course.id, "available-modules"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${course.id}/modules`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${course.id}/available-modules`] });
       toast({ title: "Module removed from course successfully" });
     },
     onError: () => {
@@ -80,12 +86,12 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
 
   const filteredAssignedModules = assignedModules.filter(module =>
     module?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module?.curriculum_topic?.toLowerCase().includes(searchTerm.toLowerCase())
+    module?.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredAvailableModules = availableModules.filter(module =>
     module?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module?.curriculum_topic?.toLowerCase().includes(searchTerm.toLowerCase())
+    module?.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -167,7 +173,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                           <div className="flex-1">
                             <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
-                              {module.grade_levels?.join(', ')} • {module.curriculum_topic}
+                              {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
                           </div>
                           <Button
@@ -186,7 +192,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             {module.topics?.length || 0} topics
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {module.estimated_hours || 0}h
+                            {module.estimatedHours || 0}h
                           </Badge>
                         </div>
                         
@@ -198,7 +204,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              <span>{module.estimated_hours || 0}h</span>
+                              <span>{module.estimatedHours || 0}h</span>
                             </div>
                           </div>
                           <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -241,18 +247,16 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                           <div className="flex-1">
                             <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
-                              {module.grade_levels?.join(', ')} • {module.curriculum_topic}
+                              {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleAddModule(module.id)}
-                            disabled={addModuleMutation.isPending}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
                           >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add
+                            <Plus className="h-4 w-4" />
                           </Button>
                         </div>
                       </CardHeader>
@@ -262,7 +266,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             {module.topics?.length || 0} topics
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {module.estimated_hours || 0}h
+                            {module.estimatedHours || 0}h
                           </Badge>
                         </div>
                         
@@ -274,7 +278,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              <span>{module.estimated_hours || 0}h</span>
+                              <span>{module.estimatedHours || 0}h</span>
                             </div>
                           </div>
                           <ChevronRight className="h-4 w-4 text-gray-400" />
