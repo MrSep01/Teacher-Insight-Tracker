@@ -14,26 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Course, InsertCourse } from "@shared/schema";
 
-interface Module {
-  id: number;
-  title: string;
-  description: string | null;
-  estimatedHours: number;
-}
-
-interface CourseWithDetails extends Course {
-  modules: Module[];
-  studentCount: number;
-  totalHours: number;
-}
-
 export default function Courses() {
   const [open, setOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: courses = [], isLoading } = useQuery<CourseWithDetails[]>({
+  const { data: courses = [], isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
@@ -218,17 +205,17 @@ export default function Courses() {
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="flex flex-col items-center">
                     <Users className="h-4 w-4 text-blue-500 mb-1" />
-                    <span className="text-sm font-medium">{course.studentCount}</span>
+                    <span className="text-sm font-medium">0</span>
                     <span className="text-xs text-gray-500">Students</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <BookOpen className="h-4 w-4 text-green-500 mb-1" />
-                    <span className="text-sm font-medium">{course.modules.length}</span>
+                    <span className="text-sm font-medium">0</span>
                     <span className="text-xs text-gray-500">Modules</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <Clock className="h-4 w-4 text-purple-500 mb-1" />
-                    <span className="text-sm font-medium">{course.totalHours}h</span>
+                    <span className="text-sm font-medium">0h</span>
                     <span className="text-xs text-gray-500">Total</span>
                   </div>
                 </div>
