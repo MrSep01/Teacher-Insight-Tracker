@@ -28,7 +28,8 @@ import {
   studentScores,
   modules,
   lessonPlans,
-  lessonRecommendations
+  lessonRecommendations,
+
 } from "@shared/schema";
 
 // Import additional table utilities
@@ -38,7 +39,7 @@ import { pgTable, serial, integer, timestamp } from "drizzle-orm/pg-core";
 type Course = Class;
 type InsertCourse = InsertClass;
 
-// Define courseModules table directly
+// Define courseModules table directly (since it's not exported from schema)
 const courseModules = pgTable("course_modules", {
   id: serial("id").primaryKey(),
   courseId: integer("course_id").notNull(),
@@ -48,19 +49,8 @@ const courseModules = pgTable("course_modules", {
 });
 
 // CourseModule types
-type CourseModule = {
-  id: number;
-  courseId: number;
-  moduleId: number;
-  sequenceOrder: number | null;
-  createdAt: Date | null;
-};
-
-type InsertCourseModule = {
-  courseId: number;
-  moduleId: number;
-  sequenceOrder?: number;
-};
+type CourseModule = typeof courseModules.$inferSelect;
+type InsertCourseModule = typeof courseModules.$inferInsert;
 
 // Use courses as classes since they're the same
 const courses = classes;
