@@ -79,13 +79,13 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
   };
 
   const filteredAssignedModules = assignedModules.filter(module =>
-    module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
+    module?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    module?.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredAvailableModules = availableModules.filter(module =>
-    module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
+    module?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    module?.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -165,7 +165,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-base leading-tight">{module.title}</CardTitle>
+                            <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
                               {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
@@ -239,7 +239,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-base leading-tight">{module.title}</CardTitle>
+                            <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
                               {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
                             </CardDescription>
