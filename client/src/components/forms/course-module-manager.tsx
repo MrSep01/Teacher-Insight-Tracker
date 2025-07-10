@@ -80,12 +80,12 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
 
   const filteredAssignedModules = assignedModules.filter(module =>
     module?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module?.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
+    module?.curriculum_topic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredAvailableModules = availableModules.filter(module =>
     module?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module?.curriculumTopic?.toLowerCase().includes(searchTerm.toLowerCase())
+    module?.curriculum_topic?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -167,7 +167,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                           <div className="flex-1">
                             <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
-                              {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
+                              {module.grade_levels?.join(', ')} • {module.curriculum_topic}
                             </CardDescription>
                           </div>
                           <Button
@@ -186,7 +186,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             {module.topics?.length || 0} topics
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {module.estimatedHours || 0}h
+                            {module.estimated_hours || 0}h
                           </Badge>
                         </div>
                         
@@ -198,7 +198,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              <span>{module.estimatedHours || 0}h</span>
+                              <span>{module.estimated_hours || 0}h</span>
                             </div>
                           </div>
                           <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -241,7 +241,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                           <div className="flex-1">
                             <CardTitle className="text-base leading-tight">{module.title || 'Untitled Module'}</CardTitle>
                             <CardDescription className="mt-1">
-                              {module.gradeLevels?.join(', ')} • {module.curriculumTopic}
+                              {module.grade_levels?.join(', ')} • {module.curriculum_topic}
                             </CardDescription>
                           </div>
                           <Button
@@ -262,7 +262,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             {module.topics?.length || 0} topics
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {module.estimatedHours || 0}h
+                            {module.estimated_hours || 0}h
                           </Badge>
                         </div>
                         
@@ -274,7 +274,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              <span>{module.estimatedHours || 0}h</span>
+                              <span>{module.estimated_hours || 0}h</span>
                             </div>
                           </div>
                           <ChevronRight className="h-4 w-4 text-gray-400" />
