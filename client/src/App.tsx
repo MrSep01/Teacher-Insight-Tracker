@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import AuthGuard from "@/components/auth/auth-guard";
+import RoleBasedRouter from "@/components/role-based-router";
 import Dashboard from "@/pages/dashboard";
 import Students from "@/pages/students";
 import Classes from "@/pages/classes";
@@ -47,12 +48,7 @@ function Router() {
       {/* Protected Dashboard Routes */}
       <Route path="/dashboard">
         <AuthGuard>
-          <div className="flex h-screen overflow-hidden">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <Dashboard />
-            </div>
-          </div>
+          <RoleBasedRouter />
         </AuthGuard>
       </Route>
       

@@ -25,7 +25,9 @@ import {
   FlaskConical,
   Target,
   Eye,
-  Heart
+  Heart,
+  ChevronDown,
+  GraduationCap
 } from "lucide-react";
 
 export default function Landing() {
@@ -96,9 +98,40 @@ export default function Landing() {
               <a href="#contact" className="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
             </nav>
             <div className="flex space-x-2">
-              <Link href="/login">
-                <Button variant="outline">Sign In</Button>
-              </Link>
+              <div className="relative group">
+                <Button variant="outline" className="flex items-center">
+                  Sign In
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                  <div className="py-1">
+                    <Link href="/login?role=teacher">
+                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                        <GraduationCap className="h-4 w-4 mr-2" />
+                        Teacher Sign In
+                      </a>
+                    </Link>
+                    <Link href="/login?role=student">
+                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Student Sign In
+                      </a>
+                    </Link>
+                    <Link href="/login?role=parent">
+                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                        <Users className="h-4 w-4 mr-2" />
+                        Parent Sign In
+                      </a>
+                    </Link>
+                    <Link href="/login?role=admin">
+                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Sign In
+                      </a>
+                    </Link>
+                  </div>
+                </div>
+              </div>
               <Link href="/login">
                 <Button>Get Started</Button>
               </Link>

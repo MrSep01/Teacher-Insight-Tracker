@@ -145,7 +145,7 @@ export default function Login() {
           </div>
           <CardTitle className="text-2xl font-bold">Welcome to EduTrack</CardTitle>
           <CardDescription>
-            Sign in to your teacher dashboard to track student progress and get AI-powered recommendations
+            Sign in to your account to access your personalized dashboard and educational tools
           </CardDescription>
           <div className="mt-4">
             <Link href="/">

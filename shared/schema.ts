@@ -16,10 +16,20 @@ export const users = pgTable("users", {
   emailVerificationToken: varchar("email_verification_token"),
   resetPasswordToken: varchar("reset_password_token"),
   resetPasswordExpires: timestamp("reset_password_expires"),
+  // Role-based access control
+  role: varchar("role").notNull().default("teacher"), // teacher, student, parent, admin
   // Teacher profile fields
   curricula: text("curricula").array(), // ["IGCSE Chemistry Edexcel", "A Level Chemistry Edexcel"]
   gradeLevels: text("grade_levels").array(), // ["10", "11", "12"]
   profileCompleted: boolean("profile_completed").default(false),
+  // Student profile fields
+  studentId: varchar("student_id"), // Only for students
+  parentId: integer("parent_id"), // Only for students - links to parent user
+  classIds: text("class_ids").array(), // Classes the student is enrolled in
+  // Parent profile fields
+  childrenIds: text("children_ids").array(), // Student IDs for parents
+  // Admin profile fields
+  permissions: text("permissions").array(), // Admin permissions
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
