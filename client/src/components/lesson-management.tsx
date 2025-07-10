@@ -178,7 +178,20 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
     try {
       // Fetch comprehensive lesson data
       const comprehensiveData = await apiRequest(`/api/lessons/${lesson.id}/full-content`);
-      setViewingLesson(comprehensiveData);
+      console.log('Comprehensive lesson data:', comprehensiveData);
+      
+      // Check if we have comprehensive content
+      const hasComprehensiveContent = comprehensiveData.fullContent || 
+                                      comprehensiveData.studentWorksheet || 
+                                      comprehensiveData.teachingScript || 
+                                      comprehensiveData.assessmentQuestions;
+      
+      if (hasComprehensiveContent) {
+        setViewingLesson(comprehensiveData);
+      } else {
+        // Fallback to basic lesson data
+        setViewingLesson(lesson);
+      }
       setIsViewLessonModalOpen(true);
     } catch (error) {
       console.error('Error fetching comprehensive lesson data:', error);
@@ -417,7 +430,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
       {/* Comprehensive Lesson View Modal */}
       <Dialog open={isViewLessonModalOpen} onOpenChange={setIsViewLessonModalOpen}>
         <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
-          {viewingLesson && viewingLesson.fullContent && (
+          {viewingLesson && (viewingLesson.fullContent || viewingLesson.studentWorksheet || viewingLesson.teachingScript || viewingLesson.assessmentQuestions) && (
             <ComprehensiveLessonViewer
               lesson={viewingLesson}
               onExport={() => {
@@ -436,7 +449,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
           )}
           
           {/* Fallback to basic lesson view if no comprehensive content */}
-          {viewingLesson && !viewingLesson.fullContent && (
+          {viewingLesson && !viewingLesson.fullContent && !viewingLesson.studentWorksheet && !viewingLesson.teachingScript && !viewingLesson.assessmentQuestions && (
             <div className="space-y-6">
               <DialogHeader>
                 <DialogTitle className="flex items-center space-x-2">
