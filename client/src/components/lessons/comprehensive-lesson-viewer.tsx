@@ -131,6 +131,15 @@ interface ComprehensiveLessonViewerProps {
 export default function ComprehensiveLessonViewer({ lesson, onExport, onShare }: ComprehensiveLessonViewerProps) {
   const [activeTab, setActiveTab] = useState("lesson-content");
   
+  // Parse the comprehensive content safely
+  const parsedFullContent = lesson.fullContent && typeof lesson.fullContent === 'string' 
+    ? JSON.parse(lesson.fullContent) 
+    : lesson.fullContent;
+  
+  const parsedStudentWorksheet = lesson.studentWorksheet;
+  const parsedTeachingScript = lesson.teachingScript;
+  const parsedAssessmentQuestions = lesson.assessmentQuestions;
+  
   const getMultimediaIcon = (type: string) => {
     switch (type) {
       case "video": return <Video className="w-4 h-4" />;
@@ -209,42 +218,44 @@ export default function ComprehensiveLessonViewer({ lesson, onExport, onShare }:
         <TabsContent value="lesson-content" className="space-y-6">
           <div className="grid gap-6">
             {/* Introduction */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5" />
-                  Introduction ({lesson.fullContent.fullLessonContent.introduction.duration} min)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Hook Activity</h4>
-                  <p className="text-sm">{lesson.fullContent.fullLessonContent.introduction.hook}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Learning Goals</h4>
-                  <ul className="text-sm space-y-1">
-                    {lesson.fullContent.fullLessonContent.introduction.learningGoals.map((goal, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        {goal}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Success Criteria</h4>
-                  <ul className="text-sm space-y-1">
-                    {lesson.fullContent.fullLessonContent.introduction.success_criteria.map((criteria, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Target className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                        {criteria}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {parsedFullContent?.fullLessonContent?.introduction && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="w-5 h-5" />
+                    Introduction ({parsedFullContent.fullLessonContent.introduction.duration} min)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Hook Activity</h4>
+                    <p className="text-sm">{parsedFullContent.fullLessonContent.introduction.hook}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Learning Goals</h4>
+                    <ul className="text-sm space-y-1">
+                      {parsedFullContent.fullLessonContent.introduction.learningGoals.map((goal, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          {goal}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Success Criteria</h4>
+                    <ul className="text-sm space-y-1">
+                      {parsedFullContent.fullLessonContent.introduction.success_criteria.map((criteria, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <Target className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                          {criteria}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Development */}
             <Card>

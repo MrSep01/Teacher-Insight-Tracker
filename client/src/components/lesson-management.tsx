@@ -16,7 +16,7 @@ import { EnhancedLessonCreator } from "./enhanced-lesson-creator";
 import { EnhancedAssessmentCreator } from "./enhanced-assessment-creator";
 import ComprehensiveLessonForm from "./lessons/comprehensive-lesson-form";
 import ManualLessonCreator from "./lessons/manual-lesson-creator";
-import ComprehensiveLessonViewer from "./lessons/comprehensive-lesson-viewer";
+import SimpleComprehensiveLessonViewer from "./lessons/simple-comprehensive-viewer";
 
 // Types
 interface Module {
@@ -441,7 +441,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                                      (viewingLesson.studentWorksheet && viewingLesson.studentWorksheet.length > 0) || 
                                      (viewingLesson.teachingScript && viewingLesson.teachingScript.length > 0) || 
                                      (viewingLesson.assessmentQuestions && viewingLesson.assessmentQuestions.length > 0)) && (
-            <ComprehensiveLessonViewer
+            <SimpleComprehensiveLessonViewer
               lesson={viewingLesson}
               onExport={() => {
                 toast({
