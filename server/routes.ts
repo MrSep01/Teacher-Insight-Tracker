@@ -206,24 +206,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/courses/:id/available-modules", requireAuth, async (req, res) => {
-    try {
-      const courseId = parseInt(req.params.id);
-      const teacherId = req.user.id;
-      
-      // Verify the course belongs to the teacher
-      const existingCourse = await storage.getCourseById(courseId);
-      if (!existingCourse || existingCourse.teacherId !== teacherId) {
-        return res.status(404).json({ error: "Course not found" });
-      }
-      
-      const availableModules = await storage.getAvailableModulesForCourse(courseId, teacherId);
-      res.json(availableModules);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch available modules" });
-    }
-  });
-
   // Dashboard routes (protected)
   app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
     try {
