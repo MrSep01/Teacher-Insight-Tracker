@@ -51,7 +51,7 @@ async function createModuleWithLessons() {
     const createdModule = await moduleResponse.json();
     console.log('Module created successfully:', createdModule.id);
     
-    // Now create 5 comprehensive manual lessons with detailed templates
+    // Now create 3 comprehensive lessons with detailed templates (2 detailed + 3 more with AI when quota available)
     const lessonPlans = [
       {
         moduleId: createdModule.id,
@@ -177,8 +177,45 @@ async function createModuleWithLessons() {
         teacherNotes: "Students often forget to show electron transfer arrows. Emphasize that diagrams show the process, not just the result."
       }
     ];
+    
+    // Additional lessons to be created with AI when quota is available
+    const aiLessonTopics = [
+      {
+        moduleId: createdModule.id,
+        lessonType: "lecture",
+        topic: "Properties of Ionic Compounds",
+        duration: 60,
+        difficulty: "intermediate",
+        curriculum: "IGCSE Chemistry Edexcel",
+        gradeLevels: ["10", "11"],
+        moduleTopics: moduleData.topics,
+        moduleObjectives: [moduleData.objectives[2], moduleData.objectives[4]]
+      },
+      {
+        moduleId: createdModule.id,
+        lessonType: "practical",
+        topic: "Common Ionic Compounds - Formation and Properties",
+        duration: 60,
+        difficulty: "intermediate",
+        curriculum: "IGCSE Chemistry Edexcel",
+        gradeLevels: ["10", "11"],
+        moduleTopics: moduleData.topics,
+        moduleObjectives: [moduleData.objectives[6], moduleData.objectives[7]]
+      },
+      {
+        moduleId: createdModule.id,
+        lessonType: "assessment",
+        topic: "Ionic Bonding Review and Assessment",
+        duration: 60,
+        difficulty: "advanced",
+        curriculum: "IGCSE Chemistry Edexcel",
+        gradeLevels: ["10", "11"],
+        moduleTopics: moduleData.topics,
+        moduleObjectives: [moduleData.objectives[5], moduleData.objectives[3], moduleData.objectives[4]]
+      }
+    ];
 
-    console.log('Creating 5 comprehensive manual lessons...');
+    console.log('Creating 2 detailed manual lessons...');
     
     // Create each lesson using manual creation endpoint
     for (let i = 0; i < lessonPlans.length; i++) {
@@ -202,7 +239,31 @@ async function createModuleWithLessons() {
       }
     }
 
-    console.log('All comprehensive lessons created successfully!');
+    console.log('Manual lessons created successfully! Now creating AI-generated lessons...');
+    
+    // Create AI-generated lessons
+    for (let i = 0; i < aiLessonTopics.length; i++) {
+      const lessonData = aiLessonTopics[i];
+      console.log(`Creating AI lesson ${i + 1}: ${lessonData.topic}`);
+      
+      const lessonResponse = await fetch(`${baseUrl}/lessons/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': 'connect.sid=s%3AqWcQAQJ8rFmqzH6hWOhXp2RfOlWTDaGN.4WQJDrN7yEKUFYFgzfYBxGBMmBsQvGzpWKWKJbHc2'
+        },
+        body: JSON.stringify(lessonData)
+      });
+
+      if (lessonResponse.ok) {
+        const lesson = await lessonResponse.json();
+        console.log(`✓ AI Lesson ${i + 1} created successfully: ${lesson.title}`);
+      } else {
+        console.error(`✗ Failed to create AI lesson ${i + 1}:`, await lessonResponse.text());
+      }
+    }
+
+    console.log('All lessons (manual + AI) created successfully!');
     
   } catch (error) {
     console.error('Error creating module or lessons:', error);
