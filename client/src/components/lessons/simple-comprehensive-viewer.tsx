@@ -11,8 +11,12 @@ import {
   Share2,
   BookOpen,
   Users,
-  CheckCircle
+  CheckCircle,
+  GraduationCap,
+  Settings
 } from "lucide-react";
+import StudentLessonViewer from "./student-lesson-viewer";
+import TeacherGuideViewer from "./teacher-guide-viewer";
 
 interface SimpleLessonData {
   id: number;
@@ -33,7 +37,7 @@ interface SimpleLessonViewerProps {
 }
 
 export default function SimpleComprehensiveLessonViewer({ lesson, onExport, onShare }: SimpleLessonViewerProps) {
-  const [activeTab, setActiveTab] = useState("student-worksheet");
+  const [activeTab, setActiveTab] = useState("student-view");
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -71,12 +75,23 @@ export default function SimpleComprehensiveLessonViewer({ lesson, onExport, onSh
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="student-view">Student View</TabsTrigger>
+          <TabsTrigger value="teacher-guide">Teacher Guide</TabsTrigger>
           <TabsTrigger value="student-worksheet">Student Worksheet</TabsTrigger>
           <TabsTrigger value="teacher-script">Teacher Script</TabsTrigger>
-          <TabsTrigger value="assessment">Assessment</TabsTrigger>
           <TabsTrigger value="objectives">Objectives</TabsTrigger>
         </TabsList>
+
+        {/* Student View Tab */}
+        <TabsContent value="student-view" className="space-y-6">
+          <StudentLessonViewer lesson={lesson} />
+        </TabsContent>
+
+        {/* Teacher Guide Tab */}
+        <TabsContent value="teacher-guide" className="space-y-6">
+          <TeacherGuideViewer lesson={lesson} />
+        </TabsContent>
 
         {/* Student Worksheet Tab */}
         <TabsContent value="student-worksheet" className="space-y-6">

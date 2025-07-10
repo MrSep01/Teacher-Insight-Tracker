@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { storage } from "./storage";
 import type { InsertLessonPlan } from "@shared/schema";
+import { multimediaGenerator } from "./multimedia-content-generator";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -266,27 +267,44 @@ export class ComprehensiveLessonGenerator {
   }
 
   private async generateMultimediaContent(request: ComprehensiveLessonRequest, lessonContent: Partial<ComprehensiveLesson>): Promise<MultimediaContent[]> {
-    const prompt = this.createMultimediaPrompt(request, lessonContent);
-    
-    const response = await this.openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a multimedia education specialist. Suggest specific images, videos, diagrams, and interactive content that would enhance chemistry learning for the given topic."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 2000,
-    });
+    try {
+      const multimediaRequest = {
+        lessonTopic: request.topic,
+        lessonObjectives: request.moduleObjectives,
+        targetAudience: `${request.gradeLevels.join(", ")} students`,
+        lessonSection: "development" as const,
+        curriculum: request.curriculum,
+        gradeLevel: request.gradeLevels[0] || "10"
+      };
 
-    const aiResponse = JSON.parse(response.choices[0].message.content || "{}");
-    return aiResponse.multimediaContent || [];
+      const multimediaContent = await multimediaGenerator.generateMultimediaContent(multimediaRequest);
+      
+      // Convert to expected format
+      return multimediaContent.map(content => ({
+        type: content.type,
+        title: content.title,
+        description: content.description,
+        suggestedSource: content.suggestedSource,
+        purpose: content.purpose,
+        placementInLesson: content.placementInLesson as "introduction" | "development" | "practice" | "assessment" | "homework",
+        alternativeText: content.alternativeText,
+        searchKeywords: content.searchKeywords
+      }));
+    } catch (error) {
+      console.error("Error generating multimedia content:", error);
+      return [
+        {
+          type: "diagram",
+          title: `${request.topic} Concept Diagram`,
+          description: `Visual diagram showing key concepts and relationships in ${request.topic}`,
+          suggestedSource: "Educational resources",
+          purpose: "Provide visual representation of key concepts",
+          placementInLesson: "development",
+          alternativeText: `Diagram illustrating ${request.topic} concepts`,
+          searchKeywords: [request.topic, "diagram", "chemistry"]
+        }
+      ];
+    }
   }
 
   private async generateDifferentiatedActivities(request: ComprehensiveLessonRequest, lessonContent: Partial<ComprehensiveLesson>): Promise<DifferentiatedActivity[]> {
