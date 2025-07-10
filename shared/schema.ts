@@ -68,6 +68,19 @@ export const courseModules = pgTable("course_modules", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Course Items - Unified ribbon system for lessons and assessments
+export const courseItems = pgTable("course_items", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  moduleId: integer("module_id").references(() => modules.id).notNull(),
+  itemType: text("item_type").notNull(), // "lesson" or "assessment"
+  itemId: integer("item_id").notNull(), // ID of the lesson or assessment
+  sequenceOrder: integer("sequence_order").notNull(), // Order in the course
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Legacy classes table alias for backward compatibility
 export const classes = courses;
 
@@ -414,6 +427,12 @@ export const insertCourseModuleSchema = createInsertSchema(courseModules).omit({
   createdAt: true,
 });
 
+export const insertCourseItemSchema = createInsertSchema(courseItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // New schemas for enhanced lesson and assessment system
 export const insertAssessmentQuestionSchema = createInsertSchema(assessmentQuestions).omit({
   id: true,
@@ -450,6 +469,9 @@ export type InsertCourse = z.infer<typeof insertCourseSchema>;
 
 export type CourseModule = typeof courseModules.$inferSelect;
 export type InsertCourseModule = z.infer<typeof insertCourseModuleSchema>;
+
+export type CourseItem = typeof courseItems.$inferSelect;
+export type InsertCourseItem = z.infer<typeof insertCourseItemSchema>;
 
 export type Student = typeof students.$inferSelect;
 export type InsertStudent = z.infer<typeof insertStudentSchema>;

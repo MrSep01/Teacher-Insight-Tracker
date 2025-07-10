@@ -29,6 +29,7 @@ import {
   modules,
   lessonPlans,
   lessonRecommendations,
+  courseItems,
 
 } from "@shared/schema";
 
@@ -86,6 +87,19 @@ export interface IStorage {
   addModuleToCourse(courseModule: InsertCourseModule): Promise<CourseModule>;
   removeModuleFromCourse(courseId: number, moduleId: number): Promise<boolean>;
   getAvailableModulesForCourse(courseId: number, teacherId: number): Promise<Module[]>;
+
+  // Course Items (Unified Ribbon System)
+  getCourseItems(courseId: number): Promise<Array<{
+    id: number;
+    itemType: 'lesson' | 'assessment';
+    itemId: number;
+    sequenceOrder: number;
+    isVisible: boolean;
+    data: LessonPlan | Assessment;
+  }>>;
+  addItemToCourse(courseId: number, moduleId: number, itemType: 'lesson' | 'assessment', itemId: number): Promise<void>;
+  removeItemFromCourse(courseId: number, itemType: 'lesson' | 'assessment', itemId: number): Promise<boolean>;
+  reorderCourseItems(courseId: number, itemUpdates: Array<{ id: number; sequenceOrder: number }>): Promise<void>;
 
   // Students
   getStudents(): Promise<Student[]>;
@@ -1074,6 +1088,89 @@ export class DatabaseStorage implements IStorage {
     
     // Filter out already assigned modules
     return allTeacherModules.filter(module => !assignedIds.includes(module.id));
+  }
+
+  // Course Items (Unified Ribbon System) implementation
+  async getCourseItems(courseId: number): Promise<Array<{
+    id: number;
+    itemType: 'lesson' | 'assessment';
+    itemId: number;
+    sequenceOrder: number;
+    isVisible: boolean;
+    data: LessonPlan | Assessment;
+  }>> {
+    const items = await db
+      .select()
+      .from(courseItems)
+      .where(eq(courseItems.courseId, courseId))
+      .orderBy(courseItems.sequenceOrder);
+
+    const result = [];
+    for (const item of items) {
+      let data;
+      if (item.itemType === 'lesson') {
+        data = await this.getLessonPlanById(item.itemId);
+      } else if (item.itemType === 'assessment') {
+        data = await this.getAssessmentById(item.itemId);
+      }
+      
+      if (data) {
+        result.push({
+          id: item.id,
+          itemType: item.itemType as 'lesson' | 'assessment',
+          itemId: item.itemId,
+          sequenceOrder: item.sequenceOrder,
+          isVisible: item.isVisible,
+          data
+        });
+      }
+    }
+    
+    return result;
+  }
+
+  async addItemToCourse(courseId: number, moduleId: number, itemType: 'lesson' | 'assessment', itemId: number): Promise<void> {
+    // Get the next sequence order
+    const existingItems = await db
+      .select({ sequenceOrder: courseItems.sequenceOrder })
+      .from(courseItems)
+      .where(eq(courseItems.courseId, courseId))
+      .orderBy(courseItems.sequenceOrder);
+    
+    const nextSequenceOrder = existingItems.length > 0 
+      ? Math.max(...existingItems.map(item => item.sequenceOrder)) + 1 
+      : 1;
+
+    await db.insert(courseItems).values({
+      courseId,
+      moduleId,
+      itemType,
+      itemId,
+      sequenceOrder: nextSequenceOrder
+    });
+  }
+
+  async removeItemFromCourse(courseId: number, itemType: 'lesson' | 'assessment', itemId: number): Promise<boolean> {
+    const result = await db
+      .delete(courseItems)
+      .where(and(
+        eq(courseItems.courseId, courseId),
+        eq(courseItems.itemType, itemType),
+        eq(courseItems.itemId, itemId)
+      ));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async reorderCourseItems(courseId: number, itemUpdates: Array<{ id: number; sequenceOrder: number }>): Promise<void> {
+    for (const update of itemUpdates) {
+      await db
+        .update(courseItems)
+        .set({ sequenceOrder: update.sequenceOrder })
+        .where(and(
+          eq(courseItems.id, update.id),
+          eq(courseItems.courseId, courseId)
+        ));
+    }
   }
 }
 

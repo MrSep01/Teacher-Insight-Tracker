@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema, insertCourseSchema, insertCourseModuleSchema } from "@shared/schema";
+import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema, insertCourseSchema, insertCourseModuleSchema, insertCourseItemSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
 import { aiAssessmentGenerator } from "./ai-assessment-generator";
 import { enhancedLessonGenerator } from "./enhanced-lesson-generator";
@@ -219,6 +219,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ error: "Failed to remove module from course" });
+    }
+  });
+
+  // Course Items (Unified Ribbon System) routes (protected)
+  app.get("/api/courses/:id/items", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const items = await storage.getCourseItems(courseId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch course items" });
+    }
+  });
+
+  app.post("/api/courses/:id/items", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      const { moduleId, itemType, itemId } = req.body;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      await storage.addItemToCourse(courseId, moduleId, itemType, itemId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to add item to course" });
+    }
+  });
+
+  app.delete("/api/courses/:id/items/:itemType/:itemId", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const itemType = req.params.itemType as 'lesson' | 'assessment';
+      const itemId = parseInt(req.params.itemId);
+      const teacherId = req.user.id;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const deleted = await storage.removeItemFromCourse(courseId, itemType, itemId);
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Item not found in course" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to remove item from course" });
+    }
+  });
+
+  app.patch("/api/courses/:id/items/reorder", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      const { itemUpdates } = req.body;
+      
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      await storage.reorderCourseItems(courseId, itemUpdates);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to reorder course items" });
     }
   });
 

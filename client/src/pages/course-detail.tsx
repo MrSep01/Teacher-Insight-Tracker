@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   BookOpen, 
@@ -27,12 +26,24 @@ import {
   Move,
   Copy,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  GripVertical,
+  ClipboardCheck
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { LessonManagement } from "@/components/lesson-management";
-import type { Course, Module } from "@shared/schema";
+import type { Course, Module, LessonPlan, Assessment } from "@shared/schema";
+
+// Types for the unified ribbon system
+interface CourseItem {
+  id: number;
+  itemType: 'lesson' | 'assessment';
+  itemId: number;
+  sequenceOrder: number;
+  isVisible: boolean;
+  data: LessonPlan | Assessment;
+}
 
 interface LessonPlan {
   id: number;
@@ -85,7 +96,7 @@ function getLessonTypeColor(type: string) {
 
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
-  const [openModules, setOpenModules] = useState<Set<number>>(new Set());
+  const [draggedItem, setDraggedItem] = useState<CourseItem | null>(null);
   const [selectedModule, setSelectedModule] = useState<ModuleWithLessons | null>(null);
   const [managementDialogOpen, setManagementDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -97,55 +108,94 @@ export default function CourseDetail() {
     enabled: !!id,
   });
 
-  // Fetch course modules with lessons
-  const { data: modules = [], isLoading: modulesLoading } = useQuery<ModuleWithLessons[]>({
-    queryKey: [`/api/courses/${id}/modules-with-lessons`],
-    queryFn: async () => {
-      const courseModules = await apiRequest(`/api/courses/${id}/modules`);
-      
-      // Fetch lessons for each module
-      const modulesWithLessons = await Promise.all(
-        courseModules.map(async (module: Module) => {
-          try {
-            const lessons = await apiRequest(`/api/modules/${module.id}/lessons`);
-            return { ...module, lessons: lessons || [] };
-          } catch (error) {
-            console.error(`Error fetching lessons for module ${module.id}:`, error);
-            return { ...module, lessons: [] };
-          }
-        })
-      );
-      
-      return modulesWithLessons;
-    },
+  // Fetch course items (unified ribbon system)
+  const { data: courseItems = [], isLoading: itemsLoading } = useQuery<CourseItem[]>({
+    queryKey: [`/api/courses/${id}/items`],
+    queryFn: () => apiRequest(`/api/courses/${id}/items`),
     enabled: !!id,
   });
 
-  const toggleModule = (moduleId: number) => {
-    setOpenModules(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(moduleId)) {
-        newSet.delete(moduleId);
-      } else {
-        newSet.add(moduleId);
-      }
-      return newSet;
-    });
-  };
+  // Fetch course modules for management
+  const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({
+    queryKey: [`/api/courses/${id}/modules`],
+    queryFn: () => apiRequest(`/api/courses/${id}/modules`),
+    enabled: !!id,
+  });
 
-  const openModuleManagement = (module: ModuleWithLessons) => {
-    setSelectedModule(module);
+  // Reorder items mutation
+  const reorderItemsMutation = useMutation({
+    mutationFn: (itemUpdates: Array<{ id: number; sequenceOrder: number }>) =>
+      apiRequest(`/api/courses/${id}/items/reorder`, {
+        method: "PATCH",
+        body: JSON.stringify({ itemUpdates }),
+        headers: { "Content-Type": "application/json" },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/items`] });
+      toast({
+        title: "Success",
+        description: "Course items reordered successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to reorder course items",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Drag and drop handlers
+  const handleDragStart = useCallback((item: CourseItem) => {
+    setDraggedItem(item);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetItem: CourseItem) => {
+    e.preventDefault();
+    
+    if (!draggedItem || draggedItem.id === targetItem.id) {
+      setDraggedItem(null);
+      return;
+    }
+
+    const draggedIndex = courseItems.findIndex(item => item.id === draggedItem.id);
+    const targetIndex = courseItems.findIndex(item => item.id === targetItem.id);
+    
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Create new order
+    const newItems = [...courseItems];
+    const [removed] = newItems.splice(draggedIndex, 1);
+    newItems.splice(targetIndex, 0, removed);
+
+    // Update sequence orders
+    const itemUpdates = newItems.map((item, index) => ({
+      id: item.id,
+      sequenceOrder: index + 1,
+    }));
+
+    reorderItemsMutation.mutate(itemUpdates);
+    setDraggedItem(null);
+  }, [draggedItem, courseItems, reorderItemsMutation]);
+
+  const openModuleManagement = (module: Module) => {
+    setSelectedModule({ ...module, lessons: [] });
     setManagementDialogOpen(true);
   };
 
   const closeModuleManagement = () => {
     setSelectedModule(null);
     setManagementDialogOpen(false);
-    // Refresh the modules data
-    queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/modules-with-lessons`] });
+    // Refresh the course items data
+    queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/items`] });
   };
 
-  if (courseLoading || modulesLoading) {
+  if (courseLoading || itemsLoading || modulesLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
         <div className="animate-pulse">
@@ -177,13 +227,14 @@ export default function CourseDetail() {
     );
   }
 
-  const totalLessons = modules.reduce((sum, module) => sum + module.lessons.length, 0);
-  const completedLessons = modules.reduce((sum, module) => 
-    sum + module.lessons.filter(lesson => lesson.isCompleted).length, 0
-  );
-  const totalDuration = modules.reduce((sum, module) => 
-    sum + module.lessons.reduce((lessonSum, lesson) => lessonSum + lesson.duration, 0), 0
-  );
+  const totalLessons = courseItems.filter(item => item.itemType === 'lesson').length;
+  const totalAssessments = courseItems.filter(item => item.itemType === 'assessment').length;
+  const completedLessons = courseItems.filter(item => 
+    item.itemType === 'lesson' && (item.data as LessonPlan).isCompleted
+  ).length;
+  const totalDuration = courseItems
+    .filter(item => item.itemType === 'lesson')
+    .reduce((sum, item) => sum + (item.data as LessonPlan).duration, 0);
 
   return (
     <div className="container mx-auto p-6 space-y-6 min-h-screen">
@@ -208,7 +259,7 @@ export default function CourseDetail() {
       </div>
 
       {/* Course Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
@@ -234,6 +285,17 @@ export default function CourseDetail() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
+              <ClipboardCheck className="h-5 w-5 text-orange-600" />
+              <div>
+                <p className="text-sm text-gray-600">Assessments</p>
+                <p className="text-2xl font-bold">{totalAssessments}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
               <Clock className="h-5 w-5 text-purple-600" />
               <div>
                 <p className="text-sm text-gray-600">Duration</p>
@@ -245,7 +307,7 @@ export default function CourseDetail() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-orange-600" />
+              <CheckCircle2 className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Progress</p>
                 <p className="text-2xl font-bold">{totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0}%</p>
@@ -257,230 +319,139 @@ export default function CourseDetail() {
 
       <Separator />
 
-      {/* Modules Ribbon */}
+      {/* Unified Course Ribbon */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900">Course Modules</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Course Content</h2>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Lesson
+            </Button>
+            <Button variant="outline" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Assessment
+            </Button>
+          </div>
+        </div>
         
-        {modules.length === 0 ? (
+        {courseItems.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No modules yet</h3>
-            <p className="text-gray-600">This course doesn't have any modules assigned yet.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No content yet</h3>
+            <p className="text-gray-600">This course doesn't have any lessons or assessments yet.</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {modules.map((module) => (
-              <Card key={module.id} className="overflow-hidden">
-                <Collapsible 
-                  open={openModules.has(module.id)}
-                  onOpenChange={() => toggleModule(module.id)}
-                >
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center space-x-2">
-                            {openModules.has(module.id) ? (
-                              <ChevronDown className="h-5 w-5 text-gray-500" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-gray-500" />
-                            )}
-                            <BookOpen className="h-5 w-5 text-blue-600" />
-                          </div>
+          <div className="space-y-3">
+            {courseItems.map((item, index) => (
+              <Card 
+                key={item.id} 
+                className={`overflow-hidden cursor-move hover:shadow-md transition-shadow ${
+                  draggedItem?.id === item.id ? 'opacity-50' : ''
+                }`}
+                draggable
+                onDragStart={() => handleDragStart(item)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, item)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <GripVertical className="h-5 w-5 text-gray-400" />
+                        <div className="flex items-center justify-center w-8 h-8 bg-blue-50 rounded-full">
+                          <span className="text-sm font-medium text-blue-600">{index + 1}</span>
+                        </div>
+                      </div>
+                      
+                      {item.itemType === 'lesson' ? (
+                        <div className="flex items-center space-x-3">
+                          <GraduationCap className="h-5 w-5 text-green-600" />
                           <div>
-                            <CardTitle className="text-lg">{module.title}</CardTitle>
-                            <p className="text-sm text-gray-600 mt-1">{module.description}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline" className="text-xs">
-                            {module.lessons.length} lessons
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            {module.estimatedHours}h
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {module.gradeLevels?.join(', ')}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      <div className="space-y-4">
-                        {/* Module Info */}
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-medium text-gray-900 mb-2">Topics</h4>
-                              {module.topics && module.topics.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {module.topics.map((topic, index) => (
-                                    <Badge key={index} variant="secondary" className="text-xs">
-                                      {topic}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="text-sm text-gray-500">No topics defined</p>
-                              )}
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-gray-900 mb-2">Objectives</h4>
-                              {module.objectives && module.objectives.length > 0 ? (
-                                <div className="space-y-1">
-                                  {module.objectives.slice(0, 3).map((objective, index) => (
-                                    <div key={index} className="flex items-start space-x-2">
-                                      <Target className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
-                                      <span className="text-xs text-gray-600">{objective}</span>
-                                    </div>
-                                  ))}
-                                  {module.objectives.length > 3 && (
-                                    <p className="text-xs text-gray-500">
-                                      +{module.objectives.length - 3} more objectives
-                                    </p>
-                                  )}
-                                </div>
-                              ) : (
-                                <p className="text-sm text-gray-500">No objectives defined</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Teacher Management Tools */}
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium text-gray-900">Lesson Management</h4>
-                            <Button 
-                              size="sm" 
-                              onClick={() => openModuleManagement(module)}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              <Settings className="h-4 w-4 mr-2" />
-                              Manage Lessons
-                            </Button>
-                          </div>
-                          
-                          {module.lessons.length === 0 ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                              <GraduationCap className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                              <p className="text-sm text-gray-600 mb-3">No lessons created yet</p>
-                              <Button 
-                                size="sm" 
+                            <h4 className="font-medium text-gray-900">{(item.data as LessonPlan).title}</h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge 
                                 variant="outline" 
-                                onClick={() => openModuleManagement(module)}
+                                className={`text-xs ${getLessonTypeColor((item.data as LessonPlan).lessonType)}`}
                               >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Create First Lesson
-                              </Button>
+                                {(item.data as LessonPlan).lessonType}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {(item.data as LessonPlan).duration}min
+                              </Badge>
+                              {(item.data as LessonPlan).aiGenerated && (
+                                <Badge variant="outline" className="text-xs text-purple-600 border-purple-200">
+                                  AI Generated
+                                </Badge>
+                              )}
+                              {(item.data as LessonPlan).hasAssessment && (
+                                <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Assessment
+                                </Badge>
+                              )}
                             </div>
-                          ) : (
-                            <div className="space-y-2">
-                              {module.lessons.map((lesson, index) => {
-                                const LessonIcon = getLessonTypeIcon(lesson.lessonType);
-                                return (
-                                  <div key={lesson.id} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
-                                    <div className="flex items-center space-x-3">
-                                      <div className="flex items-center justify-center w-8 h-8 bg-blue-50 rounded-full">
-                                        <span className="text-sm font-medium text-blue-600">{index + 1}</span>
-                                      </div>
-                                      <LessonIcon className="h-5 w-5 text-gray-600" />
-                                      <div>
-                                        <h5 className="font-medium text-gray-900">{lesson.title}</h5>
-                                        <div className="flex items-center space-x-2 mt-1">
-                                          <Badge 
-                                            variant="outline" 
-                                            className={`text-xs ${getLessonTypeColor(lesson.lessonType)}`}
-                                          >
-                                            {lesson.lessonType}
-                                          </Badge>
-                                          <Badge variant="secondary" className="text-xs">
-                                            {lesson.duration}min
-                                          </Badge>
-                                          {lesson.aiGenerated && (
-                                            <Badge variant="outline" className="text-xs text-purple-600 border-purple-200">
-                                              AI Generated
-                                            </Badge>
-                                          )}
-                                          {lesson.hasAssessment && (
-                                            <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
-                                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                                              Assessment
-                                            </Badge>
-                                          )}
-                                          {lesson.safetyNotes && (
-                                            <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
-                                              <AlertTriangle className="h-3 w-3 mr-1" />
-                                              Safety Notes
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center space-x-2">
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                            <MoreVertical className="h-4 w-4" />
-                                          </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
-                                            <Eye className="h-4 w-4 mr-2" />
-                                            View Details
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
-                                            <Edit className="h-4 w-4 mr-2" />
-                                            Edit Lesson
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
-                                            <FileText className="h-4 w-4 mr-2" />
-                                            Teacher Guide
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator />
-                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
-                                            <Copy className="h-4 w-4 mr-2" />
-                                            Duplicate
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
-                                            <Move className="h-4 w-4 mr-2" />
-                                            Reorder
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator />
-                                          <DropdownMenuItem className="text-red-600">
-                                            <Trash2 className="h-4 w-4 mr-2" />
-                                            Delete
-                                          </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                              
-                              {/* Add Lesson Button */}
-                              <div className="flex justify-center pt-3">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => openModuleManagement(module)}
-                                  className="border-dashed"
-                                >
-                                  <Plus className="h-4 w-4 mr-2" />
-                                  Add Another Lesson
-                                </Button>
-                              </div>
-                            </div>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </CollapsibleContent>
-                </Collapsible>
+                      ) : (
+                        <div className="flex items-center space-x-3">
+                          <ClipboardCheck className="h-5 w-5 text-orange-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900">{(item.data as Assessment).title}</h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                                Summative Assessment
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {(item.data as Assessment).totalQuestions} questions
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit {item.itemType === 'lesson' ? 'Lesson' : 'Assessment'}
+                          </DropdownMenuItem>
+                          {item.itemType === 'lesson' && (
+                            <DropdownMenuItem>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Teacher Guide
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Move className="h-4 w-4 mr-2" />
+                            Reorder
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
             ))}
           </div>
