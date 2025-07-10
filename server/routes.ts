@@ -222,6 +222,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reorder modules in a course
+  app.put("/api/courses/:id/modules/reorder", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const { moduleOrder } = req.body; // Array of module IDs in new order
+      const teacherId = req.user.id;
+
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      if (!Array.isArray(moduleOrder)) {
+        return res.status(400).json({ error: "moduleOrder must be an array" });
+      }
+
+      // Update sequence order for each module
+      await storage.reorderCourseModules(courseId, moduleOrder);
+
+      res.json({ message: "Module order updated successfully" });
+    } catch (error) {
+      console.error("Error reordering modules:", error);
+      res.status(500).json({ error: "Failed to reorder modules" });
+    }
+  });
+
   // Note: Course content is now retrieved from modules, not stored separately
 
   // Dashboard routes (protected)

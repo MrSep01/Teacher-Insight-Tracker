@@ -8,6 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { CourseModuleManager } from "@/components/forms/course-module-manager";
+import { SortableModuleCard } from "@/components/forms/sortable-module-card";
 import { 
   BookOpen, 
   Users, 
@@ -90,11 +95,13 @@ function getLessonTypeColor(type: string) {
   return colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
 }
 
+
+
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
-  const [draggedItem, setDraggedItem] = useState<CourseItem | null>(null);
   const [selectedModule, setSelectedModule] = useState<ModuleWithLessons | null>(null);
   const [managementDialogOpen, setManagementDialogOpen] = useState(false);
+  const [moduleManagerOpen, setModuleManagerOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -135,7 +142,60 @@ export default function CourseDetail() {
     enabled: !!id,
   });
 
-  // Note: Reordering is handled at the module level, not course level
+  // Module reordering mutation
+  const reorderModulesMutation = useMutation({
+    mutationFn: async (newOrder: number[]) => {
+      await apiRequest(`/api/courses/${id}/modules/reorder`, {
+        method: "PUT",
+        body: { moduleOrder: newOrder },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/modules-with-content`] });
+      toast({ title: "Module order updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update module order", variant: "destructive" });
+    },
+  });
+
+  // Delete module mutation
+  const deleteModuleMutation = useMutation({
+    mutationFn: async (moduleId: number) => {
+      await apiRequest(`/api/modules/${moduleId}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/modules-with-content`] });
+      toast({ title: "Module deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete module", variant: "destructive" });
+    },
+  });
+
+  // Handle drag end for module reordering
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = modulesWithContent.findIndex((module) => module.id === active.id);
+      const newIndex = modulesWithContent.findIndex((module) => module.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newModules = [...modulesWithContent];
+        const [reorderedModule] = newModules.splice(oldIndex, 1);
+        newModules.splice(newIndex, 0, reorderedModule);
+
+        // Update sequence orders
+        const newOrder = newModules.map((module, index) => ({
+          id: module.id,
+          sequenceOrder: index + 1,
+        }));
+
+        reorderModulesMutation.mutate(newOrder.map(item => item.id));
+      }
+    }
+  };
 
   const openModuleManagement = (module: Module) => {
     setSelectedModule({ ...module, lessons: [] });
@@ -147,6 +207,12 @@ export default function CourseDetail() {
     setManagementDialogOpen(false);
     // Refresh the course content data
     queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/modules-with-content`] });
+  };
+
+  const handleDeleteModule = (moduleId: number) => {
+    if (confirm("Are you sure you want to delete this module? This will also delete all associated lessons and assessments.")) {
+      deleteModuleMutation.mutate(moduleId);
+    }
   };
 
   if (courseLoading || contentLoading) {
@@ -280,7 +346,7 @@ export default function CourseDetail() {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => {/* Open module manager */}}
+            onClick={() => setModuleManagerOpen(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
             Manage Modules
@@ -297,145 +363,55 @@ export default function CourseDetail() {
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {modulesWithContent.map((module) => (
-              <Card key={module.id} className="overflow-hidden">
-                <CardContent className="p-0">
-                  {/* Module Header */}
-                  <div className="bg-gray-50 px-6 py-4 border-b">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{module.title}</h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {module.lessons.length} lessons • {module.assessments.length} assessments
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => openModuleManagement(module)}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Lesson
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {/* Open assessment creation for this module */}}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Assessment
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Module Content */}
-                  <div className="p-6">
-                    {module.lessons.length === 0 && module.assessments.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                        <p>No content in this module yet</p>
-                        <p className="text-sm">Add lessons and assessments to get started</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {/* Lessons */}
-                        {module.lessons.map((lesson, lessonIndex) => (
-                          <Card key={`lesson-${lesson.id}`} className="bg-green-50 border-green-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                  <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                                    <span className="text-sm font-medium text-green-600">{lessonIndex + 1}</span>
-                                  </div>
-                                  <GraduationCap className="h-5 w-5 text-green-600" />
-                                  <div>
-                                    <h4 className="font-medium text-gray-900">{lesson.title}</h4>
-                                    <div className="flex items-center space-x-2 mt-1">
-                                      <Badge 
-                                        variant="outline" 
-                                        className={`text-xs ${getLessonTypeColor(lesson.lessonType)}`}
-                                      >
-                                        {lesson.lessonType}
-                                      </Badge>
-                                      <Badge variant="secondary" className="text-xs">
-                                        {lesson.duration}min
-                                      </Badge>
-                                      {lesson.aiGenerated && (
-                                        <Badge variant="outline" className="text-xs text-purple-600 border-purple-200">
-                                          AI Generated
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                        
-                        {/* Assessments */}
-                        {module.assessments.map((assessment, assessmentIndex) => (
-                          <Card key={`assessment-${assessment.id}`} className="bg-orange-50 border-orange-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                  <div className="flex items-center justify-center w-8 h-8 bg-orange-100 rounded-full">
-                                    <span className="text-sm font-medium text-orange-600">A{assessmentIndex + 1}</span>
-                                  </div>
-                                  <ClipboardCheck className="h-5 w-5 text-orange-600" />
-                                  <div>
-                                    <h4 className="font-medium text-gray-900">{assessment.title}</h4>
-                                    <div className="flex items-center space-x-2 mt-1">
-                                      <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
-                                        Summative Assessment
-                                      </Badge>
-                                      <Badge variant="secondary" className="text-xs">
-                                        {assessment.totalQuestions} questions
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                </div>
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={modulesWithContent.map(module => module.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-6">
+                {modulesWithContent
+                  .sort((a, b) => (a.sequenceOrder || 0) - (b.sequenceOrder || 0))
+                  .map((module) => (
+                    <SortableModuleCard
+                      key={module.id}
+                      module={module}
+                      onEdit={() => openModuleManagement(module)}
+                      onDelete={() => handleDeleteModule(module.id)}
+                      onAddLesson={() => openModuleManagement(module)}
+                      onAddAssessment={() => {
+                        window.location.href = `/assessments/create?moduleId=${module.id}`;
+                      }}
+                    />
+                  ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 
-      {/* Module Management Dialog */}
-      <Dialog open={managementDialogOpen} onOpenChange={setManagementDialogOpen}>
-        <DialogContent className="max-w-7xl h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedModule ? `Manage Lessons - ${selectedModule.title}` : "Module Management"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden">
-            {selectedModule && (
-              <LessonManagement 
-                module={selectedModule} 
-                onClose={closeModuleManagement} 
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Module Manager Dialog */}
+      {course && (
+        <CourseModuleManager
+          course={course}
+          open={moduleManagerOpen}
+          onOpenChange={setModuleManagerOpen}
+        />
+      )}
+
+      {/* Legacy lesson management dialog */}
+      {selectedModule && (
+        <Dialog open={managementDialogOpen} onOpenChange={setManagementDialogOpen}>
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle>Manage Lessons: {selectedModule.title}</DialogTitle>
+            </DialogHeader>
+            <LessonManagement module={selectedModule} onClose={closeModuleManagement} />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

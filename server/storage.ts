@@ -86,6 +86,7 @@ export interface IStorage {
   getCourseModules(courseId: number): Promise<Module[]>;
   addModuleToCourse(courseModule: InsertCourseModule): Promise<CourseModule>;
   removeModuleFromCourse(courseId: number, moduleId: number): Promise<boolean>;
+  reorderCourseModules(courseId: number, moduleOrder: number[]): Promise<void>;
   getAvailableModulesForCourse(courseId: number, teacherId: number): Promise<Module[]>;
 
   // Course Items (Unified Ribbon System)
@@ -1069,6 +1070,21 @@ export class DatabaseStorage implements IStorage {
         eq(courseModules.moduleId, moduleId)
       ));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async reorderCourseModules(courseId: number, moduleOrder: number[]): Promise<void> {
+    // Update sequence order for each module
+    for (let i = 0; i < moduleOrder.length; i++) {
+      await db
+        .update(courseModules)
+        .set({ sequenceOrder: i + 1 })
+        .where(
+          and(
+            eq(courseModules.courseId, courseId),
+            eq(courseModules.moduleId, moduleOrder[i])
+          )
+        );
+    }
   }
 
   async getAvailableModulesForCourse(courseId: number, teacherId: number): Promise<Module[]> {
