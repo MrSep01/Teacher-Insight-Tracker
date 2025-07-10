@@ -16,10 +16,16 @@ export const users = pgTable("users", {
   emailVerificationToken: varchar("email_verification_token"),
   resetPasswordToken: varchar("reset_password_token"),
   resetPasswordExpires: timestamp("reset_password_expires"),
+  // User role - teacher or student
+  role: varchar("role", { enum: ["teacher", "student"] }).notNull().default("teacher"),
   // Teacher profile fields
   curricula: text("curricula").array(), // ["IGCSE Chemistry Edexcel", "A Level Chemistry Edexcel"]
   gradeLevels: text("grade_levels").array(), // ["10", "11", "12"]
   profileCompleted: boolean("profile_completed").default(false),
+  // Student profile fields
+  studentId: varchar("student_id").unique(), // Unique student identifier
+  grade: varchar("grade"), // "10", "11", "12" for students
+  level: varchar("level"), // "IGCSE", "A Level" for students
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -44,7 +50,32 @@ export const classes = pgTable("classes", {
   teacherId: integer("teacher_id").references(() => users.id),
   description: text("description"),
   academicYear: text("academic_year").notNull(), // "2024-2025"
+  classCode: varchar("class_code").unique().notNull(), // Unique code for students to join
   isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Student enrollments in classes
+export const enrollments = pgTable("enrollments", {
+  id: serial("id").primaryKey(),
+  studentId: integer("student_id").references(() => users.id).notNull(),
+  classId: integer("class_id").references(() => classes.id).notNull(),
+  enrolledAt: timestamp("enrolled_at").defaultNow(),
+  status: varchar("status", { enum: ["active", "inactive", "completed"] }).default("active"),
+});
+
+// Student progress tracking
+export const studentProgress = pgTable("student_progress", {
+  id: serial("id").primaryKey(),
+  studentId: integer("student_id").references(() => users.id).notNull(),
+  classId: integer("class_id").references(() => classes.id).notNull(),
+  moduleId: integer("module_id").references(() => modules.id).notNull(),
+  lessonId: integer("lesson_id").references(() => lessonPlans.id),
+  progressPercentage: integer("progress_percentage").default(0),
+  completedLessons: integer("completed_lessons").default(0),
+  totalLessons: integer("total_lessons").default(0),
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -142,6 +173,7 @@ export const modules = pgTable("modules", {
   objectives: text("objectives").array(), // Selected learning objectives
   estimatedHours: integer("estimated_hours").default(0), // Estimated teaching hours
   classId: integer("class_id").references(() => classes.id), // Optional class association
+  sequenceOrder: integer("sequence_order").default(0), // Order in curriculum
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

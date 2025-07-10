@@ -11,6 +11,7 @@ import { setupAuth, requireAuth } from "./auth";
 import { registerModuleRoutes } from "./modules";
 import { registerCurriculumRoutes } from "./curriculum-api";
 import { emailService } from "./email";
+import studentRoutes from "./student-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -21,6 +22,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register curriculum routes
   registerCurriculumRoutes(app);
+
+  // Register student routes
+  app.use("/api/student", requireAuth, studentRoutes);
 
   // Profile update routes (protected)
   app.put("/api/auth/update-profile", requireAuth, async (req, res) => {
