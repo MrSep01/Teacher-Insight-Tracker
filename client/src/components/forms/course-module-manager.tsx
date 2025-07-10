@@ -78,6 +78,7 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
   });
 
   const handleAddModule = (moduleId: number) => {
+    console.log('Adding module to course:', { moduleId, courseId: course.id });
     addModuleMutation.mutate({ moduleId, sequenceOrder: assignedModules.length + 1 });
   };
 
@@ -293,10 +294,15 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                                 e.stopPropagation();
                                 handleAddModule(module.id);
                               }}
+                              disabled={addModuleMutation.isPending}
                               className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
                               title="Add to Course"
                             >
-                              <Plus className="h-4 w-4" />
+                              {addModuleMutation.isPending ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )}
                             </Button>
                           </div>
                         </div>
