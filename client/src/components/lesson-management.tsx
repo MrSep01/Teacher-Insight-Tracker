@@ -180,11 +180,18 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
       const comprehensiveData = await apiRequest(`/api/lessons/${lesson.id}/full-content`);
       console.log('Comprehensive lesson data:', comprehensiveData);
       
-      // Check if we have comprehensive content
-      const hasComprehensiveContent = comprehensiveData.fullContent || 
-                                      comprehensiveData.studentWorksheet || 
-                                      comprehensiveData.teachingScript || 
-                                      comprehensiveData.assessmentQuestions;
+      // Check if we have comprehensive content (check for actual content, not just existence)
+      const hasComprehensiveContent = (comprehensiveData.fullContent && typeof comprehensiveData.fullContent === 'object') || 
+                                      (comprehensiveData.studentWorksheet && comprehensiveData.studentWorksheet.length > 0) || 
+                                      (comprehensiveData.teachingScript && comprehensiveData.teachingScript.length > 0) || 
+                                      (comprehensiveData.assessmentQuestions && comprehensiveData.assessmentQuestions.length > 0);
+      
+      console.log('Has comprehensive content:', hasComprehensiveContent, {
+        fullContent: !!comprehensiveData.fullContent,
+        studentWorksheet: !!comprehensiveData.studentWorksheet,
+        teachingScript: !!comprehensiveData.teachingScript,
+        assessmentQuestions: !!comprehensiveData.assessmentQuestions
+      });
       
       if (hasComprehensiveContent) {
         setViewingLesson(comprehensiveData);
@@ -430,7 +437,10 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
       {/* Comprehensive Lesson View Modal */}
       <Dialog open={isViewLessonModalOpen} onOpenChange={setIsViewLessonModalOpen}>
         <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
-          {viewingLesson && (viewingLesson.fullContent || viewingLesson.studentWorksheet || viewingLesson.teachingScript || viewingLesson.assessmentQuestions) && (
+          {viewingLesson && ((viewingLesson.fullContent && typeof viewingLesson.fullContent === 'object') || 
+                                     (viewingLesson.studentWorksheet && viewingLesson.studentWorksheet.length > 0) || 
+                                     (viewingLesson.teachingScript && viewingLesson.teachingScript.length > 0) || 
+                                     (viewingLesson.assessmentQuestions && viewingLesson.assessmentQuestions.length > 0)) && (
             <ComprehensiveLessonViewer
               lesson={viewingLesson}
               onExport={() => {
@@ -449,7 +459,10 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
           )}
           
           {/* Fallback to basic lesson view if no comprehensive content */}
-          {viewingLesson && !viewingLesson.fullContent && !viewingLesson.studentWorksheet && !viewingLesson.teachingScript && !viewingLesson.assessmentQuestions && (
+          {viewingLesson && !(viewingLesson.fullContent && typeof viewingLesson.fullContent === 'object') && 
+                        !(viewingLesson.studentWorksheet && viewingLesson.studentWorksheet.length > 0) && 
+                        !(viewingLesson.teachingScript && viewingLesson.teachingScript.length > 0) && 
+                        !(viewingLesson.assessmentQuestions && viewingLesson.assessmentQuestions.length > 0) && (
             <div className="space-y-6">
               <DialogHeader>
                 <DialogTitle className="flex items-center space-x-2">
