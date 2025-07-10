@@ -6,9 +6,11 @@ import { aiEngine } from "./ai-recommendations";
 import { aiAssessmentGenerator } from "./ai-assessment-generator";
 import { enhancedLessonGenerator } from "./enhanced-lesson-generator";
 import { enhancedAssessmentGenerator } from "./enhanced-assessment-generator";
+import { comprehensiveLessonGenerator } from "./comprehensive-lesson-generator";
 import { setupAuth, requireAuth } from "./auth";
 import { registerModuleRoutes } from "./modules";
 import { registerCurriculumRoutes } from "./curriculum-api";
+import { emailService } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -415,6 +417,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error creating manual lesson:', error);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Comprehensive Lesson Generation Routes
+  app.post("/api/lessons/comprehensive-generate", requireAuth, async (req, res) => {
+    try {
+      const result = await comprehensiveLessonGenerator.generateFullLesson(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error('Error generating comprehensive lesson:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get student performance data for lesson differentiation
+  app.get("/api/lessons/student-performance/:moduleId", requireAuth, async (req, res) => {
+    try {
+      const moduleId = parseInt(req.params.moduleId);
+      const teacherId = req.user.id;
+      
+      // Get all students for this teacher
+      const allStudents = await storage.getStudentsWithScores();
+      
+      // Get student performance data for differentiation
+      const studentPerformanceData = await Promise.all(
+        allStudents.map(async (student) => {
+          const patterns = aiEngine.analyzeLearningPatterns(student);
+          return {
+            studentId: student.id,
+            name: student.name,
+            averageScore: student.averageScore || 0,
+            strengths: patterns.strengths || [],
+            weaknesses: patterns.weaknesses || [],
+            learningStyle: patterns.learningStyle || "mixed",
+          };
+        })
+      );
+      
+      res.json(studentPerformanceData);
+    } catch (error) {
+      console.error('Error fetching student performance data:', error);
+      res.status(500).json({ error: "Failed to fetch student performance data" });
+    }
+  });
+
+  // Get lesson with full content including multimedia and teacher guide
+  app.get("/api/lessons/:id/full-content", requireAuth, async (req, res) => {
+    try {
+      const lessonId = parseInt(req.params.id);
+      const lesson = await storage.getLessonPlanById(lessonId);
+      
+      if (!lesson) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      // Parse the AI suggestions to get full lesson content
+      let fullContent = null;
+      if (lesson.aiSuggestions) {
+        try {
+          fullContent = JSON.parse(lesson.aiSuggestions);
+        } catch (parseError) {
+          console.error('Error parsing AI suggestions:', parseError);
+        }
+      }
+      
+      res.json({
+        ...lesson,
+        fullContent
+      });
+    } catch (error) {
+      console.error('Error fetching full lesson content:', error);
+      res.status(500).json({ error: "Failed to fetch lesson content" });
     }
   });
 

@@ -12,9 +12,11 @@ if (!process.env.DATABASE_URL) {
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
-  max: 10, // Maximum number of connections in the pool
-  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-  connectionTimeoutMillis: 2000, // How long to wait for a connection
+  max: 20, // Maximum number of connections in the pool
+  idleTimeoutMillis: 60000, // How long a client is allowed to remain idle before being closed
+  connectionTimeoutMillis: 10000, // How long to wait for a connection
+  acquireTimeoutMillis: 10000, // How long to wait for a connection from the pool
+  statement_timeout: 30000, // How long to wait for a query to complete
 });
 
 // Handle pool errors gracefully
