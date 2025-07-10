@@ -238,33 +238,46 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
         </Button>
       </div>
 
-      <Tabs defaultValue="lessons" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="lessons">Lessons</TabsTrigger>
-          <TabsTrigger value="assessments">Assessments</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="lessons" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Lesson Plans</h3>
-              <p className="text-sm text-gray-600">
-                {lessons.length} lesson{lessons.length !== 1 ? 's' : ''} in this module
-              </p>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Lesson Plans</h3>
+            <p className="text-sm text-gray-600">
+              {lessons.length} lesson{lessons.length !== 1 ? 's' : ''} in this module
+            </p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium text-gray-700">Create with:</label>
+              <Select value={creationMode} onValueChange={(value: "ai" | "manual") => setCreationMode(value)}>
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ai">AI</SelectItem>
+                  <SelectItem value="manual">Manual</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Create with:</label>
-                <Select value={creationMode} onValueChange={(value: "ai" | "manual") => setCreationMode(value)}>
-                  <SelectTrigger className="w-24">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ai">AI</SelectItem>
-                    <SelectItem value="manual">Manual</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+              disabled={!module.objectives || module.objectives.length === 0}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Lesson
+            </Button>
+          </div>
+        </div>
+
+        {lessons.length === 0 ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Lessons Yet</h3>
+              <p className="text-gray-600 mb-4">
+                Create your first lesson plan for this module.
+              </p>
               <Button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700"
@@ -273,31 +286,12 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                 <Plus className="h-4 w-4 mr-2" />
                 Create Lesson
               </Button>
-            </div>
-          </div>
-
-          {lessons.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Lessons Yet</h3>
-                <p className="text-gray-600 mb-4">
-                  Create your first lesson plan for this module.
-                </p>
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                  disabled={!module.objectives || module.objectives.length === 0}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Lesson
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {lessons.map((lesson) => {
-                const IconComponent = getLessonTypeIcon(lesson.lessonType);
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {lessons.map((lesson) => {
+              const IconComponent = getLessonTypeIcon(lesson.lessonType);
                 return (
                   <Card key={lesson.id} className="hover:shadow-md transition-shadow cursor-pointer">
                     <CardHeader className="pb-3">
@@ -386,12 +380,12 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
               })}
             </div>
           )}
-        </TabsContent>
-        
-        <TabsContent value="assessments">
-          <AssessmentManagement moduleId={module.id} moduleObjectives={module.objectives || []} />
-        </TabsContent>
-      </Tabs>
+      </div>
+
+      {/* Separate Assessment Management Section */}
+      <div className="border-t pt-6 mt-8">
+        <AssessmentManagement moduleId={module.id} moduleObjectives={module.objectives || []} />
+      </div>
 
       {/* Lesson Creation Modal - Only for Lessons */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
