@@ -403,6 +403,17 @@ Changelog:
   * Integrated dropdown menus for individual lesson actions and management
   * Enhanced with "Add Another Lesson" functionality for expanding course content
   * System now provides proper teacher tools for lesson creation, editing, reordering, and assessment management
+- July 10, 2025. Implemented comprehensive drag-and-drop module management system:
+  * Successfully installed @dnd-kit packages for drag-and-drop functionality across the application
+  * Created SortableModuleCard component with drag handles and visual feedback during dragging
+  * Integrated DndContext and SortableContext in CourseDetail page for module reordering
+  * Added backend API route /api/courses/:id/modules/reorder for updating module sequence order
+  * Implemented reorderCourseModules storage method with database persistence of new module order
+  * Fixed duplicate component issues and cleaned up course detail page structure
+  * Module cards now display comprehensive information: lessons count, assessments count, estimated hours, objectives
+  * Teachers can drag and drop modules within courses to reorder them with automatic database updates
+  * Enhanced module management with dropdown actions: Edit Module, Manage Lessons, Add Assessment, Delete Module
+  * System provides complete visual feedback during drag operations with opacity changes and hover states
 ```
 
 ## User Preferences
