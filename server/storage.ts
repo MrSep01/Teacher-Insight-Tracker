@@ -894,7 +894,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLessonPlanById(id: number): Promise<LessonPlan | undefined> {
-    const [lessonPlan] = await db.select().from(lessonPlans).where(eq(lessonPlans.id, id));
+    const [lessonPlan] = await db.select({
+      id: lessonPlans.id,
+      moduleId: lessonPlans.moduleId,
+      title: lessonPlans.title,
+      description: lessonPlans.description,
+      lessonType: lessonPlans.lessonType,
+      objectives: lessonPlans.objectives,
+      activities: lessonPlans.activities,
+      resources: lessonPlans.resources,
+      equipment: lessonPlans.equipment,
+      safetyNotes: lessonPlans.safetyNotes,
+      duration: lessonPlans.duration,
+      difficulty: lessonPlans.difficulty,
+      targetStudents: lessonPlans.targetStudents,
+      prerequisites: lessonPlans.prerequisites,
+      assessmentCriteria: lessonPlans.assessmentCriteria,
+      differentiation: lessonPlans.differentiation,
+      homework: lessonPlans.homework,
+      hasAssessment: lessonPlans.hasAssessment,
+      assessmentType: lessonPlans.assessmentType,
+      assessmentDescription: lessonPlans.assessmentDescription,
+      assessmentDuration: lessonPlans.assessmentDuration,
+      assessmentPoints: lessonPlans.assessmentPoints,
+      assessmentCriteriaLesson: lessonPlans.assessmentCriteriaLesson,
+      rubric: lessonPlans.rubric,
+      aiGenerated: lessonPlans.aiGenerated,
+      aiSuggestions: lessonPlans.aiSuggestions,
+      isCompleted: lessonPlans.isCompleted,
+      sequenceOrder: lessonPlans.sequenceOrder,
+      createdAt: lessonPlans.createdAt,
+      updatedAt: lessonPlans.updatedAt,
+      studentWorksheet: lessonPlans.studentWorksheet,
+      teachingScript: lessonPlans.teachingScript,
+      assessmentQuestions: lessonPlans.assessmentQuestions,
+      fullLessonContent: lessonPlans.fullLessonContent
+    }).from(lessonPlans).where(eq(lessonPlans.id, id));
     return lessonPlan;
   }
 
