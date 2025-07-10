@@ -1,28 +1,37 @@
 import { useState } from "react";
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   BookOpen, 
-  ChevronDown, 
-  ChevronRight, 
   Users, 
   Clock, 
   Target, 
   ArrowLeft,
-  FlaskConical,
-  CheckCircle,
-  MessageSquare,
+  Settings,
+  Edit,
+  Trash2,
+  Plus,
+  Eye,
+  FileText,
+  MoreVertical,
   Calendar,
   GraduationCap,
-  Play
+  Move,
+  Copy,
+  CheckCircle2,
+  AlertTriangle
 } from "lucide-react";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { LessonManagement } from "@/components/lesson-management";
 import type { Course, Module } from "@shared/schema";
 
 interface LessonPlan {
@@ -53,10 +62,10 @@ interface ModuleWithLessons extends Module {
 function getLessonTypeIcon(type: string) {
   const icons = {
     lecture: BookOpen,
-    practical: FlaskConical,
+    practical: Target,
     project: Target,
-    assessment: CheckCircle,
-    discussion: MessageSquare,
+    assessment: CheckCircle2,
+    discussion: Users,
     fieldwork: Users,
   };
   return icons[type as keyof typeof icons] || BookOpen;
@@ -74,19 +83,13 @@ function getLessonTypeColor(type: string) {
   return colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
 }
 
-function getDifficultyColor(difficulty: string) {
-  const colors = {
-    basic: "bg-green-50 text-green-700 border-green-200",
-    intermediate: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    advanced: "bg-red-50 text-red-700 border-red-200",
-  };
-  return colors[difficulty as keyof typeof colors] || "bg-gray-50 text-gray-700 border-gray-200";
-}
-
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
   const [openModules, setOpenModules] = useState<Set<number>>(new Set());
-  const [openLessons, setOpenLessons] = useState<Set<number>>(new Set());
+  const [selectedModule, setSelectedModule] = useState<ModuleWithLessons | null>(null);
+  const [managementDialogOpen, setManagementDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch course details
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
@@ -130,16 +133,16 @@ export default function CourseDetail() {
     });
   };
 
-  const toggleLesson = (lessonId: number) => {
-    setOpenLessons(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(lessonId)) {
-        newSet.delete(lessonId);
-      } else {
-        newSet.add(lessonId);
-      }
-      return newSet;
-    });
+  const openModuleManagement = (module: ModuleWithLessons) => {
+    setSelectedModule(module);
+    setManagementDialogOpen(true);
+  };
+
+  const closeModuleManagement = () => {
+    setSelectedModule(null);
+    setManagementDialogOpen(false);
+    // Refresh the modules data
+    queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/modules-with-lessons`] });
   };
 
   if (courseLoading || modulesLoading) {
@@ -347,178 +350,130 @@ export default function CourseDetail() {
                           </div>
                         </div>
 
-                        {/* Lessons */}
+                        {/* Teacher Management Tools */}
                         <div className="space-y-3">
-                          <h4 className="font-medium text-gray-900">Lessons</h4>
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-gray-900">Lesson Management</h4>
+                            <Button 
+                              size="sm" 
+                              onClick={() => openModuleManagement(module)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Settings className="h-4 w-4 mr-2" />
+                              Manage Lessons
+                            </Button>
+                          </div>
+                          
                           {module.lessons.length === 0 ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg">
+                            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                               <GraduationCap className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                              <p className="text-sm text-gray-600">No lessons in this module yet</p>
+                              <p className="text-sm text-gray-600 mb-3">No lessons created yet</p>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => openModuleManagement(module)}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Create First Lesson
+                              </Button>
                             </div>
                           ) : (
                             <div className="space-y-2">
-                              {module.lessons.map((lesson) => {
+                              {module.lessons.map((lesson, index) => {
                                 const LessonIcon = getLessonTypeIcon(lesson.lessonType);
                                 return (
-                                  <Card key={lesson.id} className="border-l-4 border-l-blue-500">
-                                    <Collapsible 
-                                      open={openLessons.has(lesson.id)}
-                                      onOpenChange={() => toggleLesson(lesson.id)}
-                                    >
-                                      <CollapsibleTrigger asChild>
-                                        <CardHeader className="py-3 hover:bg-gray-50 cursor-pointer">
-                                          <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-3">
-                                              <div className="flex items-center space-x-2">
-                                                {openLessons.has(lesson.id) ? (
-                                                  <ChevronDown className="h-4 w-4 text-gray-500" />
-                                                ) : (
-                                                  <ChevronRight className="h-4 w-4 text-gray-500" />
-                                                )}
-                                                <LessonIcon className="h-4 w-4 text-gray-600" />
-                                              </div>
-                                              <div>
-                                                <h5 className="font-medium text-gray-900">{lesson.title}</h5>
-                                                <p className="text-sm text-gray-600">{lesson.description}</p>
-                                              </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                              <Badge 
-                                                variant="outline" 
-                                                className={`text-xs ${getLessonTypeColor(lesson.lessonType)}`}
-                                              >
-                                                {lesson.lessonType}
-                                              </Badge>
-                                              <Badge 
-                                                variant="outline" 
-                                                className={`text-xs ${getDifficultyColor(lesson.difficulty)}`}
-                                              >
-                                                {lesson.difficulty}
-                                              </Badge>
-                                              <Badge variant="secondary" className="text-xs">
-                                                {lesson.duration}min
-                                              </Badge>
-                                              {lesson.isCompleted && (
-                                                <Badge variant="outline" className="text-xs text-green-600 border-green-200">
-                                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                                  Complete
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </CardHeader>
-                                      </CollapsibleTrigger>
-                                      
-                                      <CollapsibleContent>
-                                        <CardContent className="pt-0">
-                                          <div className="border border-gray-200 rounded-lg bg-gray-50/30 relative">
-                                            {/* Scroll indicator */}
-                                            <div className="absolute top-2 right-2 text-xs text-gray-400 bg-white px-2 py-1 rounded shadow-sm z-10">
-                                              Scroll for more ↓
-                                            </div>
-                                            <div className="max-h-80 overflow-y-auto p-4 space-y-4 lesson-content-scroll">
-                                            {/* Lesson Details */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                              <div>
-                                                <h6 className="font-medium text-gray-900 mb-2">Objectives</h6>
-                                                {lesson.objectives && lesson.objectives.length > 0 ? (
-                                                  <div className="space-y-1">
-                                                    {lesson.objectives.map((objective, index) => (
-                                                      <div key={index} className="flex items-start space-x-2">
-                                                        <Target className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
-                                                        <span className="text-xs text-gray-600">{objective}</span>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                ) : (
-                                                  <p className="text-sm text-gray-500">No objectives defined</p>
-                                                )}
-                                              </div>
-                                              <div>
-                                                <h6 className="font-medium text-gray-900 mb-2">Activities</h6>
-                                                {lesson.activities && lesson.activities.length > 0 ? (
-                                                  <div className="space-y-1">
-                                                    {lesson.activities.map((activity, index) => (
-                                                      <div key={index} className="flex items-start space-x-2">
-                                                        <Play className="h-3 w-3 text-blue-600 mt-0.5 flex-shrink-0" />
-                                                        <span className="text-xs text-gray-600">{activity}</span>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                ) : (
-                                                  <p className="text-sm text-gray-500">No activities defined</p>
-                                                )}
-                                              </div>
-                                            </div>
-
-                                            {/* Resources */}
-                                            {lesson.resources && lesson.resources.length > 0 && (
-                                              <div>
-                                                <h6 className="font-medium text-gray-900 mb-2">Resources</h6>
-                                                <div className="flex flex-wrap gap-1">
-                                                  {lesson.resources.map((resource, index) => (
-                                                    <Badge key={index} variant="outline" className="text-xs">
-                                                      {resource}
-                                                    </Badge>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            )}
-
-                                            {/* Equipment */}
-                                            {lesson.equipment && lesson.equipment.length > 0 && (
-                                              <div>
-                                                <h6 className="font-medium text-gray-900 mb-2">Equipment</h6>
-                                                <div className="flex flex-wrap gap-1">
-                                                  {lesson.equipment.map((item, index) => (
-                                                    <Badge key={index} variant="secondary" className="text-xs">
-                                                      {item}
-                                                    </Badge>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            )}
-
-                                            {/* Safety Notes */}
-                                            {lesson.safetyNotes && (
-                                              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                                                <h6 className="font-medium text-yellow-800 mb-1">Safety Notes</h6>
-                                                <p className="text-sm text-yellow-700">{lesson.safetyNotes}</p>
-                                              </div>
-                                            )}
-
-                                            {/* Assessment Info */}
-                                            {lesson.hasAssessment && (
-                                              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                                                <div className="flex items-center space-x-2">
-                                                  <CheckCircle className="h-4 w-4 text-orange-600" />
-                                                  <span className="font-medium text-orange-800">Assessment Included</span>
-                                                  {lesson.assessmentType && (
-                                                    <Badge variant="outline" className="text-xs">
-                                                      {lesson.assessmentType}
-                                                    </Badge>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            )}
-
-                                            {/* Action Button */}
-                                            <div className="flex justify-end pt-2 border-t border-gray-200 mt-4">
-                                              <Link href={`/lessons/${lesson.id}`}>
-                                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                                                  <Play className="h-4 w-4 mr-2" />
-                                                  Start Lesson
-                                                </Button>
-                                              </Link>
-                                            </div>
-                                            </div>
-                                          </div>
-                                        </CardContent>
-                                      </CollapsibleContent>
-                                    </Collapsible>
-                                  </Card>
+                                  <div key={lesson.id} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+                                    <div className="flex items-center space-x-3">
+                                      <div className="flex items-center justify-center w-8 h-8 bg-blue-50 rounded-full">
+                                        <span className="text-sm font-medium text-blue-600">{index + 1}</span>
+                                      </div>
+                                      <LessonIcon className="h-5 w-5 text-gray-600" />
+                                      <div>
+                                        <h5 className="font-medium text-gray-900">{lesson.title}</h5>
+                                        <div className="flex items-center space-x-2 mt-1">
+                                          <Badge 
+                                            variant="outline" 
+                                            className={`text-xs ${getLessonTypeColor(lesson.lessonType)}`}
+                                          >
+                                            {lesson.lessonType}
+                                          </Badge>
+                                          <Badge variant="secondary" className="text-xs">
+                                            {lesson.duration}min
+                                          </Badge>
+                                          {lesson.aiGenerated && (
+                                            <Badge variant="outline" className="text-xs text-purple-600 border-purple-200">
+                                              AI Generated
+                                            </Badge>
+                                          )}
+                                          {lesson.hasAssessment && (
+                                            <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+                                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                                              Assessment
+                                            </Badge>
+                                          )}
+                                          {lesson.safetyNotes && (
+                                            <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
+                                              <AlertTriangle className="h-3 w-3 mr-1" />
+                                              Safety Notes
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                            <MoreVertical className="h-4 w-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
+                                            <Eye className="h-4 w-4 mr-2" />
+                                            View Details
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            Edit Lesson
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
+                                            <FileText className="h-4 w-4 mr-2" />
+                                            Teacher Guide
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
+                                            <Copy className="h-4 w-4 mr-2" />
+                                            Duplicate
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem onClick={() => openModuleManagement(module)}>
+                                            <Move className="h-4 w-4 mr-2" />
+                                            Reorder
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem className="text-red-600">
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Delete
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                                  </div>
                                 );
                               })}
+                              
+                              {/* Add Lesson Button */}
+                              <div className="flex justify-center pt-3">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => openModuleManagement(module)}
+                                  className="border-dashed"
+                                >
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add Another Lesson
+                                </Button>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -531,6 +486,25 @@ export default function CourseDetail() {
           </div>
         )}
       </div>
+
+      {/* Module Management Dialog */}
+      <Dialog open={managementDialogOpen} onOpenChange={setManagementDialogOpen}>
+        <DialogContent className="max-w-7xl h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedModule ? `Manage Lessons - ${selectedModule.title}` : "Module Management"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            {selectedModule && (
+              <LessonManagement 
+                module={selectedModule} 
+                onClose={closeModuleManagement} 
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
