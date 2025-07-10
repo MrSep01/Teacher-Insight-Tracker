@@ -4,6 +4,7 @@ import Dashboard from "@/pages/dashboard";
 import StudentDashboard from "@/pages/student-dashboard";
 import ParentDashboard from "@/pages/parent-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import Sidebar from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
@@ -55,7 +56,14 @@ export default function RoleBasedRouter() {
   // Route based on user role
   switch (user.role) {
     case "teacher":
-      return <Dashboard />;
+      return (
+        <div className="flex h-screen overflow-hidden">
+          <Sidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Dashboard />
+          </div>
+        </div>
+      );
     case "student":
       return <StudentDashboard />;
     case "parent":
