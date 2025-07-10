@@ -189,6 +189,13 @@ export const lessonPlans = pgTable("lesson_plans", {
   aiSuggestions: text("ai_suggestions"),
   isCompleted: boolean("is_completed").default(false),
   sequenceOrder: integer("sequence_order").default(1), // Order within module
+  
+  // Comprehensive lesson content fields
+  studentWorksheet: text("student_worksheet"),
+  teachingScript: text("teaching_script"),
+  assessmentQuestions: text("assessment_questions"),
+  fullLessonContent: text("full_lesson_content"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
