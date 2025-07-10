@@ -417,8 +417,14 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
               ) : (
                 <ComprehensiveLessonForm 
                   moduleId={module.id}
-                  moduleObjectives={module.objectives || []}
-                  onLessonCreated={() => setIsCreateModalOpen(false)}
+                  moduleData={{
+                    title: module.title,
+                    curriculum: "IGCSE Chemistry Edexcel", // Default curriculum - should come from user profile
+                    gradeLevels: ["10", "11"], // Default grade levels - should come from user profile
+                    topics: module.topics || [],
+                    objectives: module.objectives || []
+                  }}
+                  onSuccess={() => setIsCreateModalOpen(false)}
                   onCancel={() => setIsCreateModalOpen(false)}
                 />
               )}
