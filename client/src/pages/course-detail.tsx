@@ -411,8 +411,12 @@ export default function CourseDetail() {
                                       
                                       <CollapsibleContent>
                                         <CardContent className="pt-0">
-                                          <div className="relative">
-                                            <div className="max-h-96 overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 border border-gray-100 rounded-lg p-4 bg-gray-50/50">
+                                          <div className="border border-gray-200 rounded-lg bg-gray-50/30 relative">
+                                            {/* Scroll indicator */}
+                                            <div className="absolute top-2 right-2 text-xs text-gray-400 bg-white px-2 py-1 rounded shadow-sm z-10">
+                                              Scroll for more ↓
+                                            </div>
+                                            <div className="max-h-80 overflow-y-auto p-4 space-y-4 lesson-content-scroll">
                                             {/* Lesson Details */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                               <div>
@@ -499,7 +503,7 @@ export default function CourseDetail() {
                                             )}
 
                                             {/* Action Button */}
-                                            <div className="flex justify-end">
+                                            <div className="flex justify-end pt-2 border-t border-gray-200 mt-4">
                                               <Link href={`/lessons/${lesson.id}`}>
                                                 <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                                                   <Play className="h-4 w-4 mr-2" />
