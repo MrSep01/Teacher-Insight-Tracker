@@ -16,6 +16,7 @@ import { EnhancedLessonCreator } from "./enhanced-lesson-creator";
 import { EnhancedAssessmentCreator } from "./enhanced-assessment-creator";
 import ComprehensiveLessonForm from "./lessons/comprehensive-lesson-form";
 import ManualLessonCreator from "./lessons/manual-lesson-creator";
+import ComprehensiveLessonViewer from "./lessons/comprehensive-lesson-viewer";
 
 // Types
 interface Module {
@@ -173,9 +174,18 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
     },
   });
 
-  const handleViewLesson = (lesson: LessonPlan) => {
-    setViewingLesson(lesson);
-    setIsViewLessonModalOpen(true);
+  const handleViewLesson = async (lesson: LessonPlan) => {
+    try {
+      // Fetch comprehensive lesson data
+      const comprehensiveData = await apiRequest(`/api/lessons/${lesson.id}/full-content`);
+      setViewingLesson(comprehensiveData);
+      setIsViewLessonModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching comprehensive lesson data:', error);
+      // Fallback to basic lesson data
+      setViewingLesson(lesson);
+      setIsViewLessonModalOpen(true);
+    }
   };
 
   const handleEditLesson = (lesson: LessonPlan) => {
@@ -404,13 +414,32 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Lesson View Modal */}
+      {/* Comprehensive Lesson View Modal */}
       <Dialog open={isViewLessonModalOpen} onOpenChange={setIsViewLessonModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              {viewingLesson && (
-                <>
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
+          {viewingLesson && viewingLesson.fullContent && (
+            <ComprehensiveLessonViewer
+              lesson={viewingLesson}
+              onExport={() => {
+                toast({
+                  title: "Export Started",
+                  description: "Your lesson materials are being prepared for download.",
+                });
+              }}
+              onShare={() => {
+                toast({
+                  title: "Share Options",
+                  description: "Share functionality will be available soon.",
+                });
+              }}
+            />
+          )}
+          
+          {/* Fallback to basic lesson view if no comprehensive content */}
+          {viewingLesson && !viewingLesson.fullContent && (
+            <div className="space-y-6">
+              <DialogHeader>
+                <DialogTitle className="flex items-center space-x-2">
                   {(() => {
                     const IconComponent = getLessonTypeIcon(viewingLesson.lessonType);
                     return <IconComponent className="h-5 w-5 text-blue-600" />;
@@ -425,174 +454,34 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
                       AI Generated
                     </Badge>
                   )}
-                </>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {viewingLesson && (
-            <div className="space-y-6">
-              {/* Lesson Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Duration</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      <span className="text-lg font-medium">{viewingLesson.duration} min</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Difficulty</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Target className="h-4 w-4 text-gray-500" />
-                      <span className="text-lg font-medium capitalize">{viewingLesson.difficulty}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Objectives</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Lightbulb className="h-4 w-4 text-gray-500" />
-                      <span className="text-lg font-medium">{viewingLesson.objectives.length}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Description */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700">{viewingLesson.description}</p>
-                </CardContent>
-              </Card>
-
-              {/* Learning Objectives */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Learning Objectives</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {viewingLesson.objectives.map((objective, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                        <span className="text-sm">{objective}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Activities */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Activities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {viewingLesson.activities.map((activity, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium mt-0.5">
-                          {index + 1}
-                        </div>
-                        <span className="text-sm">{activity}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Resources */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resources</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {viewingLesson.resources.map((resource, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <FileText className="h-4 w-4 text-gray-500 mt-0.5" />
-                        <span className="text-sm">{resource}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Equipment (if applicable) */}
-              {viewingLesson.equipment && viewingLesson.equipment.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Equipment Needed</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {viewingLesson.equipment.map((item, index) => (
-                        <li key={index} className="flex items-start space-x-2">
-                          <FlaskConical className="h-4 w-4 text-orange-500 mt-0.5" />
-                          <span className="text-sm">{item}</span>
-                        </li>
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="text-center py-8">
+                <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Basic Lesson View</h3>
+                <p className="text-gray-600 mb-4">
+                  This lesson doesn't have comprehensive content yet. Only basic information is available.
+                </p>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900">Description</h4>
+                    <p className="text-sm text-gray-600">{viewingLesson.description}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Duration</h4>
+                    <p className="text-sm text-gray-600">{viewingLesson.duration} minutes</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Objectives</h4>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      {viewingLesson.objectives.map((objective, index) => (
+                        <li key={index}>• {objective}</li>
                       ))}
                     </ul>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Safety Notes (if applicable) */}
-              {viewingLesson.safetyNotes && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-red-600">Safety Notes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-red-700 bg-red-50 p-3 rounded">{viewingLesson.safetyNotes}</p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Assessment Criteria */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Assessment Criteria</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {viewingLesson.assessmentCriteria.map((criteria, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <Target className="h-4 w-4 text-green-600 mt-0.5" />
-                        <span className="text-sm">{criteria}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Homework (if applicable) */}
-              {viewingLesson.homework && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Homework</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{viewingLesson.homework}</p>
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
