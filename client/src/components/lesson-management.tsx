@@ -393,7 +393,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
         </TabsContent>
       </Tabs>
 
-      {/* Enhanced Lesson Creation Modal */}
+      {/* Lesson Creation Modal - Only for Lessons */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -401,42 +401,27 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
               {creationMode === "ai" ? "Generate AI Lesson" : "Create New Lesson Plan"}
             </DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="lessons" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="lessons">Lessons</TabsTrigger>
-              <TabsTrigger value="assessments">Assessments</TabsTrigger>
-            </TabsList>
-            <TabsContent value="lessons">
-              {creationMode === "manual" ? (
-                <SimpleLessonCreator 
-                  moduleId={module.id}
-                  moduleObjectives={module.objectives || []}
-                  onLessonCreated={() => setIsCreateModalOpen(false)}
-                  onCancel={() => setIsCreateModalOpen(false)}
-                />
-              ) : (
-                <ComprehensiveLessonForm 
-                  moduleId={module.id}
-                  moduleData={{
-                    title: module.title,
-                    curriculum: "IGCSE Chemistry Edexcel", // Default curriculum - should come from user profile
-                    gradeLevels: ["10", "11"], // Default grade levels - should come from user profile
-                    topics: module.topics || [],
-                    objectives: module.objectives || []
-                  }}
-                  onSuccess={() => setIsCreateModalOpen(false)}
-                  onCancel={() => setIsCreateModalOpen(false)}
-                />
-              )}
-            </TabsContent>
-            <TabsContent value="assessments">
-              <EnhancedAssessmentCreator 
-                moduleId={module.id}
-                moduleObjectives={module.objectives || []}
-                onAssessmentCreated={() => setIsCreateModalOpen(false)}
-              />
-            </TabsContent>
-          </Tabs>
+          {creationMode === "manual" ? (
+            <SimpleLessonCreator 
+              moduleId={module.id}
+              moduleObjectives={module.objectives || []}
+              onLessonCreated={() => setIsCreateModalOpen(false)}
+              onCancel={() => setIsCreateModalOpen(false)}
+            />
+          ) : (
+            <ComprehensiveLessonForm 
+              moduleId={module.id}
+              moduleData={{
+                title: module.title,
+                curriculum: "IGCSE Chemistry Edexcel", // Default curriculum - should come from user profile
+                gradeLevels: ["10", "11"], // Default grade levels - should come from user profile
+                topics: module.topics || [],
+                objectives: module.objectives || []
+              }}
+              onSuccess={() => setIsCreateModalOpen(false)}
+              onCancel={() => setIsCreateModalOpen(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
 

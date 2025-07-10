@@ -142,10 +142,20 @@ export default function Courses() {
           <h1 className="text-3xl font-bold text-gray-900">Courses</h1>
           <p className="text-gray-600 mt-1">Manage your chemistry courses and organize modules</p>
         </div>
-        <Button onClick={openCreateDialog} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Create Course
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setLocation('/modules')} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <BookOpen className="h-4 w-4" />
+            Create Module
+          </Button>
+          <Button onClick={openCreateDialog} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Create Course
+          </Button>
+        </div>
       </div>
 
       {courses.length === 0 ? (
