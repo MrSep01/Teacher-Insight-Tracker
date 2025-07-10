@@ -15,7 +15,7 @@ import { Plus, Eye, Edit, Clock, Target, Users, BookOpen, CheckCircle, Lightbulb
 import { EnhancedLessonCreator } from "./enhanced-lesson-creator";
 import { EnhancedAssessmentCreator } from "./enhanced-assessment-creator";
 import ComprehensiveLessonForm from "./lessons/comprehensive-lesson-form";
-import ManualLessonCreator from "./lessons/manual-lesson-creator";
+import SimpleLessonCreator from "./lessons/simple-lesson-creator";
 import SimpleComprehensiveLessonViewer from "./lessons/simple-comprehensive-viewer";
 
 // Types
@@ -408,7 +408,7 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
             </TabsList>
             <TabsContent value="lessons">
               {creationMode === "manual" ? (
-                <ManualLessonCreator 
+                <SimpleLessonCreator 
                   moduleId={module.id}
                   moduleObjectives={module.objectives || []}
                   onLessonCreated={() => setIsCreateModalOpen(false)}
