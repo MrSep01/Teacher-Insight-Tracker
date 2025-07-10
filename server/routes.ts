@@ -67,6 +67,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/courses/:id", requireAuth, async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const teacherId = req.user.id;
+      
+      const course = await storage.getCourseById(courseId);
+      if (!course || course.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      res.json(course);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch course" });
+    }
+  });
+
   app.post("/api/courses", requireAuth, async (req, res) => {
     try {
       const teacherId = req.user.id;

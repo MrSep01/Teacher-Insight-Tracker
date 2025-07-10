@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Plus, Users, BookOpen, Clock, Edit, Trash2, Archive, MoreVertical, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ export default function Courses() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const { data: courses = [], isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -108,6 +110,10 @@ export default function Courses() {
     setModuleManagerOpen(true);
   };
 
+  const navigateToCourse = (courseId: number) => {
+    setLocation(`/courses/${courseId}`);
+  };
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -154,7 +160,7 @@ export default function Courses() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
-            <Card key={course.id} className="hover:shadow-lg transition-shadow">
+            <Card key={course.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigateToCourse(course.id)}>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -165,7 +171,7 @@ export default function Courses() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -231,10 +237,25 @@ export default function Courses() {
 
               <CardFooter className="pt-0">
                 <div className="w-full flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateToCourse(course.id);
+                    }}
+                  >
                     View Details
                   </Button>
-                  <Button size="sm" className="flex-1" onClick={() => openModuleManager(course)}>
+                  <Button 
+                    size="sm" 
+                    className="flex-1" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModuleManager(course);
+                    }}
+                  >
                     <Settings className="h-4 w-4 mr-2" />
                     Manage Modules
                   </Button>

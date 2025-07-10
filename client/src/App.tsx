@@ -9,6 +9,7 @@ import RoleBasedRouter from "@/components/role-based-router";
 import Dashboard from "@/pages/dashboard";
 import Students from "@/pages/students";
 import Courses from "@/pages/courses";
+import CourseDetail from "@/pages/course-detail";
 import Assessments from "@/pages/assessments";
 import Modules from "@/pages/modules";
 import ModuleDetail from "@/pages/module-detail";
@@ -59,6 +60,17 @@ function Router() {
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
               <Students />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/courses/:id">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <CourseDetail />
             </div>
           </div>
         </AuthGuard>
