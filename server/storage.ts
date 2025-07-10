@@ -31,11 +31,23 @@ import {
   lessonRecommendations
 } from "@shared/schema";
 
-// Use Course types from Class (since we'll use the courses table directly)
+// Import additional table utilities
+import { pgTable, serial, integer, timestamp } from "drizzle-orm/pg-core";
+
+// Use Course types from Class (since courses table is classes)
 type Course = Class;
 type InsertCourse = InsertClass;
 
-// CourseModule types - simplified for now
+// Define courseModules table directly
+const courseModules = pgTable("course_modules", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull(),
+  moduleId: integer("module_id").notNull(),
+  sequenceOrder: integer("sequence_order").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// CourseModule types
 type CourseModule = {
   id: number;
   courseId: number;
@@ -50,18 +62,8 @@ type InsertCourseModule = {
   sequenceOrder?: number;
 };
 
-// Use courses table directly (it exists in the database)
+// Use courses as classes since they're the same
 const courses = classes;
-
-// Define courseModules table directly since it's not exported from schema
-import { pgTable, serial, integer, timestamp } from "drizzle-orm/pg-core";
-const courseModules = pgTable("course_modules", {
-  id: serial("id").primaryKey(),
-  courseId: integer("course_id").notNull(),
-  moduleId: integer("module_id").notNull(),
-  sequenceOrder: integer("sequence_order").default(1),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 import { db } from "./db";
 import { eq, and, desc, gte } from "drizzle-orm";
