@@ -14,6 +14,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { Plus, Eye, Edit, Clock, Target, Users, BookOpen, CheckCircle, Lightbulb, FlaskConical, FileText, MessageSquare, Bot, Trash2 } from "lucide-react";
 import { EnhancedLessonCreator } from "./enhanced-lesson-creator";
 import { EnhancedAssessmentCreator } from "./enhanced-assessment-creator";
+import ComprehensiveLessonForm from "./lessons/comprehensive-lesson-form";
+import ManualLessonCreator from "./lessons/manual-lesson-creator";
 
 // Types
 interface Module {
@@ -375,12 +377,21 @@ export function LessonManagement({ module, onClose }: LessonManagementProps) {
               <TabsTrigger value="assessments">Assessments</TabsTrigger>
             </TabsList>
             <TabsContent value="lessons">
-              <EnhancedLessonCreator 
-                moduleId={module.id}
-                moduleObjectives={module.objectives || []}
-                onLessonCreated={() => setIsCreateModalOpen(false)}
-                creationMode={creationMode}
-              />
+              {creationMode === "manual" ? (
+                <ManualLessonCreator 
+                  moduleId={module.id}
+                  moduleObjectives={module.objectives || []}
+                  onLessonCreated={() => setIsCreateModalOpen(false)}
+                  onCancel={() => setIsCreateModalOpen(false)}
+                />
+              ) : (
+                <ComprehensiveLessonForm 
+                  moduleId={module.id}
+                  moduleObjectives={module.objectives || []}
+                  onLessonCreated={() => setIsCreateModalOpen(false)}
+                  onCancel={() => setIsCreateModalOpen(false)}
+                />
+              )}
             </TabsContent>
             <TabsContent value="assessments">
               <EnhancedAssessmentCreator 

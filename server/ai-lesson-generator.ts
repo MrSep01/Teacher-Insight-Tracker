@@ -165,6 +165,88 @@ Make the lesson engaging, practical, and aligned with Edexcel chemistry specific
     return specs[lessonType as keyof typeof specs] || specs.lecture;
   }
 
+  async generateLessonSection(request: {
+    section: string;
+    currentContent: string;
+    moduleObjectives: string[];
+    lessonTopic: string;
+    curriculum: string;
+    gradeLevels: string[];
+  }): Promise<string> {
+    const prompt = this.createSectionPrompt(request);
+    
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert chemistry teacher creating lesson content. Generate detailed, practical content for the specified lesson section that directly relates to the topic and learning objectives."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error("No content generated from AI");
+      }
+
+      return content.trim();
+    } catch (error) {
+      console.error('AI section generation error:', error);
+      throw new Error(`Failed to generate AI content: ${error.message}`);
+    }
+  }
+
+  private createSectionPrompt(request: {
+    section: string;
+    currentContent: string;
+    moduleObjectives: string[];
+    lessonTopic: string;
+    curriculum: string;
+    gradeLevels: string[];
+  }): string {
+    const sectionInstructions = {
+      starter: "Create an engaging hook activity that introduces the topic and activates prior knowledge. Include specific questions or activities to capture student interest.",
+      mainLesson: "Develop detailed I Do, We Do, You Do content with clear explanations, examples, and guided practice activities.",
+      practice: "Design practical activities where students can apply their learning with both guided and independent practice opportunities.",
+      review: "Create effective review strategies to consolidate key concepts and check for understanding.",
+      exitTicket: "Design quick assessment activities to gauge student comprehension at the end of the lesson."
+    };
+
+    const instruction = sectionInstructions[request.section as keyof typeof sectionInstructions] || 
+                       "Create appropriate content for this lesson section.";
+
+    return `
+Topic: ${request.lessonTopic}
+Curriculum: ${request.curriculum}
+Grade Levels: ${request.gradeLevels.join(", ")}
+Section: ${request.section}
+
+Learning Objectives:
+${request.moduleObjectives.map(obj => `• ${obj}`).join('\n')}
+
+Current Content: ${request.currentContent || "None provided"}
+
+Instructions: ${instruction}
+
+Please generate detailed, practical content that:
+1. Directly relates to the lesson topic and objectives
+2. Is appropriate for ${request.curriculum} students
+3. Includes specific activities, questions, or materials
+4. Provides clear step-by-step instructions
+5. Considers different learning styles and abilities
+
+Generate content that a teacher can immediately use in their lesson.
+`;
+  }
+
   private processAIResponse(aiResponse: any, request: LessonGenerationRequest): GeneratedLesson {
     // Filter AI objectives to only include those from the module
     const aiObjectives = Array.isArray(aiResponse.objectives) ? aiResponse.objectives : [];

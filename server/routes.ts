@@ -492,6 +492,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI generation for individual lesson sections
+  app.post("/api/lessons/ai-generate-section", requireAuth, async (req, res) => {
+    try {
+      const { section, currentContent, moduleObjectives, lessonTopic } = req.body;
+      
+      if (!section || !lessonTopic) {
+        return res.status(400).json({ error: "Section and lesson topic are required" });
+      }
+
+      const aiContent = await aiLessonGenerator.generateLessonSection({
+        section,
+        currentContent,
+        moduleObjectives: moduleObjectives || [],
+        lessonTopic,
+        curriculum: "IGCSE Chemistry Edexcel",
+        gradeLevels: ["10", "11"]
+      });
+
+      res.json({ content: aiContent });
+    } catch (error) {
+      console.error('Error generating AI section:', error);
+      res.status(500).json({ error: error.message || "Failed to generate AI content" });
+    }
+  });
+
+  // Create manual lesson with structured template
+  app.post("/api/lessons/manual-create", requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const lessonData = req.body;
+      
+      // Validate required fields
+      if (!lessonData.title || !lessonData.moduleId || !lessonData.objectives?.length) {
+        return res.status(400).json({ error: "Title, module ID, and objectives are required" });
+      }
+
+      // Create structured lesson content from manual form data
+      const structuredContent = {
+        starter: lessonData.starter || {},
+        mainLesson: lessonData.mainLesson || {},
+        practice: lessonData.practice || {},
+        review: lessonData.review || {},
+        exitTicket: lessonData.exitTicket || {},
+        additionalInfo: {
+          resources: lessonData.resources || [],
+          equipment: lessonData.equipment || [],
+          safetyNotes: lessonData.safetyNotes,
+          homework: lessonData.homework,
+          nextLessonPreview: lessonData.nextLessonPreview,
+          teacherNotes: lessonData.teacherNotes
+        }
+      };
+
+      // Save lesson to database
+      const lessonPlanData: InsertLessonPlan = {
+        moduleId: lessonData.moduleId,
+        title: lessonData.title,
+        description: lessonData.description,
+        lessonType: lessonData.lessonType,
+        objectives: lessonData.objectives,
+        activities: [
+          lessonData.starter?.hookActivity,
+          lessonData.mainLesson?.iDoContent,
+          lessonData.mainLesson?.weDoContent,
+          lessonData.mainLesson?.youDoContent,
+          lessonData.practice?.guidedPractice,
+          lessonData.practice?.independentPractice,
+          lessonData.review?.keyPointsReview,
+          lessonData.exitTicket?.content
+        ].filter(Boolean),
+        resources: lessonData.resources || [],
+        equipment: lessonData.equipment || [],
+        safetyNotes: lessonData.safetyNotes,
+        duration: lessonData.duration,
+        difficulty: lessonData.difficulty,
+        prerequisites: [],
+        assessmentCriteria: [],
+        differentiation: lessonData.practice?.differentiation || "",
+        homework: lessonData.homework || "",
+        aiGenerated: false,
+        sequenceOrder: 1,
+        targetStudents: ["all"],
+        aiSuggestions: JSON.stringify(structuredContent),
+      };
+
+      const savedLesson = await storage.createLessonPlan(lessonPlanData);
+      res.json(savedLesson);
+    } catch (error) {
+      console.error('Error creating manual lesson:', error);
+      res.status(500).json({ error: error.message || "Failed to create lesson" });
+    }
+  });
+
   // Enhanced Assessment Creation Routes
   app.post("/api/assessments/ai-generate", requireAuth, async (req, res) => {
     try {
