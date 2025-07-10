@@ -35,15 +35,10 @@ import { useToast } from "@/hooks/use-toast";
 import { LessonManagement } from "@/components/lesson-management";
 import type { Course, Module, LessonPlan, Assessment } from "@shared/schema";
 
-// Types for the unified ribbon system
-interface CourseItem {
-  id: string;
-  itemType: 'lesson' | 'assessment';
-  itemId: number;
-  sequenceOrder: number;
-  isVisible: boolean;
-  data: LessonPlan | Assessment;
-  moduleTitle: string;
+// Types for module-based content display
+interface ModuleWithContent extends Module {
+  lessons: LessonPlan[];
+  assessments: Assessment[];
 }
 
 interface LessonPlan {
@@ -109,59 +104,34 @@ export default function CourseDetail() {
     enabled: !!id,
   });
 
-  // Fetch course modules with lessons and assessments for unified ribbon
-  const { data: courseContent = [], isLoading: contentLoading } = useQuery<CourseItem[]>({
-    queryKey: [`/api/courses/${id}/content`],
+  // Fetch course modules with their lessons and assessments
+  const { data: modulesWithContent = [], isLoading: contentLoading } = useQuery<ModuleWithContent[]>({
+    queryKey: [`/api/courses/${id}/modules-with-content`],
     queryFn: async () => {
       const modules = await apiRequest(`/api/courses/${id}/modules`);
-      const allItems: CourseItem[] = [];
-      let sequenceOrder = 1;
+      const modulesWithContent = [];
       
       for (const module of modules) {
         // Get lessons for this module
         const lessons = await apiRequest(`/api/modules/${module.id}/lessons`);
-        for (const lesson of lessons) {
-          allItems.push({
-            id: `lesson-${lesson.id}`,
-            itemType: 'lesson',
-            itemId: lesson.id,
-            sequenceOrder: sequenceOrder++,
-            isVisible: true,
-            data: lesson,
-            moduleTitle: module.title
-          });
-        }
         
-        // Get assessments for this module (if any)
+        // Get assessments for this module
+        let assessments = [];
         try {
-          const assessments = await apiRequest(`/api/modules/${module.id}/assessments`);
-          for (const assessment of assessments) {
-            if (assessment.assessmentType === 'summative') {
-              allItems.push({
-                id: `assessment-${assessment.id}`,
-                itemType: 'assessment',
-                itemId: assessment.id,
-                sequenceOrder: sequenceOrder++,
-                isVisible: true,
-                data: assessment,
-                moduleTitle: module.title
-              });
-            }
-          }
+          assessments = await apiRequest(`/api/modules/${module.id}/assessments`);
         } catch (error) {
           // Module might not have assessments
         }
+        
+        modulesWithContent.push({
+          ...module,
+          lessons: lessons || [],
+          assessments: assessments || []
+        });
       }
       
-      return allItems;
+      return modulesWithContent;
     },
-    enabled: !!id,
-  });
-
-  // Fetch course modules for management
-  const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({
-    queryKey: [`/api/courses/${id}/modules`],
-    queryFn: () => apiRequest(`/api/courses/${id}/modules`),
     enabled: !!id,
   });
 
@@ -176,10 +146,10 @@ export default function CourseDetail() {
     setSelectedModule(null);
     setManagementDialogOpen(false);
     // Refresh the course content data
-    queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/content`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/modules-with-content`] });
   };
 
-  if (courseLoading || contentLoading || modulesLoading) {
+  if (courseLoading || contentLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
         <div className="animate-pulse">
@@ -211,14 +181,14 @@ export default function CourseDetail() {
     );
   }
 
-  const totalLessons = courseContent.filter(item => item.itemType === 'lesson').length;
-  const totalAssessments = courseContent.filter(item => item.itemType === 'assessment').length;
-  const completedLessons = courseContent.filter(item => 
-    item.itemType === 'lesson' && (item.data as LessonPlan).isCompleted
-  ).length;
-  const totalDuration = courseContent
-    .filter(item => item.itemType === 'lesson')
-    .reduce((sum, item) => sum + (item.data as LessonPlan).duration, 0);
+  const totalLessons = modulesWithContent.reduce((sum, module) => sum + module.lessons.length, 0);
+  const totalAssessments = modulesWithContent.reduce((sum, module) => sum + module.assessments.length, 0);
+  const completedLessons = modulesWithContent.reduce((sum, module) => 
+    sum + module.lessons.filter(lesson => lesson.isCompleted).length, 0
+  );
+  const totalDuration = modulesWithContent.reduce((sum, module) => 
+    sum + module.lessons.reduce((lessonSum, lesson) => lessonSum + lesson.duration, 0), 0
+  );
 
   return (
     <div className="container mx-auto p-6 space-y-6 min-h-screen">
@@ -250,7 +220,7 @@ export default function CourseDetail() {
               <BookOpen className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Modules</p>
-                <p className="text-2xl font-bold">{modules.length}</p>
+                <p className="text-2xl font-bold">{modulesWithContent.length}</p>
               </div>
             </div>
           </CardContent>
@@ -303,135 +273,143 @@ export default function CourseDetail() {
 
       <Separator />
 
-      {/* Unified Course Ribbon */}
-      <div className="space-y-4">
+      {/* Module-Based Course Ribbon */}
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Course Content</h2>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Lesson
-            </Button>
-            <Button variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Assessment
-            </Button>
-          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Course Content by Module</h2>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {/* Open module manager */}}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Manage Modules
+          </Button>
         </div>
         
-        {courseContent.length === 0 ? (
+        {modulesWithContent.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No content yet</h3>
-            <p className="text-gray-600 mb-4">This course doesn't have any lessons or assessments yet.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No modules assigned</h3>
+            <p className="text-gray-600 mb-4">This course doesn't have any modules assigned yet.</p>
             <p className="text-sm text-gray-500">
-              To add content, create lessons and assessments in the modules assigned to this course.
+              Add modules to this course to start creating lessons and assessments.
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {courseContent.map((item, index) => (
-              <Card 
-                key={item.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow"
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex items-center justify-center w-8 h-8 bg-blue-50 rounded-full">
-                          <span className="text-sm font-medium text-blue-600">{index + 1}</span>
-                        </div>
+          <div className="space-y-6">
+            {modulesWithContent.map((module) => (
+              <Card key={module.id} className="overflow-hidden">
+                <CardContent className="p-0">
+                  {/* Module Header */}
+                  <div className="bg-gray-50 px-6 py-4 border-b">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{module.title}</h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {module.lessons.length} lessons • {module.assessments.length} assessments
+                        </p>
                       </div>
-                      
-                      {item.itemType === 'lesson' ? (
-                        <div className="flex items-center space-x-3">
-                          <GraduationCap className="h-5 w-5 text-green-600" />
-                          <div>
-                            <h4 className="font-medium text-gray-900">{(item.data as LessonPlan).title}</h4>
-                            <p className="text-sm text-gray-500 mb-1">From module: {item.moduleTitle}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge 
-                                variant="outline" 
-                                className={`text-xs ${getLessonTypeColor((item.data as LessonPlan).lessonType)}`}
-                              >
-                                {(item.data as LessonPlan).lessonType}
-                              </Badge>
-                              <Badge variant="secondary" className="text-xs">
-                                {(item.data as LessonPlan).duration}min
-                              </Badge>
-                              {(item.data as LessonPlan).aiGenerated && (
-                                <Badge variant="outline" className="text-xs text-purple-600 border-purple-200">
-                                  AI Generated
-                                </Badge>
-                              )}
-                              {(item.data as LessonPlan).hasAssessment && (
-                                <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Assessment
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-3">
-                          <ClipboardCheck className="h-5 w-5 text-orange-600" />
-                          <div>
-                            <h4 className="font-medium text-gray-900">{(item.data as Assessment).title}</h4>
-                            <p className="text-sm text-gray-500 mb-1">From module: {item.moduleTitle}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
-                                Summative Assessment
-                              </Badge>
-                              <Badge variant="secondary" className="text-xs">
-                                {(item.data as Assessment).totalQuestions} questions
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openModuleManagement(module)}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Lesson
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {/* Open assessment creation for this module */}}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Assessment
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit {item.itemType === 'lesson' ? 'Lesson' : 'Assessment'}
-                          </DropdownMenuItem>
-                          {item.itemType === 'lesson' && (
-                            <DropdownMenuItem>
-                              <FileText className="h-4 w-4 mr-2" />
-                              Teacher Guide
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Move className="h-4 w-4 mr-2" />
-                            Reorder
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                  </div>
+                  
+                  {/* Module Content */}
+                  <div className="p-6">
+                    {module.lessons.length === 0 && module.assessments.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                        <p>No content in this module yet</p>
+                        <p className="text-sm">Add lessons and assessments to get started</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {/* Lessons */}
+                        {module.lessons.map((lesson, lessonIndex) => (
+                          <Card key={`lesson-${lesson.id}`} className="bg-green-50 border-green-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                                    <span className="text-sm font-medium text-green-600">{lessonIndex + 1}</span>
+                                  </div>
+                                  <GraduationCap className="h-5 w-5 text-green-600" />
+                                  <div>
+                                    <h4 className="font-medium text-gray-900">{lesson.title}</h4>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`text-xs ${getLessonTypeColor(lesson.lessonType)}`}
+                                      >
+                                        {lesson.lessonType}
+                                      </Badge>
+                                      <Badge variant="secondary" className="text-xs">
+                                        {lesson.duration}min
+                                      </Badge>
+                                      {lesson.aiGenerated && (
+                                        <Badge variant="outline" className="text-xs text-purple-600 border-purple-200">
+                                          AI Generated
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        
+                        {/* Assessments */}
+                        {module.assessments.map((assessment, assessmentIndex) => (
+                          <Card key={`assessment-${assessment.id}`} className="bg-orange-50 border-orange-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center justify-center w-8 h-8 bg-orange-100 rounded-full">
+                                    <span className="text-sm font-medium text-orange-600">A{assessmentIndex + 1}</span>
+                                  </div>
+                                  <ClipboardCheck className="h-5 w-5 text-orange-600" />
+                                  <div>
+                                    <h4 className="font-medium text-gray-900">{assessment.title}</h4>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                                        Summative Assessment
+                                      </Badge>
+                                      <Badge variant="secondary" className="text-xs">
+                                        {assessment.totalQuestions} questions
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
