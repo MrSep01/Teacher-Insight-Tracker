@@ -482,9 +482,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Parse the full lesson content JSON
+      let fullLessonContent = null;
+      if (lesson.fullLessonContent) {
+        try {
+          fullLessonContent = JSON.parse(lesson.fullLessonContent);
+        } catch (parseError) {
+          console.error('Error parsing full lesson content:', parseError);
+        }
+      }
+      
       res.json({
         ...lesson,
-        fullContent
+        fullContent: fullLessonContent || fullContent,
+        studentWorksheet: lesson.studentWorksheet,
+        teachingScript: lesson.teachingScript,
+        assessmentQuestions: lesson.assessmentQuestions
       });
     } catch (error) {
       console.error('Error fetching full lesson content:', error);

@@ -72,6 +72,9 @@ interface ComprehensiveLessonData {
   description: string;
   duration: number;
   objectives: string[];
+  studentWorksheet?: string;
+  teachingScript?: string;
+  assessmentQuestions?: string;
   fullContent: {
     title: string;
     fullLessonContent: {
@@ -192,13 +195,14 @@ export default function ComprehensiveLessonViewer({ lesson, onExport, onShare }:
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="lesson-content">Lesson Content</TabsTrigger>
+          <TabsTrigger value="student-worksheet">Student Worksheet</TabsTrigger>
+          <TabsTrigger value="teacher-script">Teacher Script</TabsTrigger>
           <TabsTrigger value="teacher-guide">Teacher Guide</TabsTrigger>
           <TabsTrigger value="multimedia">Multimedia</TabsTrigger>
           <TabsTrigger value="differentiation">Differentiation</TabsTrigger>
           <TabsTrigger value="assessment">Assessment</TabsTrigger>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
         </TabsList>
 
         {/* Lesson Content Tab */}
@@ -366,6 +370,70 @@ export default function ComprehensiveLessonViewer({ lesson, onExport, onShare }:
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Student Worksheet Tab */}
+        <TabsContent value="student-worksheet" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Student Worksheet
+              </CardTitle>
+              <CardDescription>
+                Complete worksheet for students to practice lesson concepts
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-white border rounded-lg p-6">
+                <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
+                  {lesson.studentWorksheet || "No worksheet available for this lesson."}
+                </pre>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <Button size="sm" variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
+                </Button>
+                <Button size="sm" variant="outline">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Print Version
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Teacher Script Tab */}
+        <TabsContent value="teacher-script" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                Teacher Script & Guide
+              </CardTitle>
+              <CardDescription>
+                Step-by-step teaching script with timing and key points
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-blue-50 border rounded-lg p-6">
+                <pre className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {lesson.teachingScript || "No teaching script available for this lesson."}
+                </pre>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <Button size="sm" variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Script
+                </Button>
+                <Button size="sm" variant="outline">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Print Version
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Teacher Guide Tab */}
@@ -619,56 +687,92 @@ export default function ComprehensiveLessonViewer({ lesson, onExport, onShare }:
         {/* Assessment Tab */}
         <TabsContent value="assessment" className="space-y-6">
           <div className="grid gap-6">
-            {lesson.fullContent.assessmentRubrics.map((rubric, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle>{rubric.criteria}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead>
-                        <tr className="bg-gray-50">
-                          <th className="border border-gray-300 p-2 text-left font-semibold">Level</th>
-                          <th className="border border-gray-300 p-2 text-left font-semibold">Score</th>
-                          <th className="border border-gray-300 p-2 text-left font-semibold">Description</th>
-                          <th className="border border-gray-300 p-2 text-left font-semibold">Indicators</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rubric.levels.map((level, levelIndex) => (
-                          <tr key={levelIndex} className="hover:bg-gray-50">
-                            <td className="border border-gray-300 p-2">
-                              <Badge variant="outline" className="capitalize">
-                                {level.level}
-                              </Badge>
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                              <Badge variant="secondary">
-                                {level.score}
-                              </Badge>
-                            </td>
-                            <td className="border border-gray-300 p-2 text-sm">
-                              {level.description}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                              <ul className="text-sm space-y-1">
-                                {level.indicators.map((indicator, indicatorIndex) => (
-                                  <li key={indicatorIndex} className="flex items-start gap-1">
-                                    <span className="text-blue-500">•</span>
-                                    {indicator}
-                                  </li>
-                                ))}
-                              </ul>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {/* Assessment Questions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  Assessment Questions
+                </CardTitle>
+                <CardDescription>
+                  Formative and summative assessment questions for this lesson
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-green-50 border rounded-lg p-6">
+                  <pre className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {lesson.assessmentQuestions || "No assessment questions available for this lesson."}
+                  </pre>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button size="sm" variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Assessment
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Print Version
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Assessment Rubrics */}
+            {lesson.fullContent.assessmentRubrics && lesson.fullContent.assessmentRubrics.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Assessment Rubrics</h3>
+                {lesson.fullContent.assessmentRubrics.map((rubric, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <CardTitle>{rubric.criteria}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-gray-300">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="border border-gray-300 p-2 text-left font-semibold">Level</th>
+                              <th className="border border-gray-300 p-2 text-left font-semibold">Score</th>
+                              <th className="border border-gray-300 p-2 text-left font-semibold">Description</th>
+                              <th className="border border-gray-300 p-2 text-left font-semibold">Indicators</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rubric.levels.map((level, levelIndex) => (
+                              <tr key={levelIndex} className="hover:bg-gray-50">
+                                <td className="border border-gray-300 p-2">
+                                  <Badge variant="outline" className="capitalize">
+                                    {level.level}
+                                  </Badge>
+                                </td>
+                                <td className="border border-gray-300 p-2">
+                                  <Badge variant="secondary">
+                                    {level.score}
+                                  </Badge>
+                                </td>
+                                <td className="border border-gray-300 p-2 text-sm">
+                                  {level.description}
+                                </td>
+                                <td className="border border-gray-300 p-2">
+                                  <ul className="text-sm space-y-1">
+                                    {level.indicators.map((indicator, indicatorIndex) => (
+                                      <li key={indicatorIndex} className="flex items-start gap-1">
+                                        <span className="text-blue-500">•</span>
+                                        {indicator}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </TabsContent>
 
