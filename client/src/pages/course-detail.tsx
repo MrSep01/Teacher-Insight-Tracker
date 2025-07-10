@@ -37,12 +37,13 @@ import type { Course, Module, LessonPlan, Assessment } from "@shared/schema";
 
 // Types for the unified ribbon system
 interface CourseItem {
-  id: number;
+  id: string;
   itemType: 'lesson' | 'assessment';
   itemId: number;
   sequenceOrder: number;
   isVisible: boolean;
   data: LessonPlan | Assessment;
+  moduleTitle: string;
 }
 
 interface LessonPlan {
@@ -108,10 +109,52 @@ export default function CourseDetail() {
     enabled: !!id,
   });
 
-  // Fetch course items (unified ribbon system)
-  const { data: courseItems = [], isLoading: itemsLoading } = useQuery<CourseItem[]>({
-    queryKey: [`/api/courses/${id}/items`],
-    queryFn: () => apiRequest(`/api/courses/${id}/items`),
+  // Fetch course modules with lessons and assessments for unified ribbon
+  const { data: courseContent = [], isLoading: contentLoading } = useQuery<CourseItem[]>({
+    queryKey: [`/api/courses/${id}/content`],
+    queryFn: async () => {
+      const modules = await apiRequest(`/api/courses/${id}/modules`);
+      const allItems: CourseItem[] = [];
+      let sequenceOrder = 1;
+      
+      for (const module of modules) {
+        // Get lessons for this module
+        const lessons = await apiRequest(`/api/modules/${module.id}/lessons`);
+        for (const lesson of lessons) {
+          allItems.push({
+            id: `lesson-${lesson.id}`,
+            itemType: 'lesson',
+            itemId: lesson.id,
+            sequenceOrder: sequenceOrder++,
+            isVisible: true,
+            data: lesson,
+            moduleTitle: module.title
+          });
+        }
+        
+        // Get assessments for this module (if any)
+        try {
+          const assessments = await apiRequest(`/api/modules/${module.id}/assessments`);
+          for (const assessment of assessments) {
+            if (assessment.assessmentType === 'summative') {
+              allItems.push({
+                id: `assessment-${assessment.id}`,
+                itemType: 'assessment',
+                itemId: assessment.id,
+                sequenceOrder: sequenceOrder++,
+                isVisible: true,
+                data: assessment,
+                moduleTitle: module.title
+              });
+            }
+          }
+        } catch (error) {
+          // Module might not have assessments
+        }
+      }
+      
+      return allItems;
+    },
     enabled: !!id,
   });
 
@@ -122,66 +165,7 @@ export default function CourseDetail() {
     enabled: !!id,
   });
 
-  // Reorder items mutation
-  const reorderItemsMutation = useMutation({
-    mutationFn: (itemUpdates: Array<{ id: number; sequenceOrder: number }>) =>
-      apiRequest(`/api/courses/${id}/items/reorder`, {
-        method: "PATCH",
-        body: JSON.stringify({ itemUpdates }),
-        headers: { "Content-Type": "application/json" },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/items`] });
-      toast({
-        title: "Success",
-        description: "Course items reordered successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to reorder course items",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Drag and drop handlers
-  const handleDragStart = useCallback((item: CourseItem) => {
-    setDraggedItem(item);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent, targetItem: CourseItem) => {
-    e.preventDefault();
-    
-    if (!draggedItem || draggedItem.id === targetItem.id) {
-      setDraggedItem(null);
-      return;
-    }
-
-    const draggedIndex = courseItems.findIndex(item => item.id === draggedItem.id);
-    const targetIndex = courseItems.findIndex(item => item.id === targetItem.id);
-    
-    if (draggedIndex === -1 || targetIndex === -1) return;
-
-    // Create new order
-    const newItems = [...courseItems];
-    const [removed] = newItems.splice(draggedIndex, 1);
-    newItems.splice(targetIndex, 0, removed);
-
-    // Update sequence orders
-    const itemUpdates = newItems.map((item, index) => ({
-      id: item.id,
-      sequenceOrder: index + 1,
-    }));
-
-    reorderItemsMutation.mutate(itemUpdates);
-    setDraggedItem(null);
-  }, [draggedItem, courseItems, reorderItemsMutation]);
+  // Note: Reordering is handled at the module level, not course level
 
   const openModuleManagement = (module: Module) => {
     setSelectedModule({ ...module, lessons: [] });
@@ -191,11 +175,11 @@ export default function CourseDetail() {
   const closeModuleManagement = () => {
     setSelectedModule(null);
     setManagementDialogOpen(false);
-    // Refresh the course items data
-    queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/items`] });
+    // Refresh the course content data
+    queryClient.invalidateQueries({ queryKey: [`/api/courses/${id}/content`] });
   };
 
-  if (courseLoading || itemsLoading || modulesLoading) {
+  if (courseLoading || contentLoading || modulesLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
         <div className="animate-pulse">
@@ -227,12 +211,12 @@ export default function CourseDetail() {
     );
   }
 
-  const totalLessons = courseItems.filter(item => item.itemType === 'lesson').length;
-  const totalAssessments = courseItems.filter(item => item.itemType === 'assessment').length;
-  const completedLessons = courseItems.filter(item => 
+  const totalLessons = courseContent.filter(item => item.itemType === 'lesson').length;
+  const totalAssessments = courseContent.filter(item => item.itemType === 'assessment').length;
+  const completedLessons = courseContent.filter(item => 
     item.itemType === 'lesson' && (item.data as LessonPlan).isCompleted
   ).length;
-  const totalDuration = courseItems
+  const totalDuration = courseContent
     .filter(item => item.itemType === 'lesson')
     .reduce((sum, item) => sum + (item.data as LessonPlan).duration, 0);
 
@@ -335,30 +319,26 @@ export default function CourseDetail() {
           </div>
         </div>
         
-        {courseItems.length === 0 ? (
+        {courseContent.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No content yet</h3>
-            <p className="text-gray-600">This course doesn't have any lessons or assessments yet.</p>
+            <p className="text-gray-600 mb-4">This course doesn't have any lessons or assessments yet.</p>
+            <p className="text-sm text-gray-500">
+              To add content, create lessons and assessments in the modules assigned to this course.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {courseItems.map((item, index) => (
+            {courseContent.map((item, index) => (
               <Card 
                 key={item.id} 
-                className={`overflow-hidden cursor-move hover:shadow-md transition-shadow ${
-                  draggedItem?.id === item.id ? 'opacity-50' : ''
-                }`}
-                draggable
-                onDragStart={() => handleDragStart(item)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, item)}
+                className="overflow-hidden hover:shadow-md transition-shadow"
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <GripVertical className="h-5 w-5 text-gray-400" />
                         <div className="flex items-center justify-center w-8 h-8 bg-blue-50 rounded-full">
                           <span className="text-sm font-medium text-blue-600">{index + 1}</span>
                         </div>
@@ -369,6 +349,7 @@ export default function CourseDetail() {
                           <GraduationCap className="h-5 w-5 text-green-600" />
                           <div>
                             <h4 className="font-medium text-gray-900">{(item.data as LessonPlan).title}</h4>
+                            <p className="text-sm text-gray-500 mb-1">From module: {item.moduleTitle}</p>
                             <div className="flex items-center space-x-2 mt-1">
                               <Badge 
                                 variant="outline" 
@@ -398,6 +379,7 @@ export default function CourseDetail() {
                           <ClipboardCheck className="h-5 w-5 text-orange-600" />
                           <div>
                             <h4 className="font-medium text-gray-900">{(item.data as Assessment).title}</h4>
+                            <p className="text-sm text-gray-500 mb-1">From module: {item.moduleTitle}</p>
                             <div className="flex items-center space-x-2 mt-1">
                               <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
                                 Summative Assessment
