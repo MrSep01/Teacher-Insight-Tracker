@@ -25,7 +25,7 @@ export const users = pgTable("users", {
   // Student profile fields
   studentId: varchar("student_id"), // Only for students
   parentId: integer("parent_id"), // Only for students - links to parent user
-  classIds: text("class_ids").array(), // Classes the student is enrolled in
+  courseIds: text("course_ids").array(), // Courses the student is enrolled in
   // Parent profile fields
   childrenIds: text("children_ids").array(), // Student IDs for parents
   // Admin profile fields
@@ -44,8 +44,8 @@ export const userSessions = pgTable(
   (table) => [index("IDX_user_session_expire").on(table.expire)],
 );
 
-// Classes table for organizing students
-export const classes = pgTable("classes", {
+// Courses table for organizing students and curriculum
+export const courses = pgTable("courses", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(), // "Grade 10 IGCSE Chemistry A", "Grade 12 A Level Chemistry"
   grade: text("grade").notNull(), // "10", "11", "12"
@@ -59,13 +59,25 @@ export const classes = pgTable("classes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Many-to-many relationship between courses and modules
+export const courseModules = pgTable("course_modules", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").references(() => courses.id).notNull(),
+  moduleId: integer("module_id").references(() => modules.id).notNull(),
+  sequenceOrder: integer("sequence_order").default(1), // Order of module in course
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Legacy classes table alias for backward compatibility
+export const classes = courses;
+
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   grade: text("grade").notNull(), // "10", "11", "12"
   level: text("level").notNull(), // "IGCSE", "A Level"
   studentId: text("student_id").notNull().unique(),
-  classId: integer("class_id").references(() => classes.id),
+  courseId: integer("course_id").references(() => courses.id),
   // Status will be calculated from assessment results, not stored
 });
 
@@ -87,7 +99,7 @@ export const assessments = pgTable("assessments", {
   description: text("description"),
   subjectId: integer("subject_id").notNull(),
   moduleId: integer("module_id").references(() => modules.id), // Link to module
-  classId: integer("class_id").references(() => classes.id), // Link to class
+  courseId: integer("course_id").references(() => courses.id), // Link to course
   // lessonId: integer("lesson_id").references(() => lessonPlans.id), // Link to lesson - removed to fix schema
   
   // Assessment metadata
@@ -151,7 +163,7 @@ export const modules = pgTable("modules", {
   topics: text("topics").array(), // Selected curriculum topics
   objectives: text("objectives").array(), // Selected learning objectives
   estimatedHours: integer("estimated_hours").default(0), // Estimated teaching hours
-  classId: integer("class_id").references(() => classes.id), // Optional class association
+  // classId: integer("class_id").references(() => classes.id), // Removed - now using courseModules table
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -390,6 +402,18 @@ export const insertClassSchema = createInsertSchema(classes).omit({
   updatedAt: true,
 });
 
+// Course and CourseModule schemas
+export const insertCourseSchema = createInsertSchema(courses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCourseModuleSchema = createInsertSchema(courseModules).omit({
+  id: true,
+  createdAt: true,
+});
+
 // New schemas for enhanced lesson and assessment system
 export const insertAssessmentQuestionSchema = createInsertSchema(assessmentQuestions).omit({
   id: true,
@@ -420,6 +444,12 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Class = typeof classes.$inferSelect;
 export type InsertClass = z.infer<typeof insertClassSchema>;
+
+export type Course = typeof courses.$inferSelect;
+export type InsertCourse = z.infer<typeof insertCourseSchema>;
+
+export type CourseModule = typeof courseModules.$inferSelect;
+export type InsertCourseModule = z.infer<typeof insertCourseModuleSchema>;
 
 export type Student = typeof students.$inferSelect;
 export type InsertStudent = z.infer<typeof insertStudentSchema>;

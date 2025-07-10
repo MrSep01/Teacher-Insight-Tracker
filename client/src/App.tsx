@@ -8,7 +8,7 @@ import AuthGuard from "@/components/auth/auth-guard";
 import RoleBasedRouter from "@/components/role-based-router";
 import Dashboard from "@/pages/dashboard";
 import Students from "@/pages/students";
-import Classes from "@/pages/classes";
+import Courses from "@/pages/courses";
 import Assessments from "@/pages/assessments";
 import Modules from "@/pages/modules";
 import Reports from "@/pages/reports";
@@ -63,12 +63,12 @@ function Router() {
         </AuthGuard>
       </Route>
       
-      <Route path="/classes">
+      <Route path="/courses">
         <AuthGuard>
           <div className="flex h-screen overflow-hidden">
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
-              <Classes />
+              <Courses />
             </div>
           </div>
         </AuthGuard>

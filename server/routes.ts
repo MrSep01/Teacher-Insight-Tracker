@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema } from "@shared/schema";
+import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema, insertCourseSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
 import { aiAssessmentGenerator } from "./ai-assessment-generator";
 import { enhancedLessonGenerator } from "./enhanced-lesson-generator";
@@ -56,66 +56,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Classes routes (protected)
-  app.get("/api/classes", requireAuth, async (req, res) => {
+  // Courses routes (protected)
+  app.get("/api/courses", requireAuth, async (req, res) => {
     try {
       const teacherId = req.user.id;
-      const classes = await storage.getClassesByTeacherId(teacherId);
-      res.json(classes);
+      const courses = await storage.getCoursesByTeacherId(teacherId);
+      res.json(courses);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch classes" });
+      res.status(500).json({ error: "Failed to fetch courses" });
     }
   });
 
-  app.post("/api/classes", requireAuth, async (req, res) => {
+  app.post("/api/courses", requireAuth, async (req, res) => {
     try {
       const teacherId = req.user.id;
-      const classData = insertClassSchema.parse({ ...req.body, teacherId });
-      const newClass = await storage.createClass(classData);
-      res.json(newClass);
+      const courseData = insertCourseSchema.parse({ ...req.body, teacherId });
+      const newCourse = await storage.createCourse(courseData);
+      res.json(newCourse);
     } catch (error) {
-      res.status(400).json({ error: "Failed to create class" });
+      res.status(400).json({ error: "Failed to create course" });
     }
   });
 
-  app.put("/api/classes/:id", requireAuth, async (req, res) => {
+  app.patch("/api/courses/:id", requireAuth, async (req, res) => {
     try {
-      const classId = parseInt(req.params.id);
+      const courseId = parseInt(req.params.id);
       const teacherId = req.user.id;
       
-      // Verify the class belongs to the teacher
-      const existingClass = await storage.getClassById(classId);
-      if (!existingClass || existingClass.teacherId !== teacherId) {
-        return res.status(404).json({ error: "Class not found" });
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
       }
       
-      const classData = insertClassSchema.partial().parse(req.body);
-      const updatedClass = await storage.updateClass(classId, classData);
-      res.json(updatedClass);
+      const courseData = insertCourseSchema.partial().parse(req.body);
+      const updatedCourse = await storage.updateCourse(courseId, courseData);
+      res.json(updatedCourse);
     } catch (error) {
-      res.status(400).json({ error: "Failed to update class" });
+      res.status(400).json({ error: "Failed to update course" });
     }
   });
 
-  app.delete("/api/classes/:id", requireAuth, async (req, res) => {
+  app.delete("/api/courses/:id", requireAuth, async (req, res) => {
     try {
-      const classId = parseInt(req.params.id);
+      const courseId = parseInt(req.params.id);
       const teacherId = req.user.id;
       
-      // Verify the class belongs to the teacher
-      const existingClass = await storage.getClassById(classId);
-      if (!existingClass || existingClass.teacherId !== teacherId) {
-        return res.status(404).json({ error: "Class not found" });
+      // Verify the course belongs to the teacher
+      const existingCourse = await storage.getCourseById(courseId);
+      if (!existingCourse || existingCourse.teacherId !== teacherId) {
+        return res.status(404).json({ error: "Course not found" });
       }
       
-      const deleted = await storage.deleteClass(classId);
+      const deleted = await storage.deleteCourse(courseId);
       if (deleted) {
         res.json({ success: true });
       } else {
-        res.status(404).json({ error: "Class not found" });
+        res.status(404).json({ error: "Course not found" });
       }
     } catch (error) {
-      res.status(500).json({ error: "Failed to delete class" });
+      res.status(500).json({ error: "Failed to delete course" });
     }
   });
 

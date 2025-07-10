@@ -30,6 +30,13 @@ import {
   lessonPlans,
   lessonRecommendations
 } from "@shared/schema";
+
+// Use Course types from Class (since we'll use the courses table directly)
+type Course = Class;
+type InsertCourse = InsertClass;
+
+// Use courses table directly (it exists in the database)
+const courses = classes;
 import { db } from "./db";
 import { eq, and, desc, gte } from "drizzle-orm";
 
@@ -48,6 +55,13 @@ export interface IStorage {
   createClass(cls: InsertClass): Promise<Class>;
   updateClass(id: number, cls: Partial<InsertClass>): Promise<Class | undefined>;
   deleteClass(id: number): Promise<boolean>;
+
+  // Courses
+  getCoursesByTeacherId(teacherId: number): Promise<Course[]>;
+  getCourseById(id: number): Promise<Course | undefined>;
+  createCourse(course: InsertCourse): Promise<Course>;
+  updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course | undefined>;
+  deleteCourse(id: number): Promise<boolean>;
 
   // Students
   getStudents(): Promise<Student[]>;
@@ -524,7 +538,32 @@ export class DatabaseStorage implements IStorage {
 
   async deleteClass(id: number): Promise<boolean> {
     const result = await db.delete(classes).where(eq(classes.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Course methods
+  async getCoursesByTeacherId(teacherId: number): Promise<Course[]> {
+    return await db.select().from(courses).where(eq(courses.teacherId, teacherId));
+  }
+
+  async getCourseById(id: number): Promise<Course | undefined> {
+    const [course] = await db.select().from(courses).where(eq(courses.id, id));
+    return course;
+  }
+
+  async createCourse(course: InsertCourse): Promise<Course> {
+    const [newCourse] = await db.insert(courses).values(course).returning();
+    return newCourse;
+  }
+
+  async updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course | undefined> {
+    const [updatedCourse] = await db.update(courses).set(course).where(eq(courses.id, id)).returning();
+    return updatedCourse;
+  }
+
+  async deleteCourse(id: number): Promise<boolean> {
+    const result = await db.delete(courses).where(eq(courses.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getStudents(): Promise<Student[]> {
@@ -923,15 +962,6 @@ export class DatabaseStorage implements IStorage {
 
   async getLessonsByModule(moduleId: number): Promise<LessonPlan[]> {
     return await db.select().from(lessonPlans).where(eq(lessonPlans.moduleId, moduleId));
-  }
-
-  async updateLessonPlan(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined> {
-    const [updatedLessonPlan] = await db
-      .update(lessonPlans)
-      .set(lessonPlan)
-      .where(eq(lessonPlans.id, id))
-      .returning();
-    return updatedLessonPlan;
   }
 
   async getDashboardStats(): Promise<DashboardStats> {
