@@ -492,13 +492,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      res.json({
+      const responseData = {
         ...lesson,
         fullContent: fullLessonContent || fullContent,
         studentWorksheet: lesson.studentWorksheet,
         teachingScript: lesson.teachingScript,
         assessmentQuestions: lesson.assessmentQuestions
+      };
+      
+      // Debug logging
+      console.log('Sending lesson data with comprehensive content:', {
+        id: lesson.id,
+        title: lesson.title,
+        hasFullContent: !!responseData.fullContent,
+        hasStudentWorksheet: !!responseData.studentWorksheet,
+        hasTeachingScript: !!responseData.teachingScript,
+        hasAssessmentQuestions: !!responseData.assessmentQuestions
       });
+      
+      res.json(responseData);
     } catch (error) {
       console.error('Error fetching full lesson content:', error);
       res.status(500).json({ error: "Failed to fetch lesson content" });
