@@ -517,6 +517,567 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
             mathematicalSkills: ["Property analysis", "Structure correlations", "Bonding theory applications"]
           }
         ]
+      },
+      {
+        id: "igcse-topic-2",
+        name: "Inorganic Chemistry",
+        description: "Chemistry of metals, non-metals, and common compounds",
+        specificationCode: "2",
+        timeAllocation: 40,
+        assessmentNotes: "Practical chemistry with metal extraction, acid-base reactions, and gas tests",
+        subtopics: [
+          {
+            id: "2.1",
+            name: "Group 1 (Alkali Metals)",
+            description: "Properties and reactions of alkali metals",
+            objectives: [
+              {
+                id: "2.1.1",
+                code: "2.1",
+                statement: "Know the trends in properties of Group 1 elements: lithium, sodium and potassium",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.4.2"],
+                keywords: ["alkali metals", "Group 1", "lithium", "sodium", "potassium", "trends", "reactivity"]
+              },
+              {
+                id: "2.1.2",
+                code: "2.2",
+                statement: "Understand the reactions of Group 1 elements with oxygen, water and halogens",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "predict"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["2.1.1"],
+                keywords: ["alkali metal reactions", "oxygen", "water", "halogens", "metal oxides", "metal hydroxides"]
+              }
+            ],
+            practicalWork: ["Group 1 metal reactions", "Flame tests", "Reactivity series investigation"],
+            mathematicalSkills: ["Trend analysis", "Reaction predictions", "Equation balancing"]
+          },
+          {
+            id: "2.2",
+            name: "Group 7 (Halogens)",
+            description: "Properties and reactions of halogens",
+            objectives: [
+              {
+                id: "2.2.1",
+                code: "2.3",
+                statement: "Know the trends in properties of Group 7 elements: fluorine, chlorine, bromine and iodine",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.4.2"],
+                keywords: ["halogens", "Group 7", "fluorine", "chlorine", "bromine", "iodine", "trends"]
+              },
+              {
+                id: "2.2.2",
+                code: "2.4",
+                statement: "Understand the displacement reactions of halogens with halides",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "predict"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["2.2.1"],
+                keywords: ["displacement reactions", "halides", "reactivity order", "oxidation", "reduction"]
+              }
+            ],
+            practicalWork: ["Halogen displacement reactions", "Halide identification tests", "Reactivity investigations"],
+            mathematicalSkills: ["Reactivity series", "Redox equations", "Trend analysis"]
+          },
+          {
+            id: "2.3",
+            name: "Oxygen and Oxides",
+            description: "Chemistry of oxygen and oxide compounds",
+            objectives: [
+              {
+                id: "2.3.1",
+                code: "2.5",
+                statement: "Know the tests for oxygen and understand how oxygen is obtained industrially",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["know", "understand"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.2.2"],
+                keywords: ["oxygen", "oxygen test", "industrial production", "fractional distillation", "air"]
+              },
+              {
+                id: "2.3.2",
+                code: "2.6",
+                statement: "Understand the formation of metal oxides by oxidation of metals in air",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["2.3.1"],
+                keywords: ["metal oxides", "oxidation", "combustion", "corrosion", "rusting"]
+              }
+            ],
+            practicalWork: ["Oxygen preparation", "Metal oxidation experiments", "Oxide formation studies"],
+            mathematicalSkills: ["Oxidation equations", "Mass calculations", "Percentage composition"]
+          },
+          {
+            id: "2.4",
+            name: "Hydrogen and Water",
+            description: "Properties and reactions of hydrogen and water",
+            objectives: [
+              {
+                id: "2.4.1",
+                code: "2.7",
+                statement: "Know the test for hydrogen and understand how hydrogen is obtained industrially",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["know", "understand"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.2.2"],
+                keywords: ["hydrogen", "hydrogen test", "industrial production", "electrolysis", "steam reforming"]
+              },
+              {
+                id: "2.4.2",
+                code: "2.8",
+                statement: "Understand the reactions between hydrogen and oxygen, and between hydrogen and halogens",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "predict"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["2.4.1"],
+                keywords: ["hydrogen reactions", "water formation", "hydrogen halides", "synthesis reactions"]
+              }
+            ],
+            practicalWork: ["Hydrogen preparation", "Water electrolysis", "Hydrogen combustion"],
+            mathematicalSkills: ["Electrolysis calculations", "Gas volume calculations", "Reaction equations"]
+          },
+          {
+            id: "2.5",
+            name: "Reactivity Series",
+            description: "Metal reactivity and displacement reactions",
+            objectives: [
+              {
+                id: "2.5.1",
+                code: "2.9",
+                statement: "Know the order of reactivity of metals: potassium, sodium, lithium, calcium, magnesium, aluminium, zinc, iron, copper, silver, gold",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["2.1.1"],
+                keywords: ["reactivity series", "metal reactivity", "displacement", "metal extraction"]
+              },
+              {
+                id: "2.5.2",
+                code: "2.10",
+                statement: "Understand displacement reactions between metals and solutions of metal salts",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "predict"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["2.5.1"],
+                keywords: ["displacement reactions", "metal salts", "more reactive metals", "less reactive metals"]
+              }
+            ],
+            practicalWork: ["Reactivity series experiments", "Metal displacement reactions", "Competitive reactions"],
+            mathematicalSkills: ["Reactivity predictions", "Displacement equations", "Competition analysis"]
+          },
+          {
+            id: "2.6",
+            name: "Tests for Ions and Gases",
+            description: "Identification tests for common ions and gases",
+            objectives: [
+              {
+                id: "2.6.1",
+                code: "2.11",
+                statement: "Know the tests for the gases: ammonia, carbon dioxide, chlorine, hydrogen, oxygen",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "identify"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["1.2.2"],
+                keywords: ["gas tests", "ammonia", "carbon dioxide", "chlorine", "hydrogen", "oxygen", "identification"]
+              },
+              {
+                id: "2.6.2",
+                code: "2.12",
+                statement: "Know the tests for the ions: chloride, bromide, iodide, sulfate, carbonate, nitrate, ammonium",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "identify"],
+                estimatedTeachingMinutes: 120,
+                assessmentWeight: 6,
+                prerequisiteObjectives: ["2.6.1"],
+                keywords: ["ion tests", "halide tests", "sulfate test", "carbonate test", "nitrate test", "ammonium test"]
+              }
+            ],
+            practicalWork: ["Gas identification tests", "Ion identification tests", "Qualitative analysis"],
+            mathematicalSkills: ["Test result interpretation", "Analytical procedures", "Systematic identification"]
+          }
+        ]
+      },
+      {
+        id: "igcse-topic-3",
+        name: "Physical Chemistry",
+        description: "Energy changes, reaction rates, and equilibrium",
+        specificationCode: "3",
+        timeAllocation: 35,
+        assessmentNotes: "Quantitative chemistry with calculations, energy changes, and reaction kinetics",
+        subtopics: [
+          {
+            id: "3.1",
+            name: "Energetics",
+            description: "Energy changes in chemical reactions",
+            objectives: [
+              {
+                id: "3.1.1",
+                code: "3.1",
+                statement: "Know that chemical reactions in which heat is given out are exothermic and those in which heat is taken in are endothermic",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "define"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["1.5.1"],
+                keywords: ["exothermic", "endothermic", "heat energy", "energy transfer", "temperature change"]
+              },
+              {
+                id: "3.1.2",
+                code: "3.2",
+                statement: "Understand the use of ΔH to represent enthalpy change and know that exothermic reactions have negative ΔH and endothermic reactions have positive ΔH",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "interpret"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["3.1.1"],
+                keywords: ["enthalpy change", "ΔH", "energy diagrams", "activation energy", "bond breaking", "bond forming"]
+              },
+              {
+                id: "3.1.3",
+                code: "3.3",
+                statement: "Know that bond breaking is endothermic and bond forming is exothermic",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["3.1.2"],
+                keywords: ["bond breaking", "bond forming", "bond energies", "energy required", "energy released"]
+              }
+            ],
+            practicalWork: ["Calorimetry experiments", "Energy change measurements", "Reaction temperature monitoring"],
+            mathematicalSkills: ["Enthalpy calculations", "Energy change calculations", "Graph interpretation"]
+          },
+          {
+            id: "3.2",
+            name: "Rates of Reaction",
+            description: "Factors affecting reaction rates",
+            objectives: [
+              {
+                id: "3.2.1",
+                code: "3.4",
+                statement: "Know that the rate of a reaction can be changed by changing the concentration, pressure, temperature or by adding a catalyst",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["1.1.1"],
+                keywords: ["reaction rate", "concentration", "pressure", "temperature", "catalyst", "collision theory"]
+              },
+              {
+                id: "3.2.2",
+                code: "3.5",
+                statement: "Understand the collision theory and explain how changing concentration, pressure, temperature or adding a catalyst affects the rate of reaction",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["3.2.1"],
+                keywords: ["collision theory", "successful collisions", "activation energy", "frequency of collisions", "catalysts"]
+              }
+            ],
+            practicalWork: ["Rate of reaction experiments", "Catalyst investigations", "Temperature effect studies"],
+            mathematicalSkills: ["Rate calculations", "Graph analysis", "Data interpretation"]
+          },
+          {
+            id: "3.3",
+            name: "Reversible Reactions and Equilibrium",
+            description: "Dynamic equilibrium and Le Chatelier's principle",
+            objectives: [
+              {
+                id: "3.3.1",
+                code: "3.6",
+                statement: "Know that some reactions are reversible and understand what is meant by dynamic equilibrium",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["know", "understand"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["3.2.1"],
+                keywords: ["reversible reactions", "dynamic equilibrium", "forward reaction", "backward reaction", "equal rates"]
+              },
+              {
+                id: "3.3.2",
+                code: "3.7",
+                statement: "Understand how changing temperature, pressure or concentration affects the position of equilibrium",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "predict"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["3.3.1"],
+                keywords: ["Le Chatelier's principle", "equilibrium position", "temperature effect", "pressure effect", "concentration effect"]
+              }
+            ],
+            practicalWork: ["Equilibrium demonstrations", "Le Chatelier's principle experiments", "Equilibrium shift investigations"],
+            mathematicalSkills: ["Equilibrium predictions", "Effect analysis", "Principle applications"]
+          }
+        ]
+      },
+      {
+        id: "igcse-topic-4",
+        name: "Organic Chemistry",
+        description: "Chemistry of carbon compounds and polymers",
+        specificationCode: "4",
+        timeAllocation: 30,
+        assessmentNotes: "Organic chemistry including hydrocarbons, alcohols, acids, and synthetic polymers",
+        subtopics: [
+          {
+            id: "4.1",
+            name: "Introduction to Organic Chemistry",
+            description: "Basic concepts of organic chemistry",
+            objectives: [
+              {
+                id: "4.1.1",
+                code: "4.1",
+                statement: "Know that organic chemistry is the chemistry of compounds containing carbon",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "define"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["1.3.1"],
+                keywords: ["organic chemistry", "carbon compounds", "hydrocarbons", "organic molecules"]
+              },
+              {
+                id: "4.1.2",
+                code: "4.2",
+                statement: "Know that a functional group is the reactive part of an organic molecule",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "identify"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.1.1"],
+                keywords: ["functional group", "reactive part", "organic molecule", "chemical behavior"]
+              }
+            ],
+            practicalWork: ["Organic compound identification", "Functional group recognition", "Molecular model building"],
+            mathematicalSkills: ["Molecular formula determination", "Structural formula representation", "Isomer identification"]
+          },
+          {
+            id: "4.2",
+            name: "Alkanes",
+            description: "Saturated hydrocarbons",
+            objectives: [
+              {
+                id: "4.2.1",
+                code: "4.3",
+                statement: "Know the general formula for alkanes and understand that they are saturated hydrocarbons",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["know", "understand"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["4.1.1"],
+                keywords: ["alkanes", "CnH2n+2", "saturated hydrocarbons", "single bonds", "homologous series"]
+              },
+              {
+                id: "4.2.2",
+                code: "4.4",
+                statement: "Know the molecular and structural formulae of methane, ethane, propane and butane",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "write"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.2.1"],
+                keywords: ["methane", "ethane", "propane", "butane", "molecular formula", "structural formula"]
+              }
+            ],
+            practicalWork: ["Alkane combustion experiments", "Molecular model construction", "Hydrocarbon properties"],
+            mathematicalSkills: ["Formula writing", "Homologous series patterns", "Combustion equations"]
+          },
+          {
+            id: "4.3",
+            name: "Alkenes",
+            description: "Unsaturated hydrocarbons",
+            objectives: [
+              {
+                id: "4.3.1",
+                code: "4.5",
+                statement: "Know the general formula for alkenes and understand that they are unsaturated hydrocarbons",
+                bloomsLevel: "understand",
+                difficulty: "basic",
+                commandWords: ["know", "understand"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["4.2.1"],
+                keywords: ["alkenes", "CnH2n", "unsaturated hydrocarbons", "double bonds", "C=C"]
+              },
+              {
+                id: "4.3.2",
+                code: "4.6",
+                statement: "Know the molecular and structural formulae of ethene, propene and butene",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "write"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.3.1"],
+                keywords: ["ethene", "propene", "butene", "molecular formula", "structural formula", "double bond"]
+              },
+              {
+                id: "4.3.3",
+                code: "4.7",
+                statement: "Understand addition reactions of alkenes with hydrogen, steam, hydrogen halides and halogens",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "predict"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["4.3.1"],
+                keywords: ["addition reactions", "hydrogen", "steam", "hydrogen halides", "halogens", "alkene reactions"]
+              }
+            ],
+            practicalWork: ["Alkene addition reactions", "Bromine water test", "Hydrogenation experiments"],
+            mathematicalSkills: ["Addition reaction equations", "Product prediction", "Mechanism understanding"]
+          },
+          {
+            id: "4.4",
+            name: "Alcohols",
+            description: "Organic compounds containing hydroxyl groups",
+            objectives: [
+              {
+                id: "4.4.1",
+                code: "4.8",
+                statement: "Know the molecular and structural formulae of methanol, ethanol, propanol and butanol",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "write"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.1.2"],
+                keywords: ["alcohols", "methanol", "ethanol", "propanol", "butanol", "hydroxyl group", "-OH"]
+              },
+              {
+                id: "4.4.2",
+                code: "4.9",
+                statement: "Know the uses of alcohols in alcoholic drinks and as fuels",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "state"],
+                estimatedTeachingMinutes: 30,
+                assessmentWeight: 2,
+                prerequisiteObjectives: ["4.4.1"],
+                keywords: ["alcohol uses", "alcoholic drinks", "fuels", "fermentation", "ethanol fuel"]
+              }
+            ],
+            practicalWork: ["Alcohol preparation", "Fermentation experiments", "Alcohol combustion"],
+            mathematicalSkills: ["Fermentation equations", "Combustion calculations", "Yield calculations"]
+          },
+          {
+            id: "4.5",
+            name: "Carboxylic Acids",
+            description: "Organic acids containing carboxyl groups",
+            objectives: [
+              {
+                id: "4.5.1",
+                code: "4.10",
+                statement: "Know the molecular and structural formulae of methanoic acid, ethanoic acid, propanoic acid and butanoic acid",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "write"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.1.2"],
+                keywords: ["carboxylic acids", "methanoic acid", "ethanoic acid", "propanoic acid", "butanoic acid", "carboxyl group", "-COOH"]
+              },
+              {
+                id: "4.5.2",
+                code: "4.11",
+                statement: "Know the reactions of carboxylic acids with metals, metal oxides, metal hydroxides and metal carbonates",
+                bloomsLevel: "remember",
+                difficulty: "intermediate",
+                commandWords: ["know", "predict"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["4.5.1"],
+                keywords: ["carboxylic acid reactions", "metals", "metal oxides", "metal hydroxides", "metal carbonates", "salt formation"]
+              }
+            ],
+            practicalWork: ["Carboxylic acid reactions", "Acid-metal experiments", "Salt preparation"],
+            mathematicalSkills: ["Acid reaction equations", "Salt formation equations", "Neutralization calculations"]
+          },
+          {
+            id: "4.6",
+            name: "Synthetic Polymers",
+            description: "Addition and condensation polymers",
+            objectives: [
+              {
+                id: "4.6.1",
+                code: "4.12",
+                statement: "Know that addition polymers are formed by joining up many small molecules called monomers",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "understand"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.3.1"],
+                keywords: ["addition polymers", "monomers", "polymerization", "polymer chains", "repeating units"]
+              },
+              {
+                id: "4.6.2",
+                code: "4.13",
+                statement: "Know the formation of poly(ethene) from ethene and poly(propene) from propene",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "represent"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["4.6.1"],
+                keywords: ["poly(ethene)", "poly(propene)", "polyethylene", "polypropylene", "polymer formation"]
+              },
+              {
+                id: "4.6.3",
+                code: "4.14",
+                statement: "Understand the environmental challenges posed by synthetic polymers",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "evaluate"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["4.6.1"],
+                keywords: ["environmental impact", "plastic pollution", "biodegradability", "recycling", "waste management"]
+              }
+            ],
+            practicalWork: ["Polymer formation demonstrations", "Polymer property investigations", "Environmental impact studies"],
+            mathematicalSkills: ["Polymer structure representation", "Molecular weight calculations", "Environmental data analysis"]
+          }
+        ]
       }
     ]
   },
