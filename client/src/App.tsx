@@ -11,6 +11,7 @@ import Students from "@/pages/students";
 import Courses from "@/pages/courses";
 import Assessments from "@/pages/assessments";
 import Modules from "@/pages/modules";
+import ModuleDetail from "@/pages/module-detail";
 import Reports from "@/pages/reports";
 import AIRecommendations from "@/pages/ai-recommendations";
 import Profile from "@/pages/profile";
@@ -69,6 +70,17 @@ function Router() {
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
               <Courses />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/modules/:id">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <ModuleDetail />
             </div>
           </div>
         </AuthGuard>
