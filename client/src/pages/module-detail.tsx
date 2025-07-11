@@ -658,7 +658,7 @@ export default function ModuleDetail() {
             IGCSE Chemistry Edexcel specification objectives for this module - All {module.objectives?.length || 0} objectives displayed
           </CardDescription>
         </CardHeader>
-        <CardContent className="max-h-none">
+        <CardContent className="max-h-[800px] overflow-y-auto">
           {module.objectives && module.objectives.length > 0 ? (
             <div className="space-y-4">
               {module.objectives.map((objective, index) => {
@@ -740,6 +740,7 @@ export default function ModuleDetail() {
               </div>
             ) : lessons.length > 0 ? (
               <div className="space-y-4">
+                <div className="text-xs text-gray-500 mb-2">Debug: {lessons.length} lessons loaded</div>
                 {lessons.map((lesson) => (
                   <div key={lesson.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" onClick={() => handleViewLesson(lesson)}>
                     <div className="flex items-start gap-3">
@@ -831,6 +832,7 @@ export default function ModuleDetail() {
               </div>
             ) : assessments.length > 0 ? (
               <div className="space-y-4">
+                <div className="text-xs text-gray-500 mb-2">Debug: {assessments.length} assessments loaded</div>
                 {assessments.map((assessment) => (
                   <div key={assessment.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:border-purple-300 transition-colors cursor-pointer" onClick={() => handleViewAssessment(assessment)}>
                     <div className="flex items-start gap-3">
