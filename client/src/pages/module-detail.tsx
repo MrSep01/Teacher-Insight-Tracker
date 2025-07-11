@@ -457,7 +457,7 @@ export default function ModuleDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-4 sm:p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -648,41 +648,41 @@ export default function ModuleDetail() {
         </CardContent>
       </Card>
 
-      {/* Learning Objectives */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
+      {/* Learning Objectives - Expanded */}
+      <Card className="border-2 border-green-200 bg-green-50/30">
+        <CardHeader className="bg-green-50">
+          <CardTitle className="flex items-center gap-2 text-green-800">
+            <Target className="h-6 w-6" />
             Complete Learning Objectives ({module.objectives?.length || 0})
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-green-700">
             IGCSE Chemistry Edexcel specification objectives for this module - All {module.objectives?.length || 0} objectives displayed
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-6 space-y-6">
           {module.objectives && module.objectives.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {module.objectives.map((objective, index) => {
                 const formatted = formatObjective(objective, index);
                 return (
-                  <div key={index} className="flex items-start gap-4 p-4 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
+                  <div key={index} className="flex items-start gap-6 p-6 bg-white rounded-xl border border-green-200 hover:bg-green-50 transition-colors shadow-sm min-h-[120px]">
                     <div className="flex-shrink-0">
-                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 font-mono font-bold text-sm px-3 py-1">
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 font-mono font-bold text-base px-4 py-2">
                         {formatted.code}
                       </Badge>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-sm text-green-700 leading-relaxed mb-3 font-medium">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-base text-green-700 leading-relaxed mb-4 font-medium">
                         {formatted.description}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Badge variant="secondary" className="text-xs px-2 py-1 bg-blue-100 text-blue-700">
+                      <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
+                        <Badge variant="secondary" className="text-sm px-3 py-1 bg-blue-100 text-blue-700">
                           {formatted.topic}
                         </Badge>
-                        <span>→</span>
+                        <span className="text-gray-400">→</span>
                         <Badge 
                           variant="secondary" 
-                          className={`text-xs px-2 py-1 ${
+                          className={`text-sm px-3 py-1 ${
                             formatted.isHighlighted 
                               ? 'bg-yellow-100 text-yellow-800 border-yellow-300 font-semibold' 
                               : 'bg-purple-100 text-purple-700'
@@ -692,7 +692,7 @@ export default function ModuleDetail() {
                         </Badge>
                       </div>
                     </div>
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
+                    <CheckCircle className="h-6 w-6 text-green-600 mt-2 flex-shrink-0" />
                   </div>
                 );
               })}
@@ -711,7 +711,7 @@ export default function ModuleDetail() {
 
       {/* Lessons and Assessments - Single Column Layout */}
       <div className="space-y-6">
-        {/* Lessons Section */}
+        {/* Lessons Section - Expanded */}
         <Card className="border-2 border-blue-200 bg-blue-50/30">
           <CardHeader className="bg-blue-50">
             <div className="flex items-center justify-between">
@@ -730,31 +730,31 @@ export default function ModuleDetail() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
+          <CardContent className="p-6 space-y-6">
             {lessonsLoading ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="h-32 bg-gray-200 rounded"></div>
+                    <div className="h-40 bg-gray-200 rounded-xl"></div>
                   </div>
                 ))}
               </div>
             ) : lessons.length > 0 ? (
-              <div className="space-y-4">
-                <div className="text-xs text-gray-500 mb-2">Debug: {lessons.length} lessons loaded</div>
+              <div className="space-y-6">
+                <div className="text-sm text-blue-600 mb-4 font-medium">Debug: {lessons.length} lessons loaded</div>
                 {lessons.map((lesson) => (
-                  <div key={lesson.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" onClick={() => handleViewLesson(lesson)}>
-                    <div className="flex items-start gap-3">
+                  <div key={lesson.id} className="bg-white p-6 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer min-h-[140px]" onClick={() => handleViewLesson(lesson)}>
+                    <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 mt-1">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <BookOpen className="h-4 w-4 text-blue-600" />
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                          <BookOpen className="h-6 w-6 text-blue-600" />
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 mb-1">{lesson.title}</h4>
-                        <p className="text-sm text-gray-600 mb-3">{lesson.description}</p>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="outline" className={`text-xs px-2 py-1 ${
+                        <h4 className="font-semibold text-gray-900 mb-2 text-lg">{lesson.title}</h4>
+                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">{lesson.description}</p>
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                          <Badge variant="outline" className={`text-sm px-3 py-1 ${
                             lesson.lessonType === 'lecture' ? 'bg-blue-100 text-blue-800 border-blue-200' :
                             lesson.lessonType === 'practical' ? 'bg-green-100 text-green-800 border-green-200' :
                             lesson.lessonType === 'assessment' ? 'bg-red-100 text-red-800 border-red-200' :
@@ -762,7 +762,7 @@ export default function ModuleDetail() {
                           }`}>
                             {lesson.lessonType}
                           </Badge>
-                          <Badge variant="outline" className={`text-xs px-2 py-1 ${
+                          <Badge variant="outline" className={`text-sm px-3 py-1 ${
                             lesson.difficulty === 'basic' ? 'bg-green-100 text-green-800 border-green-200' :
                             lesson.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
                             'bg-red-100 text-red-800 border-red-200'
@@ -770,17 +770,17 @@ export default function ModuleDetail() {
                             {lesson.difficulty}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                        <div className="flex items-center gap-6 text-sm text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
                             {lesson.duration} min
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Target className="h-3 w-3" />
+                          <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4" />
                             {lesson.objectives?.length || 0} objectives
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Play className="h-3 w-3" />
+                          <div className="flex items-center gap-2">
+                            <Play className="h-4 w-4" />
                             {lesson.activities?.length || 0} activities
                           </div>
                         </div>
