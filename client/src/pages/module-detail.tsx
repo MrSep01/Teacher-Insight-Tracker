@@ -633,7 +633,9 @@ export default function ModuleDetail() {
               <div className="text-sm text-purple-700 space-y-1">
                 <div>• <strong>(d) The Periodic Table</strong></div>
                 <div>• <strong>(e) Chemical formulae, equations and calculations</strong></div>
-                <div>• <strong>(f) Ionic bonding</strong> (5.1-5.7)</div>
+                <div className="bg-yellow-100 border border-yellow-300 rounded p-2 my-1">
+                  <div className="text-yellow-800 font-semibold">• <strong>(f) Ionic bonding</strong> (5.1-5.7) ← This Module Focus</div>
+                </div>
                 <div>• <strong>(g) Covalent bonding</strong></div>
                 <div>• <strong>(h) Metallic bonding</strong></div>
                 <div>• <strong>(i) Electrolysis</strong></div>
@@ -642,12 +644,15 @@ export default function ModuleDetail() {
             
             {/* Objectives Examples */}
             <div className="border-l-4 border-orange-500 pl-4">
-              <div className="text-sm font-semibold text-orange-800 mb-2">Ionic Bonding Objectives</div>
+              <div className="text-sm font-semibold text-orange-800 mb-2">Ionic Bonding Objectives (5.1-5.7)</div>
               <div className="text-sm text-orange-700 space-y-1">
                 <div><strong>5.1</strong> - understand how ions are formed by electron loss or gain</div>
                 <div><strong>5.2</strong> - know the charges of these ions: metals in Groups 1, 2 and 3; non-metals in Groups 5, 6 and 7</div>
                 <div><strong>5.3</strong> - write formulae for compounds formed between the ions listed above</div>
                 <div><strong>5.4</strong> - draw dot-and-cross diagrams to show the formation of ionic compounds by electron transfer</div>
+                <div><strong>5.5</strong> - understand ionic bonding in terms of electrostatic attractions</div>
+                <div><strong>5.6</strong> - understand why compounds with giant ionic lattices have high melting and boiling points</div>
+                <div><strong>5.7</strong> - know that ionic compounds do not conduct electricity when solid, but do conduct electricity when molten and in aqueous solution</div>
               </div>
             </div>
           </div>
