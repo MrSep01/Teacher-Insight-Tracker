@@ -43,9 +43,9 @@ import { apiRequest } from "@/lib/queryClient";
 
 // Helper function to format objectives for better display
 function formatObjective(objective: string, index: number): { code: string; description: string } {
+  // IGCSE format: "1.1 understand the three states of matter..."
   // Try to parse the objective as a curriculum specification code with description
-  // Format: "1.1 - Describe the structure of atoms" or "1.1 Describe the structure of atoms"
-  const codeMatch = objective.match(/^(\d+\.\d+(?:\.\d+)?)\s*[-–—]?\s*(.+)$/);
+  const codeMatch = objective.match(/^(\d+\.\d+[A-Z]?)\s+(.+)$/);
   if (codeMatch) {
     return {
       code: codeMatch[1],
@@ -54,7 +54,7 @@ function formatObjective(objective: string, index: number): { code: string; desc
   }
   
   // Check if it's just a spec code (e.g., "1.1", "2.3.4")
-  const specCodePattern = /^(\d+\.\d+(?:\.\d+)?)$/;
+  const specCodePattern = /^(\d+\.\d+[A-Z]?)$/;
   if (specCodePattern.test(objective.trim())) {
     return {
       code: objective.trim(),
@@ -62,9 +62,10 @@ function formatObjective(objective: string, index: number): { code: string; desc
     };
   }
   
-  // For full descriptions without codes, assign a simple index
+  // For full descriptions without codes, assign a simple index following IGCSE pattern
+  const generatedCode = `${Math.floor(index / 10) + 1}.${(index % 10) + 1}`;
   return {
-    code: `${index + 1}`,
+    code: generatedCode,
     description: objective
   };
 }
@@ -564,64 +565,102 @@ export default function ModuleDetail() {
         </Card>
       </div>
 
-      {/* Topics Covered */}
-      {module.topics && module.topics.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Topics Covered
-            </CardTitle>
-            <CardDescription>
-              Curriculum topics and subtopics included in this module
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {module.topics.map((topic, index) => (
-                <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                  {topic}
-                </Badge>
-              ))}
+      {/* Curriculum Hierarchy */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Curriculum Structure
+          </CardTitle>
+          <CardDescription>
+            Understanding the hierarchy: Curriculum → Topics → Subtopics → Objectives
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Curriculum Level */}
+            <div className="border-l-4 border-blue-500 pl-4">
+              <div className="text-sm font-semibold text-blue-800 mb-1">Curriculum</div>
+              <div className="text-lg font-bold text-blue-900">{module.curriculumTopic}</div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            
+            {/* Topics Level */}
+            {module.topics && module.topics.length > 0 && (
+              <div className="border-l-4 border-green-500 pl-4">
+                <div className="text-sm font-semibold text-green-800 mb-2">Topics Covered</div>
+                <div className="flex flex-wrap gap-2">
+                  {module.topics.map((topic, index) => (
+                    <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      {topic}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Subtopics Note */}
+            <div className="border-l-4 border-purple-500 pl-4">
+              <div className="text-sm font-semibold text-purple-800 mb-1">Subtopics</div>
+              <div className="text-sm text-purple-700">
+                Subtopics like "States of matter", "Elements, compounds and mixtures" are organized under each topic.
+              </div>
+            </div>
+            
+            {/* Objectives Link */}
+            <div className="border-l-4 border-orange-500 pl-4">
+              <div className="text-sm font-semibold text-orange-800 mb-1">Learning Objectives</div>
+              <div className="text-sm text-orange-700">
+                Specific objectives (1.1, 1.2, 1.3, etc.) define what students learn under each subtopic.
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Learning Objectives */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
-            Learning Objectives
+            Learning Objectives ({module.objectives?.length || 0})
           </CardTitle>
           <CardDescription>
-            What students will learn in this module ({module.objectives?.length || 0} objectives)
+            IGCSE Chemistry Edexcel specification objectives for this module
           </CardDescription>
         </CardHeader>
         <CardContent>
           {module.objectives && module.objectives.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="space-y-3">
               {module.objectives.map((objective, index) => {
                 const formatted = formatObjective(objective, index);
                 return (
-                  <div key={index} className="flex items-start gap-2 p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="w-full">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-300">
-                          {formatted.code}
-                        </Badge>
-                        <span className="text-xs text-gray-500">{module.curriculumTopic}</span>
-                      </div>
-                      <span className="text-sm text-green-700">{formatted.description}</span>
+                  <div key={index} className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
+                    <div className="flex-shrink-0">
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 font-mono">
+                        {formatted.code}
+                      </Badge>
                     </div>
+                    <div className="flex-1">
+                      <div className="text-sm text-green-700 leading-relaxed">
+                        {formatted.description}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        IGCSE Chemistry Edexcel Specification
+                      </div>
+                    </div>
+                    <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">No objectives defined</p>
+            <div className="text-center py-8">
+              <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-sm text-gray-500 mb-2">No objectives defined</p>
+              <p className="text-xs text-gray-400">
+                Add objectives when creating or editing this module
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
