@@ -1272,7 +1272,8 @@ export class DatabaseStorage implements IStorage {
 
   async getAllAssessmentsByTeacherId(teacherId: number): Promise<Assessment[]> {
     // Get all assessments created by the teacher with additional context
-    const assessmentsWithContext = await db
+    // First, get assessments linked to modules owned by the teacher
+    const assessmentsLinkedToModules = await db
       .select({
         id: assessments.id,
         title: assessments.title,
@@ -1289,13 +1290,42 @@ export class DatabaseStorage implements IStorage {
         level: courses.level,
       })
       .from(assessments)
-      .leftJoin(modules, eq(assessments.moduleId, modules.id))
+      .innerJoin(modules, eq(assessments.moduleId, modules.id))
       .leftJoin(courseModules, eq(modules.id, courseModules.moduleId))
       .leftJoin(courses, eq(courseModules.courseId, courses.id))
       .where(eq(modules.userId, teacherId))
       .orderBy(assessments.createdAt);
 
-    return assessmentsWithContext;
+    // Also get assessments directly linked to courses owned by the teacher
+    const assessmentsLinkedToCourses = await db
+      .select({
+        id: assessments.id,
+        title: assessments.title,
+        description: assessments.description,
+        assessmentType: assessments.assessmentType,
+        difficulty: assessments.difficulty,
+        totalPoints: assessments.totalPoints,
+        estimatedDuration: assessments.estimatedDuration,
+        createdAt: assessments.createdAt,
+        // Additional context from course
+        moduleName: null,
+        courseName: courses.name,
+        grade: courses.grade,
+        level: courses.level,
+      })
+      .from(assessments)
+      .innerJoin(courses, eq(assessments.courseId, courses.id))
+      .where(eq(courses.teacherId, teacherId))
+      .orderBy(assessments.createdAt);
+
+    // Combine both result sets and remove duplicates
+    const allAssessments = [...assessmentsLinkedToModules, ...assessmentsLinkedToCourses];
+    const uniqueAssessments = allAssessments.filter(
+      (assessment, index, self) => 
+        index === self.findIndex(a => a.id === assessment.id)
+    );
+
+    return uniqueAssessments;
   }
 }
 

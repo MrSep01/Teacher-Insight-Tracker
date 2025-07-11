@@ -4,6 +4,40 @@ import { requireAuth } from "./auth";
 import { insertModuleSchema } from "../shared/schema";
 
 export function registerModuleRoutes(app: Express) {
+  // Library routes - must come before parameterized routes to avoid conflicts
+  app.get("/api/modules/all", requireAuth, async (req, res) => {
+    try {
+      const teacherId = req.user.id;
+      const modules = await storage.getAllModulesByTeacherId(teacherId);
+      res.json(modules);
+    } catch (error) {
+      console.error("Error fetching all modules:", error);
+      res.status(500).json({ error: "Failed to fetch modules" });
+    }
+  });
+
+  app.get("/api/lessons/all", requireAuth, async (req, res) => {
+    try {
+      const teacherId = req.user.id;
+      const lessons = await storage.getAllLessonsByTeacherId(teacherId);
+      res.json(lessons);
+    } catch (error) {
+      console.error("Error fetching all lessons:", error);
+      res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
+
+  app.get("/api/assessments/all", requireAuth, async (req, res) => {
+    try {
+      const teacherId = req.user.id;
+      const assessments = await storage.getAllAssessmentsByTeacherId(teacherId);
+      res.json(assessments);
+    } catch (error) {
+      console.error("Error fetching all assessments:", error);
+      res.status(500).json({ error: "Failed to fetch assessments" });
+    }
+  });
+
   // Get all modules for the authenticated user
   app.get("/api/modules", requireAuth, async (req, res) => {
     try {

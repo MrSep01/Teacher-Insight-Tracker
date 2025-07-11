@@ -500,36 +500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Library routes - fetch all resources for the library view
-  app.get("/api/lessons/all", requireAuth, async (req, res) => {
-    try {
-      const teacherId = req.user.id;
-      const lessons = await storage.getAllLessonsByTeacherId(teacherId);
-      res.json(lessons);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch lessons" });
-    }
-  });
 
-  app.get("/api/modules/all", requireAuth, async (req, res) => {
-    try {
-      const teacherId = req.user.id;
-      const modules = await storage.getAllModulesByTeacherId(teacherId);
-      res.json(modules);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch modules" });
-    }
-  });
-
-  app.get("/api/assessments/all", requireAuth, async (req, res) => {
-    try {
-      const teacherId = req.user.id;
-      const assessments = await storage.getAllAssessmentsByTeacherId(teacherId);
-      res.json(assessments);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch assessments" });
-    }
-  });
 
   // Lesson Recommendations routes
   app.get("/api/students/:id/recommendations", async (req, res) => {
