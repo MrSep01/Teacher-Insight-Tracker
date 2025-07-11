@@ -30,6 +30,7 @@ import {
   lessonPlans,
   lessonRecommendations,
   courseItems,
+  courseModules,
 
 } from "@shared/schema";
 
@@ -39,15 +40,6 @@ import { pgTable, serial, integer, timestamp } from "drizzle-orm/pg-core";
 // Use Course types from Class (since courses table is classes)
 type Course = Class;
 type InsertCourse = InsertClass;
-
-// Define courseModules table directly (since it's not exported from schema)
-const courseModules = pgTable("course_modules", {
-  id: serial("id").primaryKey(),
-  courseId: integer("course_id").notNull(),
-  moduleId: integer("module_id").notNull(),
-  sequenceOrder: integer("sequence_order").default(1),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 // CourseModule types
 type CourseModule = typeof courseModules.$inferSelect;
@@ -967,6 +959,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteModule(id: number): Promise<boolean> {
+    // First, remove the module from all courses (delete course_modules entries)
+    await db.delete(courseModules).where(eq(courseModules.moduleId, id));
+    
+    // Then, delete all lesson plans associated with this module
+    await db.delete(lessonPlans).where(eq(lessonPlans.moduleId, id));
+    
+    // Finally, delete the module itself
     const result = await db.delete(modules).where(eq(modules.id, id));
     return (result.rowCount ?? 0) > 0;
   }
