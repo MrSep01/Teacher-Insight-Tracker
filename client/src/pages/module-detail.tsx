@@ -42,31 +42,59 @@ import type { Module, LessonPlan, Assessment } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 // Helper function to format objectives for better display
-function formatObjective(objective: string, index: number): { code: string; description: string } {
+function formatObjective(objective: string, index: number): { code: string; description: string; topic?: string; subtopic?: string } {
   // IGCSE format: "1.1 understand the three states of matter..."
   // Try to parse the objective as a curriculum specification code with description
   const codeMatch = objective.match(/^(\d+\.\d+[A-Z]?)\s+(.+)$/);
   if (codeMatch) {
-    return {
-      code: codeMatch[1],
-      description: codeMatch[2].trim()
+    const code = codeMatch[1];
+    const description = codeMatch[2].trim();
+    
+    // Map authentic IGCSE codes to topics/subtopics
+    const getTopicSubtopic = (code: string) => {
+      const majorCode = code.split('.')[0];
+      const minorCode = parseFloat(code);
+      
+      if (majorCode === '1') {
+        if (minorCode >= 1.1 && minorCode <= 1.8) return { topic: "Principles of Chemistry", subtopic: "States of Matter" };
+        if (minorCode >= 1.9 && minorCode <= 1.11) return { topic: "Principles of Chemistry", subtopic: "Elements, Compounds and Mixtures" };
+        if (minorCode >= 1.12 && minorCode <= 1.20) return { topic: "Principles of Chemistry", subtopic: "Atomic Structure" };
+        if (minorCode >= 1.21 && minorCode <= 1.28) return { topic: "Principles of Chemistry", subtopic: "Periodic Table" };
+        if (minorCode >= 1.29 && minorCode <= 1.38) return { topic: "Principles of Chemistry", subtopic: "Chemical Formulae and Equations" };
+      }
+      if (majorCode === '2') {
+        return { topic: "Inorganic Chemistry", subtopic: "Reactivity Series and Metals" };
+      }
+      if (majorCode === '3') {
+        return { topic: "Physical Chemistry", subtopic: "Energetics" };
+      }
+      if (majorCode === '4') {
+        return { topic: "Organic Chemistry", subtopic: "Hydrocarbons" };
+      }
+      return { topic: "Chemistry", subtopic: "General" };
     };
+    
+    const { topic, subtopic } = getTopicSubtopic(code);
+    return { code, description, topic, subtopic };
   }
   
-  // Check if it's just a spec code (e.g., "1.1", "2.3.4")
+  // Check if it's just a spec code (e.g., "1.1", "2.3")
   const specCodePattern = /^(\d+\.\d+[A-Z]?)$/;
   if (specCodePattern.test(objective.trim())) {
     return {
       code: objective.trim(),
-      description: `Learning objective ${objective.trim()}`
+      description: `Learning objective ${objective.trim()}`,
+      topic: "Chemistry",
+      subtopic: "General"
     };
   }
   
-  // For full descriptions without codes, assign a simple index following IGCSE pattern
-  const generatedCode = `${Math.floor(index / 10) + 1}.${(index % 10) + 1}`;
+  // For full descriptions without codes, this shouldn't happen with authentic IGCSE data
   return {
-    code: generatedCode,
-    description: objective
+    code: `Obj-${index + 1}`,
+    description: objective,
+    topic: "Chemistry",
+    subtopic: "General"
   };
 }
 
@@ -598,19 +626,25 @@ export default function ModuleDetail() {
               </div>
             )}
             
-            {/* Subtopics Note */}
+            {/* Subtopics Examples */}
             <div className="border-l-4 border-purple-500 pl-4">
-              <div className="text-sm font-semibold text-purple-800 mb-1">Subtopics</div>
-              <div className="text-sm text-purple-700">
-                Subtopics like "States of matter", "Elements, compounds and mixtures" are organized under each topic.
+              <div className="text-sm font-semibold text-purple-800 mb-2">Example Subtopics</div>
+              <div className="text-sm text-purple-700 space-y-1">
+                <div>• <strong>States of Matter</strong> (1.1-1.8)</div>
+                <div>• <strong>Elements, Compounds and Mixtures</strong> (1.9-1.11)</div>
+                <div>• <strong>Atomic Structure</strong> (1.12-1.20)</div>
+                <div>• <strong>Periodic Table</strong> (1.21-1.28)</div>
+                <div>• <strong>Chemical Formulae and Equations</strong> (1.29-1.38)</div>
               </div>
             </div>
             
-            {/* Objectives Link */}
+            {/* Objectives Examples */}
             <div className="border-l-4 border-orange-500 pl-4">
-              <div className="text-sm font-semibold text-orange-800 mb-1">Learning Objectives</div>
-              <div className="text-sm text-orange-700">
-                Specific objectives (1.1, 1.2, 1.3, etc.) define what students learn under each subtopic.
+              <div className="text-sm font-semibold text-orange-800 mb-2">Example Objectives</div>
+              <div className="text-sm text-orange-700 space-y-1">
+                <div><strong>1.1</strong> - Understand the three states of matter in terms of arrangement, movement and energy of particles</div>
+                <div><strong>1.2</strong> - Understand the interconversions between the three states of matter</div>
+                <div><strong>1.3</strong> - Understand how diffusion and dilution experiments can be explained</div>
               </div>
             </div>
           </div>
@@ -636,16 +670,22 @@ export default function ModuleDetail() {
                 return (
                   <div key={index} className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
                     <div className="flex-shrink-0">
-                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 font-mono">
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 font-mono font-bold">
                         {formatted.code}
                       </Badge>
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm text-green-700 leading-relaxed">
+                      <div className="text-sm text-green-700 leading-relaxed mb-2">
                         {formatted.description}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        IGCSE Chemistry Edexcel Specification
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <Badge variant="secondary" className="text-xs px-2 py-1 bg-blue-100 text-blue-700">
+                          {formatted.topic}
+                        </Badge>
+                        <span>→</span>
+                        <Badge variant="secondary" className="text-xs px-2 py-1 bg-purple-100 text-purple-700">
+                          {formatted.subtopic}
+                        </Badge>
                       </div>
                     </div>
                     <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
