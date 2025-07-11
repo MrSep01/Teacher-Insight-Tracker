@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LessonManagement } from "@/components/lesson-management";
 import { ModuleForm } from "@/components/forms/module-form";
 import { Link } from "wouter";
+import { getCurriculumHierarchy } from "@/lib/curriculum-utils";
 
 interface LessonPlan {
   id: number;

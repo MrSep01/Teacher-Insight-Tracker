@@ -14,6 +14,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { getCurriculumTopics } from "@shared/curriculum-data";
 import { ModuleForm } from "@/components/forms/module-form";
 import { LessonManagement } from "@/components/lesson-management";
+import { getCurriculumHierarchy } from "@/lib/curriculum-utils";
 import { 
   BookOpen, 
   Plus, 

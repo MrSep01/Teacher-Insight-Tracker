@@ -424,6 +424,16 @@ Changelog:
   * Updated deleteModule function to remove module from all courses first, then delete associated lesson plans, then delete module
   * System now provides consistent module functionality across Library and course management areas
   * Library serves as unified resource hub for all modules with complete management capabilities
+- July 11, 2025. Implemented global curriculum utility system for authentic IGCSE structure:
+  * Created comprehensive curriculum-utils.ts with formatObjective, getCurriculumHierarchy, getTopic5Subtopics, and getIonicBondingObjectives functions
+  * Implemented global highlighting system for focused subtopics (ionic bonding subtopic (f) highlighted in yellow)
+  * Added authentic IGCSE Topic 5 structure with proper subtopic lettering: (d) through (i) with correct objective ranges
+  * Updated all curriculum displays to use consistent authentic IGCSE Chemistry Edexcel specification codes
+  * Enhanced objective formatting to show proper topic hierarchy: Curriculum → Topic → Subtopic → Objectives
+  * Implemented highlighting for focused subtopics throughout the application with visual indicators
+  * All curriculum components now use shared utility functions for consistent IGCSE formatting
+  * Fixed ionic bonding objectives to show complete range 5.1-5.7 with authentic specification statements
+  * System ensures authentic IGCSE curriculum structure is maintained globally across all components
 ```
 
 ## User Preferences

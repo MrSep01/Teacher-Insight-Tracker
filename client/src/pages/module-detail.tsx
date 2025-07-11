@@ -40,64 +40,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Module, LessonPlan, Assessment } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { formatObjective, getTopic5Subtopics, getIonicBondingObjectives } from "@/lib/curriculum-utils";
 
-// Helper function to format objectives for better display
-function formatObjective(objective: string, index: number): { code: string; description: string; topic?: string; subtopic?: string } {
-  // IGCSE format: "1.1 understand the three states of matter..."
-  // Try to parse the objective as a curriculum specification code with description
-  const codeMatch = objective.match(/^(\d+\.\d+[A-Z]?)\s+(.+)$/);
-  if (codeMatch) {
-    const code = codeMatch[1];
-    const description = codeMatch[2].trim();
-    
-    // Map authentic IGCSE codes to topics/subtopics based on official specification
-    const getTopicSubtopic = (code: string) => {
-      const majorCode = code.split('.')[0];
-      const minorCode = parseFloat(code);
-      
-      if (majorCode === '1') {
-        return { topic: "Topic 1: Principles of chemistry: Part 1", subtopic: "States of Matter" };
-      }
-      if (majorCode === '2') {
-        return { topic: "Topic 2: Inorganic chemistry", subtopic: "Group chemistry" };
-      }
-      if (majorCode === '3') {
-        return { topic: "Topic 3: Physical chemistry", subtopic: "Energetics" };
-      }
-      if (majorCode === '4') {
-        return { topic: "Topic 4: Organic chemistry", subtopic: "Hydrocarbons" };
-      }
-      if (majorCode === '5') {
-        if (minorCode >= 5.1 && minorCode <= 5.7) return { topic: "Topic 5: Principles of chemistry: Part 2", subtopic: "Ionic bonding" };
-        if (minorCode >= 5.8 && minorCode <= 5.15) return { topic: "Topic 5: Principles of chemistry: Part 2", subtopic: "Covalent bonding" };
-        if (minorCode >= 5.16 && minorCode <= 5.20) return { topic: "Topic 5: Principles of chemistry: Part 2", subtopic: "Metallic bonding" };
-      }
-      return { topic: "IGCSE Chemistry", subtopic: "General" };
-    };
-    
-    const { topic, subtopic } = getTopicSubtopic(code);
-    return { code, description, topic, subtopic };
-  }
-  
-  // Check if it's just a spec code (e.g., "1.1", "2.3")
-  const specCodePattern = /^(\d+\.\d+[A-Z]?)$/;
-  if (specCodePattern.test(objective.trim())) {
-    return {
-      code: objective.trim(),
-      description: `Learning objective ${objective.trim()}`,
-      topic: "Chemistry",
-      subtopic: "General"
-    };
-  }
-  
-  // For full descriptions without codes, this shouldn't happen with authentic IGCSE data
-  return {
-    code: `Obj-${index + 1}`,
-    description: objective,
-    topic: "Chemistry",
-    subtopic: "General"
-  };
-}
+// Use global curriculum utility functions for consistent IGCSE formatting
 
 // Sortable Lesson Card Component
 function SortableLessonCard({ lesson, onView }: { lesson: LessonPlan; onView: (lesson: LessonPlan) => void }) {
@@ -631,14 +576,15 @@ export default function ModuleDetail() {
             <div className="border-l-4 border-purple-500 pl-4">
               <div className="text-sm font-semibold text-purple-800 mb-2">Topic 5 Subtopics</div>
               <div className="text-sm text-purple-700 space-y-1">
-                <div>• <strong>(d) The Periodic Table</strong></div>
-                <div>• <strong>(e) Chemical formulae, equations and calculations</strong></div>
-                <div className="bg-yellow-100 border border-yellow-300 rounded p-2 my-1">
-                  <div className="text-yellow-800 font-semibold">• <strong>(f) Ionic bonding</strong> (5.1-5.7) ← This Module Focus</div>
-                </div>
-                <div>• <strong>(g) Covalent bonding</strong></div>
-                <div>• <strong>(h) Metallic bonding</strong></div>
-                <div>• <strong>(i) Electrolysis</strong></div>
+                {getTopic5Subtopics("(f)").map((subtopic, index) => (
+                  <div key={index} className={subtopic.isHighlighted ? "bg-yellow-100 border border-yellow-300 rounded p-2 my-1" : ""}>
+                    <div className={`font-semibold ${subtopic.isHighlighted ? "text-yellow-800" : ""}`}>
+                      • <strong>{subtopic.code} {subtopic.name}</strong>
+                      {subtopic.objectiveRange && ` (${subtopic.objectiveRange})`}
+                      {subtopic.isHighlighted && " ← This Module Focus"}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
             
@@ -646,13 +592,11 @@ export default function ModuleDetail() {
             <div className="border-l-4 border-orange-500 pl-4">
               <div className="text-sm font-semibold text-orange-800 mb-2">Ionic Bonding Objectives (5.1-5.7)</div>
               <div className="text-sm text-orange-700 space-y-1">
-                <div><strong>5.1</strong> - understand how ions are formed by electron loss or gain</div>
-                <div><strong>5.2</strong> - know the charges of these ions: metals in Groups 1, 2 and 3; non-metals in Groups 5, 6 and 7</div>
-                <div><strong>5.3</strong> - write formulae for compounds formed between the ions listed above</div>
-                <div><strong>5.4</strong> - draw dot-and-cross diagrams to show the formation of ionic compounds by electron transfer</div>
-                <div><strong>5.5</strong> - understand ionic bonding in terms of electrostatic attractions</div>
-                <div><strong>5.6</strong> - understand why compounds with giant ionic lattices have high melting and boiling points</div>
-                <div><strong>5.7</strong> - know that ionic compounds do not conduct electricity when solid, but do conduct electricity when molten and in aqueous solution</div>
+                {getIonicBondingObjectives().map((objective, index) => (
+                  <div key={index}>
+                    <strong>{objective.code}</strong> - {objective.statement}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -691,7 +635,14 @@ export default function ModuleDetail() {
                           {formatted.topic}
                         </Badge>
                         <span>→</span>
-                        <Badge variant="secondary" className="text-xs px-2 py-1 bg-purple-100 text-purple-700">
+                        <Badge 
+                          variant="secondary" 
+                          className={`text-xs px-2 py-1 ${
+                            formatted.isHighlighted 
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-300' 
+                              : 'bg-purple-100 text-purple-700'
+                          }`}
+                        >
                           {formatted.subtopic}
                         </Badge>
                       </div>
