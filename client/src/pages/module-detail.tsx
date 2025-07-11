@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { EditModuleForm } from "@/components/forms/edit-module-form";
+import { useToast } from "@/hooks/use-toast";
 import { 
   BookOpen, 
   Clock, 
@@ -284,7 +287,9 @@ export default function ModuleDetail() {
   const [, setLocation] = useLocation();
   const [lessons, setLessons] = useState<LessonPlan[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Queries
   const { data: module, isLoading } = useQuery<Module>({
@@ -356,6 +361,83 @@ export default function ModuleDetail() {
     setLocation(`/assessments/${assessment.id}`);
   };
 
+  // Edit module mutation
+  const editModuleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest(`/api/modules/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/modules/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/modules'] });
+      toast({
+        title: "Success",
+        description: "Module updated successfully",
+      });
+      setIsEditModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update module",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Duplicate module mutation  
+  const duplicateModuleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('/api/modules', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: (newModule) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/modules'] });
+      toast({
+        title: "Success",
+        description: "New module created successfully",
+      });
+      setIsEditModalOpen(false);
+      // Navigate to the new module
+      setLocation(`/modules/${newModule.id}`);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create new module",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete module mutation
+  const deleteModuleMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest(`/api/modules/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/modules'] });
+      toast({
+        title: "Success",
+        description: "Module deleted successfully",
+      });
+      setLocation('/library');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete module",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -409,13 +491,22 @@ export default function ModuleDetail() {
           <Badge variant="secondary" className="bg-blue-100 text-blue-800">
             Active
           </Badge>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsEditModalOpen(true)}
+          >
             <Edit className="mr-2 h-4 w-4" />
             Edit
           </Button>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => deleteModuleMutation.mutate()}
+            disabled={deleteModuleMutation.isPending}
+          >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete
+            {deleteModuleMutation.isPending ? "Deleting..." : "Delete"}
           </Button>
         </div>
       </div>
@@ -627,6 +718,28 @@ export default function ModuleDetail() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Module Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Module</DialogTitle>
+            <DialogDescription>
+              Update module information and curriculum mapping. Library modules cannot have their names changed.
+            </DialogDescription>
+          </DialogHeader>
+          {module && (
+            <EditModuleForm
+              module={module}
+              onSubmit={(data) => editModuleMutation.mutate(data)}
+              onDuplicate={(data) => duplicateModuleMutation.mutate(data)}
+              isLoading={editModuleMutation.isPending || duplicateModuleMutation.isPending}
+              onClose={() => setIsEditModalOpen(false)}
+              isLibraryModule={true} // Assume library modules by default
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
