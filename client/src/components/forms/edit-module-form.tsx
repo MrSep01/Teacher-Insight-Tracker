@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, Info, Copy } from "lucide-react";
-import { HierarchicalCurriculumMapper } from "@/components/hierarchical-curriculum-mapper";
+import { AuthenticCurriculumSelector } from "@/components/forms/authentic-curriculum-selector";
 import type { Module } from "@shared/schema";
 
 interface EditModuleFormProps {
@@ -39,8 +39,6 @@ export function EditModuleForm({
   });
 
   // Separate state for curriculum mapper
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(module.topics || []);
-  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>(module.objectives || []);
 
   const [nameChanged, setNameChanged] = useState(false);
@@ -261,12 +259,16 @@ export function EditModuleForm({
               </p>
             </div>
 
-            <HierarchicalCurriculumMapper
-              selectedTopics={selectedTopics}
-              selectedSubtopics={selectedSubtopics}
+            <AuthenticCurriculumSelector
               selectedObjectives={selectedObjectives}
-              onSelectionChange={handleCurriculumSelection}
-              showLevelMixing={true}
+              onObjectivesChange={(objectives) => {
+                setSelectedObjectives(objectives);
+                setFormData(prev => ({ ...prev, objectives }));
+              }}
+              estimatedHours={formData.estimatedHours}
+              onEstimatedHoursChange={(hours) => {
+                setFormData(prev => ({ ...prev, estimatedHours: hours }));
+              }}
             />
 
             {!showDuplicateOption && (

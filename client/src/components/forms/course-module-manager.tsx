@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { HierarchicalCurriculumMapper } from "@/components/hierarchical-curriculum-mapper";
+import { AuthenticCurriculumSelector } from "@/components/forms/authentic-curriculum-selector";
 import { 
   BookOpen, 
   Plus, 
@@ -51,8 +51,6 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
   });
   
   // Curriculum selection state
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
 
   // Fetch assigned modules for the course
@@ -171,8 +169,6 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
       curriculumTopic: "",
       gradeLevels: [],
     });
-    setSelectedTopics([]);
-    setSelectedSubtopics([]);
     setSelectedObjectives([]);
     setEditingModule(null);
     setIsCreating(false);
@@ -192,7 +188,6 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
       curriculumTopic: module.curriculumTopic || "",
       gradeLevels: module.gradeLevels || [],
     });
-    setSelectedTopics(module.topics || []);
     setSelectedObjectives(module.objectives || []);
     setActiveTab("create");
   };
@@ -204,7 +199,6 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
       curriculumTopic: module.curriculumTopic || "",
       gradeLevels: module.gradeLevels || [],
     });
-    setSelectedTopics(module.topics || []);
     setSelectedObjectives(module.objectives || []);
     setIsCreating(true);
     setActiveTab("create");
@@ -589,12 +583,15 @@ export function CourseModuleManager({ course, open, onOpenChange }: CourseModule
                       </p>
                     </div>
                     
-                    <HierarchicalCurriculumMapper
-                      selectedTopics={selectedTopics}
-                      selectedSubtopics={selectedSubtopics}
+                    <AuthenticCurriculumSelector
                       selectedObjectives={selectedObjectives}
-                      onSelectionChange={handleSelectionChange}
-                      showLevelMixing={true}
+                      onObjectivesChange={(objectives) => {
+                        setSelectedObjectives(objectives);
+                      }}
+                      estimatedHours={Math.max(1, Math.ceil(selectedObjectives.length * 0.5))}
+                      onEstimatedHoursChange={(hours) => {
+                        // Auto-calculated based on objectives
+                      }}
                     />
                   </TabsContent>
                 </Tabs>
