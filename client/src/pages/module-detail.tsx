@@ -456,7 +456,8 @@ export default function ModuleDetail() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -729,7 +730,7 @@ export default function ModuleDetail() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="max-h-[600px] overflow-y-auto">
+          <CardContent className="min-h-[400px] max-h-[800px] overflow-y-auto">
             {lessonsLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -821,7 +822,7 @@ export default function ModuleDetail() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="max-h-[600px] overflow-y-auto">
+          <CardContent className="min-h-[400px] max-h-[800px] overflow-y-auto">
             {assessmentsLoading ? (
               <div className="space-y-4">
                 {[1, 2].map((i) => (
@@ -907,6 +908,7 @@ export default function ModuleDetail() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
