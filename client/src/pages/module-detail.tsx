@@ -285,15 +285,24 @@ export default function ModuleDetail() {
   // Update state when data changes
   useEffect(() => {
     if (lessonsData) {
+      console.log('Debug - Setting lessons:', lessonsData);
       setLessons(lessonsData);
     }
   }, [lessonsData]);
 
   useEffect(() => {
     if (assessmentsData) {
+      console.log('Debug - Setting assessments:', assessmentsData);
       setAssessments(assessmentsData);
     }
   }, [assessmentsData]);
+
+  // Debug logs
+  console.log('Debug - Module ID:', id);
+  console.log('Debug - Lessons State:', lessons);
+  console.log('Debug - Assessments State:', assessments);
+  console.log('Debug - Lessons Loading:', lessonsLoading);
+  console.log('Debug - Assessments Loading:', assessmentsLoading);
 
   // Drag and drop sensors
   const sensors = useSensors(
