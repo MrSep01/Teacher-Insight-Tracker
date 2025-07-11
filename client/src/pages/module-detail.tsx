@@ -539,6 +539,41 @@ export default function ModuleDetail() {
         </Card>
       </div>
 
+      {/* Module Progress Overview */}
+      <Card className="mb-6 border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+        <CardHeader>
+          <CardTitle className="text-indigo-800">Module Progress Overview</CardTitle>
+          <CardDescription className="text-indigo-600">
+            Complete overview of all module components and their completion status
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+              <div className="text-3xl font-bold text-green-600">{module.objectives?.length || 0}/7</div>
+              <div className="text-sm text-gray-600 mt-1">Learning Objectives</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {module.objectives?.length === 7 ? "Complete ✓" : "In Progress"}
+              </div>
+            </div>
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+              <div className="text-3xl font-bold text-blue-600">{lessons.length}</div>
+              <div className="text-sm text-gray-600 mt-1">Lesson Plans</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {lessons.length > 0 ? "Available" : "None Created"}
+              </div>
+            </div>
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+              <div className="text-3xl font-bold text-purple-600">{assessments.length}</div>
+              <div className="text-sm text-gray-600 mt-1">Assessments</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {assessments.length > 0 ? "Available" : "None Created"}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Curriculum Hierarchy */}
       <Card>
         <CardHeader>
@@ -608,26 +643,26 @@ export default function ModuleDetail() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
-            Learning Objectives ({module.objectives?.length || 0})
+            Complete Learning Objectives ({module.objectives?.length || 0}/7)
           </CardTitle>
           <CardDescription>
-            IGCSE Chemistry Edexcel specification objectives for this module
+            IGCSE Chemistry Edexcel specification objectives for this module - All {module.objectives?.length || 0} objectives displayed
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-none">
           {module.objectives && module.objectives.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {module.objectives.map((objective, index) => {
                 const formatted = formatObjective(objective, index);
                 return (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
+                  <div key={index} className="flex items-start gap-4 p-4 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
                     <div className="flex-shrink-0">
-                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 font-mono font-bold">
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 font-mono font-bold text-sm px-3 py-1">
                         {formatted.code}
                       </Badge>
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm text-green-700 leading-relaxed mb-2">
+                      <div className="text-sm text-green-700 leading-relaxed mb-3 font-medium">
                         {formatted.description}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -639,7 +674,7 @@ export default function ModuleDetail() {
                           variant="secondary" 
                           className={`text-xs px-2 py-1 ${
                             formatted.isHighlighted 
-                              ? 'bg-yellow-100 text-yellow-800 border-yellow-300' 
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-300 font-semibold' 
                               : 'bg-purple-100 text-purple-700'
                           }`}
                         >
@@ -647,7 +682,7 @@ export default function ModuleDetail() {
                         </Badge>
                       </div>
                     </div>
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
                   </div>
                 );
               })}
@@ -664,20 +699,20 @@ export default function ModuleDetail() {
         </CardContent>
       </Card>
 
-      {/* Lessons Section */}
-      <Card>
-        <CardHeader>
+      {/* Lessons Section - Enhanced Visibility */}
+      <Card className="border-2 border-blue-200 bg-blue-50/30">
+        <CardHeader className="bg-blue-50">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Lessons ({lessons.length})
+              <CardTitle className="flex items-center gap-2 text-blue-800">
+                <BookOpen className="h-6 w-6" />
+                Lesson Plans ({lessons.length})
               </CardTitle>
-              <CardDescription>
-                Drag and drop to reorder lessons
+              <CardDescription className="text-blue-600">
+                Complete lesson plans for this module - Drag and drop to reorder
               </CardDescription>
             </div>
-            <Button size="sm">
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
               <Plus className="mr-2 h-4 w-4" />
               Add Lesson
             </Button>
@@ -724,20 +759,20 @@ export default function ModuleDetail() {
         </CardContent>
       </Card>
 
-      {/* Assessments Section */}
-      <Card>
-        <CardHeader>
+      {/* Assessments Section - Enhanced Visibility */}
+      <Card className="border-2 border-purple-200 bg-purple-50/30">
+        <CardHeader className="bg-purple-50">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <ClipboardList className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-purple-800">
+                <ClipboardList className="h-6 w-6" />
                 Assessments ({assessments.length})
               </CardTitle>
-              <CardDescription>
-                Drag and drop to reorder assessments
+              <CardDescription className="text-purple-600">
+                Assessment tools for this module - Drag and drop to reorder
               </CardDescription>
             </div>
-            <Button size="sm">
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
               <Plus className="mr-2 h-4 w-4" />
               Add Assessment
             </Button>
