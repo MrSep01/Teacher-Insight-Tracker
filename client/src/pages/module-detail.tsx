@@ -43,9 +43,18 @@ import { apiRequest } from "@/lib/queryClient";
 
 // Helper function to format objectives for better display
 function formatObjective(objective: string, index: number): { code: string; description: string } {
-  // Check if the objective looks like a spec code (e.g., "1.1.1", "2.3.4")
-  const specCodePattern = /^(\d+\.\d+\.\d+|\d+\.\d+)$/;
+  // Try to parse the objective as a curriculum specification code with description
+  // Format: "1.1 - Describe the structure of atoms" or "1.1 Describe the structure of atoms"
+  const codeMatch = objective.match(/^(\d+\.\d+(?:\.\d+)?)\s*[-–—]?\s*(.+)$/);
+  if (codeMatch) {
+    return {
+      code: codeMatch[1],
+      description: codeMatch[2].trim()
+    };
+  }
   
+  // Check if it's just a spec code (e.g., "1.1", "2.3.4")
+  const specCodePattern = /^(\d+\.\d+(?:\.\d+)?)$/;
   if (specCodePattern.test(objective.trim())) {
     return {
       code: objective.trim(),
@@ -53,16 +62,7 @@ function formatObjective(objective: string, index: number): { code: string; desc
     };
   }
   
-  // If it's a full description, try to extract code from the beginning
-  const codeMatch = objective.match(/^(\d+\.\d+\.\d+|\d+\.\d+)\s+(.+)$/);
-  if (codeMatch) {
-    return {
-      code: codeMatch[1],
-      description: codeMatch[2]
-    };
-  }
-  
-  // Default case - treat as full description
+  // For full descriptions without codes, assign a simple index
   return {
     code: `${index + 1}`,
     description: objective
@@ -518,7 +518,7 @@ export default function ModuleDetail() {
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
               <div>
-                <div className="text-sm font-medium text-gray-600">Topic</div>
+                <div className="text-sm font-medium text-gray-600">Curriculum</div>
                 <div className="text-lg font-semibold">{module.curriculumTopic}</div>
               </div>
             </div>
@@ -564,6 +564,30 @@ export default function ModuleDetail() {
         </Card>
       </div>
 
+      {/* Topics Covered */}
+      {module.topics && module.topics.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              Topics Covered
+            </CardTitle>
+            <CardDescription>
+              Curriculum topics and subtopics included in this module
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {module.topics.map((topic, index) => (
+                <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  {topic}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Learning Objectives */}
       <Card>
         <CardHeader>
@@ -583,9 +607,12 @@ export default function ModuleDetail() {
                 return (
                   <div key={index} className="flex items-start gap-2 p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-xs font-semibold text-green-800 mb-1">
-                        {formatted.code}
+                    <div className="w-full">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-300">
+                          {formatted.code}
+                        </Badge>
+                        <span className="text-xs text-gray-500">{module.curriculumTopic}</span>
                       </div>
                       <span className="text-sm text-green-700">{formatted.description}</span>
                     </div>

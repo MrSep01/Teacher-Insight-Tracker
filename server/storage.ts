@@ -1296,7 +1296,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(courseModules, eq(modules.id, courseModules.moduleId))
       .leftJoin(courses, eq(courseModules.courseId, courses.id))
       .where(eq(modules.userId, teacherId))
-      .orderBy(assessments.createdAt);
+      .orderBy(desc(assessments.createdAt));
 
     // Also get assessments directly linked to courses owned by the teacher
     const assessmentsLinkedToCourses = await db
@@ -1318,7 +1318,7 @@ export class DatabaseStorage implements IStorage {
       .from(assessments)
       .innerJoin(courses, eq(assessments.courseId, courses.id))
       .where(eq(courses.teacherId, teacherId))
-      .orderBy(assessments.createdAt);
+      .orderBy(desc(assessments.createdAt));
 
     // Combine both result sets and remove duplicates
     const allAssessments = [...assessmentsLinkedToModules, ...assessmentsLinkedToCourses];
