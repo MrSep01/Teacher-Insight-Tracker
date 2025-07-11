@@ -105,6 +105,39 @@ export const subjects = pgTable("subjects", {
   icon: text("icon").notNull(),
 });
 
+// Curriculum structure tables for authentic IGCSE/A Level content
+export const curriculumTopics = pgTable("curriculum_topics", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // "1", "2", "3", "4" for IGCSE
+  name: text("name").notNull(), // "Principles of Chemistry", "Inorganic Chemistry"
+  curriculum: text("curriculum").notNull(), // "IGCSE Chemistry Edexcel", "A Level Chemistry Edexcel"
+  description: text("description"),
+  sequenceOrder: integer("sequence_order").notNull(),
+});
+
+export const curriculumSubtopics = pgTable("curriculum_subtopics", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").references(() => curriculumTopics.id).notNull(),
+  code: text("code").notNull(), // "1.1", "1.2", "5.1", etc.
+  name: text("name").notNull(), // "States of Matter", "Ionic Bonding"
+  description: text("description"),
+  sequenceOrder: integer("sequence_order").notNull(),
+  practicalWork: text("practical_work").array(), // Required practical work
+  mathematicalSkills: text("mathematical_skills").array(), // Required math skills
+});
+
+export const curriculumObjectives = pgTable("curriculum_objectives", {
+  id: serial("id").primaryKey(),
+  subtopicId: integer("subtopic_id").references(() => curriculumSubtopics.id).notNull(),
+  code: text("code").notNull().unique(), // "1.1", "1.2", "5.1", "5.2", etc.
+  statement: text("statement").notNull(), // Full objective statement
+  bloomsLevel: text("blooms_level").notNull(), // remember, understand, apply, analyze, evaluate, create
+  difficulty: text("difficulty").notNull(), // basic, intermediate, advanced
+  commandWords: text("command_words").array(), // define, explain, describe, calculate
+  assessmentWeight: integer("assessment_weight").default(1), // 1-5 importance
+  sequenceOrder: integer("sequence_order").notNull(),
+});
+
 // Enhanced assessments with Formative.com-inspired features
 export const assessments = pgTable("assessments", {
   id: serial("id").primaryKey(),
@@ -506,6 +539,24 @@ export type InsertLessonPlan = z.infer<typeof insertLessonPlanSchema>;
 
 export type LessonRecommendation = typeof lessonRecommendations.$inferSelect;
 export type InsertLessonRecommendation = z.infer<typeof insertLessonRecommendationSchema>;
+
+// Curriculum table schemas
+export const insertCurriculumTopicSchema = createInsertSchema(curriculumTopics).omit({
+  id: true,
+});
+export const insertCurriculumSubtopicSchema = createInsertSchema(curriculumSubtopics).omit({
+  id: true,
+});
+export const insertCurriculumObjectiveSchema = createInsertSchema(curriculumObjectives).omit({
+  id: true,
+});
+
+export type CurriculumTopic = typeof curriculumTopics.$inferSelect;
+export type InsertCurriculumTopic = z.infer<typeof insertCurriculumTopicSchema>;
+export type CurriculumSubtopic = typeof curriculumSubtopics.$inferSelect;
+export type InsertCurriculumSubtopic = z.infer<typeof insertCurriculumSubtopicSchema>;
+export type CurriculumObjective = typeof curriculumObjectives.$inferSelect;
+export type InsertCurriculumObjective = z.infer<typeof insertCurriculumObjectiveSchema>;
 
 // Extended types for API responses
 export type StudentWithScores = Student & {
