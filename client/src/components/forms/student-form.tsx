@@ -44,8 +44,10 @@ export default function StudentForm({ onSuccess }: StudentFormProps) {
 
   const createStudentMutation = useMutation({
     mutationFn: async (data: StudentFormData) => {
-      const response = await apiRequest("POST", "/api/students", data);
-      return response.json();
+      return await apiRequest("/api/students", {
+        method: "POST",
+        body: data,
+      });
     },
     onSuccess: () => {
       toast({
