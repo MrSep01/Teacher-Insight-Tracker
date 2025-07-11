@@ -699,129 +699,181 @@ export default function ModuleDetail() {
         </CardContent>
       </Card>
 
-      {/* Lessons Section - Enhanced Visibility */}
-      <Card className="border-2 border-blue-200 bg-blue-50/30">
-        <CardHeader className="bg-blue-50">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-blue-800">
-                <BookOpen className="h-6 w-6" />
-                Lesson Plans ({lessons.length})
-              </CardTitle>
-              <CardDescription className="text-blue-600">
-                Complete lesson plans for this module - Drag and drop to reorder
-              </CardDescription>
-            </div>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Lesson
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {lessonsLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="h-24 bg-gray-200 rounded"></div>
-                </div>
-              ))}
-            </div>
-          ) : lessons.length > 0 ? (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleLessonDragEnd}
-            >
-              <SortableContext items={lessons.map(l => l.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-3">
-                  {lessons.map((lesson) => (
-                    <SortableLessonCard
-                      key={lesson.id}
-                      lesson={lesson}
-                      onView={handleViewLesson}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          ) : (
-            <div className="text-center py-8">
-              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No lessons found</h3>
-              <p className="text-gray-500 mb-4">
-                Debug Info: Loading={lessonsLoading ? "true" : "false"}, Count={lessons.length}
-              </p>
-              <Button>
+      {/* Lessons and Assessments - Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Lessons Section */}
+        <Card className="border-2 border-blue-200 bg-blue-50/30">
+          <CardHeader className="bg-blue-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <BookOpen className="h-6 w-6" />
+                  Lesson Plans ({lessons.length})
+                </CardTitle>
+                <CardDescription className="text-blue-600">
+                  Complete lesson plans for this module
+                </CardDescription>
+              </div>
+              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="mr-2 h-4 w-4" />
-                Create First Lesson
+                Add Lesson
               </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="max-h-[600px] overflow-y-auto">
+            {lessonsLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-32 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : lessons.length > 0 ? (
+              <div className="space-y-4">
+                {lessons.map((lesson) => (
+                  <div key={lesson.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" onClick={() => handleViewLesson(lesson)}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <BookOpen className="h-4 w-4 text-blue-600" />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 mb-1">{lesson.title}</h4>
+                        <p className="text-sm text-gray-600 mb-3">{lesson.description}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className={`text-xs px-2 py-1 ${
+                            lesson.lessonType === 'lecture' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                            lesson.lessonType === 'practical' ? 'bg-green-100 text-green-800 border-green-200' :
+                            lesson.lessonType === 'assessment' ? 'bg-red-100 text-red-800 border-red-200' :
+                            'bg-gray-100 text-gray-800 border-gray-200'
+                          }`}>
+                            {lesson.lessonType}
+                          </Badge>
+                          <Badge variant="outline" className={`text-xs px-2 py-1 ${
+                            lesson.difficulty === 'basic' ? 'bg-green-100 text-green-800 border-green-200' :
+                            lesson.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                            'bg-red-100 text-red-800 border-red-200'
+                          }`}>
+                            {lesson.difficulty}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {lesson.duration} min
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Target className="h-3 w-3" />
+                            {lesson.objectives?.length || 0} objectives
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Play className="h-3 w-3" />
+                            {lesson.activities?.length || 0} activities
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No lessons found</h3>
+                <p className="text-gray-500 mb-4">Create your first lesson to get started</p>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Lesson
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Assessments Section - Enhanced Visibility */}
-      <Card className="border-2 border-purple-200 bg-purple-50/30">
-        <CardHeader className="bg-purple-50">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-purple-800">
-                <ClipboardList className="h-6 w-6" />
-                Assessments ({assessments.length})
-              </CardTitle>
-              <CardDescription className="text-purple-600">
-                Assessment tools for this module - Drag and drop to reorder
-              </CardDescription>
-            </div>
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Assessment
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {assessmentsLoading ? (
-            <div className="space-y-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="h-24 bg-gray-200 rounded"></div>
-                </div>
-              ))}
-            </div>
-          ) : assessments.length > 0 ? (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleAssessmentDragEnd}
-            >
-              <SortableContext items={assessments.map(a => a.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-3">
-                  {assessments.map((assessment) => (
-                    <SortableAssessmentCard
-                      key={assessment.id}
-                      assessment={assessment}
-                      onView={handleViewAssessment}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          ) : (
-            <div className="text-center py-8">
-              <ClipboardList className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No assessments found</h3>
-              <p className="text-gray-500 mb-4">
-                Debug Info: Loading={assessmentsLoading ? "true" : "false"}, Count={assessments.length}
-              </p>
-              <Button>
+        {/* Assessments Section */}
+        <Card className="border-2 border-purple-200 bg-purple-50/30">
+          <CardHeader className="bg-purple-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-purple-800">
+                  <ClipboardList className="h-6 w-6" />
+                  Summative Assessments ({assessments.length})
+                </CardTitle>
+                <CardDescription className="text-purple-600">
+                  Assessment tools for this module
+                </CardDescription>
+              </div>
+              <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
                 <Plus className="mr-2 h-4 w-4" />
-                Create First Assessment
+                Add Assessment
               </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="max-h-[600px] overflow-y-auto">
+            {assessmentsLoading ? (
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-32 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : assessments.length > 0 ? (
+              <div className="space-y-4">
+                {assessments.map((assessment) => (
+                  <div key={assessment.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:border-purple-300 transition-colors cursor-pointer" onClick={() => handleViewAssessment(assessment)}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <ClipboardList className="h-4 w-4 text-purple-600" />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 mb-1">{assessment.title}</h4>
+                        <p className="text-sm text-gray-600 mb-3">{assessment.description}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className={`text-xs px-2 py-1 ${
+                            assessment.assessmentType === 'formative' ? 'bg-green-100 text-green-800 border-green-200' :
+                            assessment.assessmentType === 'summative' ? 'bg-red-100 text-red-800 border-red-200' :
+                            'bg-blue-100 text-blue-800 border-blue-200'
+                          }`}>
+                            {assessment.assessmentType}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs px-2 py-1 bg-gray-100 text-gray-800 border-gray-200">
+                            {assessment.totalPoints} points
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {assessment.estimatedDuration} min
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Target className="h-3 w-3" />
+                            {assessment.questions?.length || 0} questions
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <ClipboardList className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No assessments found</h3>
+                <p className="text-gray-500 mb-4">Create your first assessment to get started</p>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Assessment
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Edit Module Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
