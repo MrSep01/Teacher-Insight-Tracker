@@ -20,6 +20,12 @@ import {
   StudentWithScores,
   AssessmentWithDetails,
   DashboardStats,
+  CurriculumTopic,
+  InsertCurriculumTopic,
+  CurriculumSubtopic,
+  InsertCurriculumSubtopic,
+  CurriculumObjective,
+  InsertCurriculumObjective,
   users,
   classes,
   students,
@@ -31,6 +37,9 @@ import {
   lessonRecommendations,
   courseItems,
   courseModules,
+  curriculumTopics,
+  curriculumSubtopics,
+  curriculumObjectives,
 
 } from "@shared/schema";
 
@@ -158,6 +167,13 @@ export interface IStorage {
   getAllLessonsByTeacherId(teacherId: number): Promise<LessonPlan[]>;
   getAllModulesByTeacherId(teacherId: number): Promise<Module[]>;
   getAllAssessmentsByTeacherId(teacherId: number): Promise<Assessment[]>;
+
+  // Curriculum API methods
+  getCurriculumTopics(): Promise<CurriculumTopic[]>;
+  getCurriculumTopicById(id: number): Promise<CurriculumTopic | undefined>;
+  getCurriculumSubtopicsByTopicId(topicId: number): Promise<CurriculumSubtopic[]>;
+  getCurriculumObjectivesBySubtopicId(subtopicId: number): Promise<CurriculumObjective[]>;
+  getCurriculumObjectivesByCodes(codes: string[]): Promise<CurriculumObjective[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -1313,6 +1329,36 @@ export class DatabaseStorage implements IStorage {
 
   async deleteLesson(id: number): Promise<boolean> {
     return this.deleteLessonPlan(id);
+  }
+
+  // Curriculum API methods implementation
+  async getCurriculumTopics(): Promise<CurriculumTopic[]> {
+    return await db.select().from(curriculumTopics).orderBy(curriculumTopics.sequenceOrder);
+  }
+
+  async getCurriculumTopicById(id: number): Promise<CurriculumTopic | undefined> {
+    const [topic] = await db.select().from(curriculumTopics).where(eq(curriculumTopics.id, id));
+    return topic || undefined;
+  }
+
+  async getCurriculumSubtopicsByTopicId(topicId: number): Promise<CurriculumSubtopic[]> {
+    return await db.select().from(curriculumSubtopics)
+      .where(eq(curriculumSubtopics.topicId, topicId))
+      .orderBy(curriculumSubtopics.sequenceOrder);
+  }
+
+  async getCurriculumObjectivesBySubtopicId(subtopicId: number): Promise<CurriculumObjective[]> {
+    return await db.select().from(curriculumObjectives)
+      .where(eq(curriculumObjectives.subtopicId, subtopicId))
+      .orderBy(curriculumObjectives.sequenceOrder);
+  }
+
+  async getCurriculumObjectivesByCodes(codes: string[]): Promise<CurriculumObjective[]> {
+    if (codes.length === 0) return [];
+    
+    return await db.select().from(curriculumObjectives)
+      .where(eq(curriculumObjectives.code, codes[0])) // Need to use inArray for multiple codes
+      .orderBy(curriculumObjectives.sequenceOrder);
   }
 }
 

@@ -1,9 +1,9 @@
-import type { Express } from "express";
-import { requireAuth } from "./auth";
+import { Express } from "express";
 import { storage } from "./storage";
+import { requireAuth } from "./auth";
 
 export function registerCurriculumRoutes(app: Express) {
-  // Get all curriculum topics from database
+  // Get all curriculum topics
   app.get("/api/curriculum/topics", requireAuth, async (req, res) => {
     try {
       const topics = await storage.getCurriculumTopics();
@@ -100,54 +100,6 @@ export function registerCurriculumRoutes(app: Express) {
     } catch (error) {
       console.error('Error fetching curriculum hierarchy:', error);
       res.status(500).json({ error: 'Failed to fetch curriculum hierarchy' });
-    }
-  });
-
-  // Legacy routes for backward compatibility (keeping existing API working)
-  app.get("/api/curriculum", requireAuth, async (req, res) => {
-    try {
-      const topics = await storage.getCurriculumTopics();
-      // Transform to match old format
-      const curricula = [{
-        id: "igcse-chemistry-edexcel",
-        name: "IGCSE Chemistry Edexcel",
-        description: "IGCSE Chemistry Edexcel curriculum",
-        topics: topics.map(topic => ({
-          id: topic.code,
-          name: topic.name,
-          description: topic.description
-        }))
-      }];
-      res.json(curricula);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch curricula" });
-    }
-  });
-
-  app.get("/api/curriculum/:name", requireAuth, async (req, res) => {
-    try {
-      const { name } = req.params;
-      const decodedName = decodeURIComponent(name);
-      
-      if (decodedName === "IGCSE Chemistry Edexcel") {
-        const topics = await storage.getCurriculumTopics();
-        const curriculum = {
-          id: "igcse-chemistry-edexcel",
-          name: "IGCSE Chemistry Edexcel",
-          description: "IGCSE Chemistry Edexcel curriculum",
-          topics: topics.map(topic => ({
-            id: topic.code,
-            name: topic.name,
-            description: topic.description
-          }))
-        };
-        res.json(curriculum);
-      } else {
-        res.status(404).json({ error: "Curriculum not found" });
-      }
-    } catch (error) {
-      console.error("Error fetching curriculum:", error);
-      res.status(500).json({ error: "Failed to fetch curriculum" });
     }
   });
 }
