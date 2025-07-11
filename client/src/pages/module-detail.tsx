@@ -659,7 +659,7 @@ export default function ModuleDetail() {
             IGCSE Chemistry Edexcel specification objectives for this module - All {module.objectives?.length || 0} objectives displayed
           </CardDescription>
         </CardHeader>
-        <CardContent className="max-h-[800px] overflow-y-auto">
+        <CardContent className="p-4">
           {module.objectives && module.objectives.length > 0 ? (
             <div className="space-y-4">
               {module.objectives.map((objective, index) => {
@@ -709,8 +709,8 @@ export default function ModuleDetail() {
         </CardContent>
       </Card>
 
-      {/* Lessons and Assessments - Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Lessons and Assessments - Single Column Layout */}
+      <div className="space-y-6">
         {/* Lessons Section */}
         <Card className="border-2 border-blue-200 bg-blue-50/30">
           <CardHeader className="bg-blue-50">
@@ -730,7 +730,7 @@ export default function ModuleDetail() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="min-h-[400px] max-h-[800px] overflow-y-auto">
+          <CardContent className="p-4">
             {lessonsLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -822,7 +822,7 @@ export default function ModuleDetail() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="min-h-[400px] max-h-[800px] overflow-y-auto">
+          <CardContent className="p-4">
             {assessmentsLoading ? (
               <div className="space-y-4">
                 {[1, 2].map((i) => (
