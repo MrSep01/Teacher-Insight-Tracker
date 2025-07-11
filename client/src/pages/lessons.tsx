@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Filter, BookOpen, Target, CheckCircle2, Users, Eye, Edit, Trash2, Plus, Clock, GraduationCap, FileText, MoreVertical } from "lucide-react";
+import { Search, Filter, BookOpen, Target, CheckCircle2, Users, Eye, Edit, Trash2, Plus, Clock, GraduationCap, FileText, MoreVertical, ChevronRight } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LessonManagement } from "@/components/lesson-management";
+import { ModuleForm } from "@/components/forms/module-form";
 import { Link } from "wouter";
 
 interface LessonPlan {
@@ -94,6 +95,9 @@ function getLessonTypeColor(type: string) {
 export default function Lessons() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("modules");
+  const [isCreateModuleModalOpen, setIsCreateModuleModalOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch all lessons from all modules
   const { data: lessons = [], isLoading: lessonsLoading } = useQuery<LessonPlan[]>({
@@ -116,6 +120,31 @@ export default function Lessons() {
     queryKey: ["/api/assessments/all"],
     queryFn: async () => {
       return await apiRequest("/api/assessments/all");
+    },
+  });
+
+  // Create module mutation
+  const createModuleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("/api/modules", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Module created successfully",
+        description: "You can now add lesson plans to this module.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/modules/all"] });
+      setIsCreateModuleModalOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error creating module",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -276,7 +305,7 @@ export default function Lessons() {
                   <h3 className="text-lg font-semibold text-gray-900">Teaching Modules</h3>
                   <p className="text-sm text-gray-600">Reusable curriculum modules for your courses</p>
                 </div>
-                <Button className="bg-blue-600 hover:bg-blue-700">
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsCreateModuleModalOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Module
                 </Button>
@@ -295,7 +324,7 @@ export default function Lessons() {
                     <p className="text-gray-500 mb-4">
                       {searchQuery ? "No modules match your search criteria." : "Create your first module to get started."}
                     </p>
-                    <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsCreateModuleModalOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Module
                     </Button>
@@ -389,6 +418,23 @@ export default function Lessons() {
           </Tabs>
         </div>
       </main>
+
+      {/* Create Module Modal */}
+      <Dialog open={isCreateModuleModalOpen} onOpenChange={setIsCreateModuleModalOpen}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Module</DialogTitle>
+            <DialogDescription>
+              Mix and match IGCSE and A Level topics to create flexible modules based on student abilities
+            </DialogDescription>
+          </DialogHeader>
+          <ModuleForm
+            onSubmit={(data) => createModuleMutation.mutate(data)}
+            isLoading={createModuleMutation.isPending}
+            onClose={() => setIsCreateModuleModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -438,12 +484,17 @@ function LibraryModuleCard({ module }: LibraryModuleCardProps) {
     setIsLessonModalOpen(true);
   };
 
+  const handleModuleClick = () => {
+    // Navigate to module details page
+    window.location.href = `/modules/${module.id}`;
+  };
+
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow group">
+      <Card className="hover:shadow-lg transition-shadow group cursor-pointer">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <div className="flex-1">
+            <div className="flex-1" onClick={handleModuleClick}>
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen className="h-5 w-5 text-blue-600" />
                 <CardTitle className="text-lg line-clamp-1">{module.title}</CardTitle>
@@ -454,7 +505,7 @@ function LibraryModuleCard({ module }: LibraryModuleCardProps) {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -477,7 +528,7 @@ function LibraryModuleCard({ module }: LibraryModuleCardProps) {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0" onClick={handleModuleClick}>
           <div className="space-y-3">
             <div className="flex items-center flex-wrap gap-2">
               <Badge variant="outline" className="text-xs">
@@ -512,8 +563,9 @@ function LibraryModuleCard({ module }: LibraryModuleCardProps) {
                   <span>{module.topics?.length || 0} topics</span>
                 </div>
               </div>
-              <div className="text-xs text-gray-500">
-                {new Date(module.createdAt).toLocaleDateString()}
+              <div className="flex items-center gap-1 text-blue-600">
+                <span className="text-xs font-medium">View Details</span>
+                <ChevronRight className="h-4 w-4" />
               </div>
             </div>
           </div>
