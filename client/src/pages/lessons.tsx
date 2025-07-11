@@ -142,7 +142,7 @@ export default function Lessons() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900">Teaching Resources Library</h2>
-            <p className="text-sm text-gray-500">Access all your modules, lessons, and assessments in organized sections</p>
+            <p className="text-sm text-gray-500">Access all your modules, lessons, and assessments in one organized space</p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">

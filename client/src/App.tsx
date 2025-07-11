@@ -88,7 +88,7 @@ function Router() {
         </AuthGuard>
       </Route>
       
-      <Route path="/lessons">
+      <Route path="/library">
         <AuthGuard>
           <div className="flex h-screen overflow-hidden">
             <Sidebar />

@@ -158,6 +158,11 @@ export interface IStorage {
   // Dashboard
   getDashboardStats(): Promise<DashboardStats>;
   getStudentsWithScores(): Promise<StudentWithScores[]>;
+
+  // Library methods - fetch all resources by teacher
+  getAllLessonsByTeacherId(teacherId: number): Promise<LessonPlan[]>;
+  getAllModulesByTeacherId(teacherId: number): Promise<Module[]>;
+  getAllAssessmentsByTeacherId(teacherId: number): Promise<Assessment[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -1187,6 +1192,110 @@ export class DatabaseStorage implements IStorage {
           eq(courseItems.courseId, courseId)
         ));
     }
+  }
+
+  // Library methods - fetch all resources by teacher
+  async getAllLessonsByTeacherId(teacherId: number): Promise<LessonPlan[]> {
+    // Get all modules created by the teacher, then get all lessons from those modules
+    const teacherModules = await db
+      .select({ id: modules.id })
+      .from(modules)
+      .where(eq(modules.userId, teacherId));
+
+    if (teacherModules.length === 0) {
+      return [];
+    }
+
+    const moduleIds = teacherModules.map(m => m.id);
+    
+    // Get all lesson plans from teacher's modules with additional context
+    const lessonsWithContext = await db
+      .select({
+        id: lessonPlans.id,
+        moduleId: lessonPlans.moduleId,
+        title: lessonPlans.title,
+        description: lessonPlans.description,
+        lessonType: lessonPlans.lessonType,
+        duration: lessonPlans.duration,
+        difficulty: lessonPlans.difficulty,
+        objectives: lessonPlans.objectives,
+        activities: lessonPlans.activities,
+        resources: lessonPlans.resources,
+        equipment: lessonPlans.equipment,
+        safetyNotes: lessonPlans.safetyNotes,
+        aiGenerated: lessonPlans.aiGenerated,
+        createdAt: lessonPlans.createdAt,
+        // Additional context from module
+        moduleName: modules.title,
+        // Get course info through course-module relationship
+        courseName: courses.name,
+        grade: courses.grade,
+        level: courses.level,
+      })
+      .from(lessonPlans)
+      .leftJoin(modules, eq(lessonPlans.moduleId, modules.id))
+      .leftJoin(courseModules, eq(modules.id, courseModules.moduleId))
+      .leftJoin(courses, eq(courseModules.courseId, courses.id))
+      .where(eq(modules.userId, teacherId))
+      .orderBy(lessonPlans.createdAt);
+
+    return lessonsWithContext;
+  }
+
+  async getAllModulesByTeacherId(teacherId: number): Promise<Module[]> {
+    // Get all modules created by the teacher with additional context
+    const modulesWithContext = await db
+      .select({
+        id: modules.id,
+        userId: modules.userId,
+        title: modules.title,
+        description: modules.description,
+        curriculumTopic: modules.curriculumTopic,
+        gradeLevels: modules.gradeLevels,
+        topics: modules.topics,
+        objectives: modules.objectives,
+        estimatedHours: modules.estimatedHours,
+        createdAt: modules.createdAt,
+        // Additional context from course
+        courseName: courses.name,
+        grade: courses.grade,
+        level: courses.level,
+      })
+      .from(modules)
+      .leftJoin(courseModules, eq(modules.id, courseModules.moduleId))
+      .leftJoin(courses, eq(courseModules.courseId, courses.id))
+      .where(eq(modules.userId, teacherId))
+      .orderBy(modules.createdAt);
+
+    return modulesWithContext;
+  }
+
+  async getAllAssessmentsByTeacherId(teacherId: number): Promise<Assessment[]> {
+    // Get all assessments created by the teacher with additional context
+    const assessmentsWithContext = await db
+      .select({
+        id: assessments.id,
+        title: assessments.title,
+        description: assessments.description,
+        assessmentType: assessments.assessmentType,
+        difficulty: assessments.difficulty,
+        totalPoints: assessments.totalPoints,
+        estimatedDuration: assessments.estimatedDuration,
+        createdAt: assessments.createdAt,
+        // Additional context from module and course
+        moduleName: modules.title,
+        courseName: courses.name,
+        grade: courses.grade,
+        level: courses.level,
+      })
+      .from(assessments)
+      .leftJoin(modules, eq(assessments.moduleId, modules.id))
+      .leftJoin(courseModules, eq(modules.id, courseModules.moduleId))
+      .leftJoin(courses, eq(courseModules.courseId, courses.id))
+      .where(eq(modules.userId, teacherId))
+      .orderBy(assessments.createdAt);
+
+    return assessmentsWithContext;
   }
 }
 
