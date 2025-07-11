@@ -147,6 +147,77 @@ export function registerModuleRoutes(app: Express) {
     }
   });
 
+  // Get individual lesson
+  app.get("/api/lessons/:id", requireAuth, async (req, res) => {
+    try {
+      const lessonId = parseInt(req.params.id);
+      const lesson = await storage.getLessonById(lessonId);
+      
+      if (!lesson) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      // Check if user owns the lesson through module
+      const module = await storage.getModuleById(lesson.moduleId);
+      if (!module || module.userId !== req.user.id) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      res.json(lesson);
+    } catch (error) {
+      console.error("Error fetching lesson:", error);
+      res.status(500).json({ error: "Failed to fetch lesson" });
+    }
+  });
+
+  // Update lesson
+  app.put("/api/lessons/:id", requireAuth, async (req, res) => {
+    try {
+      const lessonId = parseInt(req.params.id);
+      const lesson = await storage.getLessonById(lessonId);
+      
+      if (!lesson) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      // Check if user owns the lesson through module
+      const module = await storage.getModuleById(lesson.moduleId);
+      if (!module || module.userId !== req.user.id) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      const updatedLesson = await storage.updateLesson(lessonId, req.body);
+      res.json(updatedLesson);
+    } catch (error) {
+      console.error("Error updating lesson:", error);
+      res.status(500).json({ error: "Failed to update lesson" });
+    }
+  });
+
+  // Delete lesson
+  app.delete("/api/lessons/:id", requireAuth, async (req, res) => {
+    try {
+      const lessonId = parseInt(req.params.id);
+      const lesson = await storage.getLessonById(lessonId);
+      
+      if (!lesson) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      // Check if user owns the lesson through module
+      const module = await storage.getModuleById(lesson.moduleId);
+      if (!module || module.userId !== req.user.id) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      await storage.deleteLesson(lessonId);
+      res.json({ message: "Lesson deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting lesson:", error);
+      res.status(500).json({ error: "Failed to delete lesson" });
+    }
+  });
+
   // Create lesson plan within a module
   app.post("/api/modules/:id/lessons", requireAuth, async (req, res) => {
     try {
@@ -295,6 +366,74 @@ export function registerModuleRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching all lessons:", error);
       res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
+
+  // Get individual assessment
+  app.get("/api/assessments/:id", requireAuth, async (req, res) => {
+    try {
+      const assessmentId = parseInt(req.params.id);
+      const assessment = await storage.getAssessmentById(assessmentId);
+      
+      if (!assessment) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      
+      // Check if user owns the assessment
+      if (assessment.userId !== req.user.id) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      
+      res.json(assessment);
+    } catch (error) {
+      console.error("Error fetching assessment:", error);
+      res.status(500).json({ error: "Failed to fetch assessment" });
+    }
+  });
+
+  // Update assessment
+  app.put("/api/assessments/:id", requireAuth, async (req, res) => {
+    try {
+      const assessmentId = parseInt(req.params.id);
+      const assessment = await storage.getAssessmentById(assessmentId);
+      
+      if (!assessment) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      
+      // Check if user owns the assessment
+      if (assessment.userId !== req.user.id) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      
+      const updatedAssessment = await storage.updateAssessment(assessmentId, req.body);
+      res.json(updatedAssessment);
+    } catch (error) {
+      console.error("Error updating assessment:", error);
+      res.status(500).json({ error: "Failed to update assessment" });
+    }
+  });
+
+  // Delete assessment
+  app.delete("/api/assessments/:id", requireAuth, async (req, res) => {
+    try {
+      const assessmentId = parseInt(req.params.id);
+      const assessment = await storage.getAssessmentById(assessmentId);
+      
+      if (!assessment) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      
+      // Check if user owns the assessment
+      if (assessment.userId !== req.user.id) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      
+      await storage.deleteAssessment(assessmentId);
+      res.json({ message: "Assessment deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting assessment:", error);
+      res.status(500).json({ error: "Failed to delete assessment" });
     }
   });
 }

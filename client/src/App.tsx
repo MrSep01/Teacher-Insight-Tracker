@@ -11,7 +11,9 @@ import Students from "@/pages/students";
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/course-detail";
 import Lessons from "@/pages/lessons";
+import LessonDetail from "@/pages/lesson-detail";
 import Assessments from "@/pages/assessments";
+import AssessmentDetail from "@/pages/assessment-detail";
 import Modules from "@/pages/modules";
 import ModuleDetail from "@/pages/module-detail";
 import Reports from "@/pages/reports";
@@ -121,12 +123,45 @@ function Router() {
         </AuthGuard>
       </Route>
       
+      <Route path="/assessments/:id">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <AssessmentDetail />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
       <Route path="/assessments">
         <AuthGuard>
           <div className="flex h-screen overflow-hidden">
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
               <Assessments />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/lessons/:id">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <LessonDetail />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
+      <Route path="/lessons/:id">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <LessonDetail />
             </div>
           </div>
         </AuthGuard>

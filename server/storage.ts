@@ -136,9 +136,12 @@ export interface IStorage {
   getLessonsByModule(moduleId: number): Promise<LessonPlan[]>;
   getLessonPlansByModuleId(moduleId: number): Promise<LessonPlan[]>;
   getLessonPlanById(id: number): Promise<LessonPlan | undefined>;
+  getLessonById(id: number): Promise<LessonPlan | undefined>;
   createLessonPlan(lessonPlan: InsertLessonPlan): Promise<LessonPlan>;
   updateLessonPlan(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined>;
+  updateLesson(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined>;
   deleteLessonPlan(id: number): Promise<boolean>;
+  deleteLesson(id: number): Promise<boolean>;
 
   // Lesson Recommendations
   getLessonRecommendations(): Promise<LessonRecommendation[]>;
@@ -1325,6 +1328,19 @@ export class DatabaseStorage implements IStorage {
     );
 
     return uniqueAssessments;
+  }
+
+  // Additional lesson methods for individual lesson access
+  async getLessonById(id: number): Promise<LessonPlan | undefined> {
+    return this.getLessonPlanById(id);
+  }
+
+  async updateLesson(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined> {
+    return this.updateLessonPlan(id, lessonPlan);
+  }
+
+  async deleteLesson(id: number): Promise<boolean> {
+    return this.deleteLessonPlan(id);
   }
 }
 
