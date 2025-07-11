@@ -414,6 +414,16 @@ Changelog:
   * Teachers can drag and drop modules within courses to reorder them with automatic database updates
   * Enhanced module management with dropdown actions: Edit Module, Manage Lessons, Add Assessment, Delete Module
   * System provides complete visual feedback during drag operations with opacity changes and hover states
+- July 11, 2025. Consolidated modules under Library with enhanced functionality and fixed deletion issues:
+  * Removed separate "Modules" navigation from sidebar to consolidate everything under Library section
+  * Enhanced Library module cards with better formatting similar to standalone modules page
+  * Made module cards fully clickable with navigation to detailed module views and "View Details" visual indicator
+  * Added dropdown menus for module management (View Details, Manage Lessons, Delete) with proper modal dialogs
+  * Implemented create module functionality in Library with comprehensive form and curriculum selection
+  * Fixed critical module deletion issue by properly handling foreign key constraints in database
+  * Updated deleteModule function to remove module from all courses first, then delete associated lesson plans, then delete module
+  * System now provides consistent module functionality across Library and course management areas
+  * Library serves as unified resource hub for all modules with complete management capabilities
 ```
 
 ## User Preferences
