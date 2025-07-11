@@ -1273,28 +1273,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllAssessmentsByTeacherId(teacherId: number): Promise<Assessment[]> {
-    // Simplified query to avoid null issues - just get assessments for modules owned by teacher
-    const assessmentsForTeacher = await db
-      .select({
-        id: assessments.id,
-        title: assessments.title,
-        description: assessments.description,
-        assessmentType: assessments.assessmentType,
-        difficulty: assessments.difficulty,
-        totalPoints: assessments.totalPoints,
-        estimatedDuration: assessments.estimatedDuration,
-        createdAt: assessments.createdAt,
-        moduleId: assessments.moduleId,
-        questions: assessments.questions,
-        markingScheme: assessments.markingScheme,
-        objectives: assessments.objectives,
-      })
-      .from(assessments)
-      .innerJoin(modules, eq(assessments.moduleId, modules.id))
-      .where(eq(modules.userId, teacherId))
-      .orderBy(desc(assessments.createdAt));
+    try {
+      // Simplified query to avoid null issues - just get assessments for modules owned by teacher
+      const assessmentsForTeacher = await db
+        .select({
+          id: assessments.id,
+          title: assessments.title,
+          description: assessments.description,
+          assessmentType: assessments.assessmentType,
+          difficulty: assessments.difficulty,
+          totalPoints: assessments.totalPoints,
+          estimatedDuration: assessments.estimatedDuration,
+          createdAt: assessments.createdAt,
+          moduleId: assessments.moduleId,
+          questions: assessments.questions,
+          markingScheme: assessments.markingScheme,
+          objectives: assessments.objectives,
+        })
+        .from(assessments)
+        .innerJoin(modules, eq(assessments.moduleId, modules.id))
+        .where(eq(modules.userId, teacherId))
+        .orderBy(desc(assessments.createdAt));
 
-    return assessmentsForTeacher;
+      return assessmentsForTeacher;
+    } catch (error) {
+      console.error('Error fetching assessments by teacher ID:', error);
+      return [];
+    }
   }
 
   // Additional lesson methods for individual lesson access

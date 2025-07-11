@@ -50,28 +50,29 @@ function formatObjective(objective: string, index: number): { code: string; desc
     const code = codeMatch[1];
     const description = codeMatch[2].trim();
     
-    // Map authentic IGCSE codes to topics/subtopics
+    // Map authentic IGCSE codes to topics/subtopics based on official specification
     const getTopicSubtopic = (code: string) => {
       const majorCode = code.split('.')[0];
       const minorCode = parseFloat(code);
       
       if (majorCode === '1') {
-        if (minorCode >= 1.1 && minorCode <= 1.8) return { topic: "Principles of Chemistry", subtopic: "States of Matter" };
-        if (minorCode >= 1.9 && minorCode <= 1.11) return { topic: "Principles of Chemistry", subtopic: "Elements, Compounds and Mixtures" };
-        if (minorCode >= 1.12 && minorCode <= 1.20) return { topic: "Principles of Chemistry", subtopic: "Atomic Structure" };
-        if (minorCode >= 1.21 && minorCode <= 1.28) return { topic: "Principles of Chemistry", subtopic: "Periodic Table" };
-        if (minorCode >= 1.29 && minorCode <= 1.38) return { topic: "Principles of Chemistry", subtopic: "Chemical Formulae and Equations" };
+        return { topic: "Topic 1: Principles of chemistry: Part 1", subtopic: "States of Matter" };
       }
       if (majorCode === '2') {
-        return { topic: "Inorganic Chemistry", subtopic: "Reactivity Series and Metals" };
+        return { topic: "Topic 2: Inorganic chemistry", subtopic: "Group chemistry" };
       }
       if (majorCode === '3') {
-        return { topic: "Physical Chemistry", subtopic: "Energetics" };
+        return { topic: "Topic 3: Physical chemistry", subtopic: "Energetics" };
       }
       if (majorCode === '4') {
-        return { topic: "Organic Chemistry", subtopic: "Hydrocarbons" };
+        return { topic: "Topic 4: Organic chemistry", subtopic: "Hydrocarbons" };
       }
-      return { topic: "Chemistry", subtopic: "General" };
+      if (majorCode === '5') {
+        if (minorCode >= 5.1 && minorCode <= 5.7) return { topic: "Topic 5: Principles of chemistry: Part 2", subtopic: "Ionic bonding" };
+        if (minorCode >= 5.8 && minorCode <= 5.15) return { topic: "Topic 5: Principles of chemistry: Part 2", subtopic: "Covalent bonding" };
+        if (minorCode >= 5.16 && minorCode <= 5.20) return { topic: "Topic 5: Principles of chemistry: Part 2", subtopic: "Metallic bonding" };
+      }
+      return { topic: "IGCSE Chemistry", subtopic: "General" };
     };
     
     const { topic, subtopic } = getTopicSubtopic(code);
@@ -628,23 +629,25 @@ export default function ModuleDetail() {
             
             {/* Subtopics Examples */}
             <div className="border-l-4 border-purple-500 pl-4">
-              <div className="text-sm font-semibold text-purple-800 mb-2">Example Subtopics</div>
+              <div className="text-sm font-semibold text-purple-800 mb-2">Topic 5 Subtopics</div>
               <div className="text-sm text-purple-700 space-y-1">
-                <div>• <strong>States of Matter</strong> (1.1-1.8)</div>
-                <div>• <strong>Elements, Compounds and Mixtures</strong> (1.9-1.11)</div>
-                <div>• <strong>Atomic Structure</strong> (1.12-1.20)</div>
-                <div>• <strong>Periodic Table</strong> (1.21-1.28)</div>
-                <div>• <strong>Chemical Formulae and Equations</strong> (1.29-1.38)</div>
+                <div>• <strong>(d) The Periodic Table</strong></div>
+                <div>• <strong>(e) Chemical formulae, equations and calculations</strong></div>
+                <div>• <strong>(f) Ionic bonding</strong> (5.1-5.7)</div>
+                <div>• <strong>(g) Covalent bonding</strong></div>
+                <div>• <strong>(h) Metallic bonding</strong></div>
+                <div>• <strong>(i) Electrolysis</strong></div>
               </div>
             </div>
             
             {/* Objectives Examples */}
             <div className="border-l-4 border-orange-500 pl-4">
-              <div className="text-sm font-semibold text-orange-800 mb-2">Example Objectives</div>
+              <div className="text-sm font-semibold text-orange-800 mb-2">Ionic Bonding Objectives</div>
               <div className="text-sm text-orange-700 space-y-1">
-                <div><strong>1.1</strong> - Understand the three states of matter in terms of arrangement, movement and energy of particles</div>
-                <div><strong>1.2</strong> - Understand the interconversions between the three states of matter</div>
-                <div><strong>1.3</strong> - Understand how diffusion and dilution experiments can be explained</div>
+                <div><strong>5.1</strong> - understand how ions are formed by electron loss or gain</div>
+                <div><strong>5.2</strong> - know the charges of these ions: metals in Groups 1, 2 and 3; non-metals in Groups 5, 6 and 7</div>
+                <div><strong>5.3</strong> - write formulae for compounds formed between the ions listed above</div>
+                <div><strong>5.4</strong> - draw dot-and-cross diagrams to show the formation of ionic compounds by electron transfer</div>
               </div>
             </div>
           </div>
