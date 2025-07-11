@@ -42,6 +42,95 @@ import type { Module, LessonPlan, Assessment } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { formatObjective, getTopic5Subtopics, getIonicBondingObjectives } from "@/lib/curriculum-utils";
 
+// Curriculum Coverage Display Component
+function CurriculumCoverageDisplay({ objectives }: { objectives: string[] }) {
+  const { data: topicsData } = useQuery({
+    queryKey: ['/api/curriculum/topics'],
+    enabled: objectives.length > 0,
+  });
+
+  const { data: hierarchyData } = useQuery({
+    queryKey: ['/api/curriculum/topics/5/hierarchy'],
+    enabled: objectives.length > 0,
+  });
+
+  if (!objectives.length || !topicsData || !hierarchyData) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Curriculum Coverage</CardTitle>
+          <CardDescription>No curriculum objectives selected</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const topic = hierarchyData.topic;
+  
+  // Group objectives by subtopic
+  const subtopicCoverage = topic.subtopics.map(subtopic => {
+    const subtopicObjectives = subtopic.objectives.filter(obj => 
+      objectives.includes(obj.code)
+    );
+    return {
+      ...subtopic,
+      coveredObjectives: subtopicObjectives,
+      totalObjectives: subtopic.objectives.length,
+      percentageCovered: Math.round((subtopicObjectives.length / subtopic.objectives.length) * 100)
+    };
+  }).filter(subtopic => subtopic.coveredObjectives.length > 0);
+
+  const totalObjectivesCovered = objectives.length;
+  const totalObjectivesAvailable = topic.subtopics.reduce((sum, subtopic) => sum + subtopic.objectives.length, 0);
+  const overallPercentage = Math.round((totalObjectivesCovered / totalObjectivesAvailable) * 100);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ClipboardList className="h-5 w-5" />
+          Curriculum Coverage
+        </CardTitle>
+        <CardDescription>
+          <div className="flex items-center gap-4">
+            <span>Topic {topic.code}: {topic.name}</span>
+            <Badge variant="outline">
+              {totalObjectivesCovered} of {totalObjectivesAvailable} objectives ({overallPercentage}%)
+            </Badge>
+          </div>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {subtopicCoverage.map((subtopic) => (
+            <div key={subtopic.id} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h4 className="font-semibold">Subtopic {subtopic.code}: {subtopic.name}</h4>
+                  <p className="text-sm text-gray-600">{subtopic.description}</p>
+                </div>
+                <Badge variant={subtopic.percentageCovered === 100 ? "default" : "secondary"}>
+                  {subtopic.coveredObjectives.length}/{subtopic.totalObjectives} ({subtopic.percentageCovered}%)
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+                {subtopic.coveredObjectives.map((objective) => (
+                  <div key={objective.id} className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="font-mono">{objective.code}</span>
+                    <span className="text-gray-700">{objective.statement}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Use global curriculum utility functions for consistent IGCSE formatting
 
 // Sortable Lesson Card Component
@@ -577,69 +666,8 @@ export default function ModuleDetail() {
         </CardContent>
       </Card>
 
-      {/* Curriculum Hierarchy */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Curriculum Structure
-          </CardTitle>
-          <CardDescription>
-            Understanding the hierarchy: Curriculum → Topics → Subtopics → Objectives
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Curriculum Level */}
-            <div className="border-l-4 border-blue-500 pl-4">
-              <div className="text-sm font-semibold text-blue-800 mb-1">Curriculum</div>
-              <div className="text-lg font-bold text-blue-900">{module.curriculumTopic}</div>
-            </div>
-            
-            {/* Topics Level */}
-            {module.topics && module.topics.length > 0 && (
-              <div className="border-l-4 border-green-500 pl-4">
-                <div className="text-sm font-semibold text-green-800 mb-2">Topics Covered</div>
-                <div className="flex flex-wrap gap-2">
-                  {module.topics.map((topic, index) => (
-                    <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      {topic}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Subtopics Examples */}
-            <div className="border-l-4 border-purple-500 pl-4">
-              <div className="text-sm font-semibold text-purple-800 mb-2">Topic 5 Subtopics</div>
-              <div className="text-sm text-purple-700 space-y-1">
-                {getTopic5Subtopics("(f)").map((subtopic, index) => (
-                  <div key={index} className={subtopic.isHighlighted ? "bg-yellow-100 border border-yellow-300 rounded p-2 my-1" : ""}>
-                    <div className={`font-semibold ${subtopic.isHighlighted ? "text-yellow-800" : ""}`}>
-                      • <strong>{subtopic.code} {subtopic.name}</strong>
-                      {subtopic.objectiveRange && ` (${subtopic.objectiveRange})`}
-                      {subtopic.isHighlighted && " ← This Module Focus"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Objectives Examples */}
-            <div className="border-l-4 border-orange-500 pl-4">
-              <div className="text-sm font-semibold text-orange-800 mb-2">Ionic Bonding Objectives (5.1-5.7)</div>
-              <div className="text-sm text-orange-700 space-y-1">
-                {getIonicBondingObjectives().map((objective, index) => (
-                  <div key={index}>
-                    <strong>{objective.code}</strong> - {objective.statement}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Curriculum Coverage */}
+      <CurriculumCoverageDisplay objectives={module.objectives || []} />
 
       {/* Learning Objectives - Expanded */}
       <Card className="border-2 border-green-200 bg-green-50/30">

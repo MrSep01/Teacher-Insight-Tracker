@@ -130,12 +130,37 @@ export function AuthenticCurriculumSelector({
     onEstimatedHoursChange(newHours);
   };
 
+  const selectAllTopicObjectives = (topic: TopicWithHierarchy) => {
+    const topicObjectiveCodes = topic.subtopics.flatMap(subtopic => 
+      subtopic.objectives.map(obj => obj.code)
+    );
+    const otherObjectives = selectedObjectives.filter(code => 
+      !topicObjectiveCodes.includes(code)
+    );
+    const newObjectives = [...otherObjectives, ...topicObjectiveCodes];
+    onObjectivesChange(newObjectives);
+    
+    const newHours = Math.max(1, Math.round((newObjectives.length * 2) / 60));
+    onEstimatedHoursChange(newHours);
+  };
+
   const selectAllSubtopicObjectives = (subtopic: CurriculumSubtopic & { objectives: CurriculumObjective[] }) => {
     const subtopicObjectiveCodes = subtopic.objectives.map(obj => obj.code);
-    const newObjectives = [
-      ...selectedObjectives.filter(code => !subtopicObjectiveCodes.includes(code)),
-      ...subtopicObjectiveCodes
-    ];
+    const otherObjectives = selectedObjectives.filter(code => 
+      !subtopicObjectiveCodes.includes(code)
+    );
+    const newObjectives = [...otherObjectives, ...subtopicObjectiveCodes];
+    onObjectivesChange(newObjectives);
+    
+    const newHours = Math.max(1, Math.round((newObjectives.length * 2) / 60));
+    onEstimatedHoursChange(newHours);
+  };
+
+  const deselectAllSubtopicObjectives = (subtopic: CurriculumSubtopic & { objectives: CurriculumObjective[] }) => {
+    const subtopicObjectiveCodes = subtopic.objectives.map(obj => obj.code);
+    const newObjectives = selectedObjectives.filter(code => 
+      !subtopicObjectiveCodes.includes(code)
+    );
     onObjectivesChange(newObjectives);
     
     const newHours = Math.max(1, Math.round((newObjectives.length * 2) / 60));
@@ -188,6 +213,18 @@ export function AuthenticCurriculumSelector({
               const topicWithHierarchy = topicsWithHierarchy.find(t => t.id === topic.id);
               const isExpanded = expandedTopics.has(topic.id);
               
+              // Calculate topic selection status
+              const topicObjectiveCodes = topicWithHierarchy?.subtopics.flatMap(subtopic => 
+                subtopic.objectives.map(obj => obj.code)
+              ) || [];
+              const selectedTopicObjectives = topicObjectiveCodes.filter(code => 
+                selectedObjectives.includes(code)
+              );
+              const isTopicFullySelected = topicObjectiveCodes.length > 0 && 
+                selectedTopicObjectives.length === topicObjectiveCodes.length;
+              const isTopicPartiallySelected = selectedTopicObjectives.length > 0 && 
+                selectedTopicObjectives.length < topicObjectiveCodes.length;
+              
               return (
                 <Card key={topic.id} className="border-l-4 border-l-blue-500">
                   <CardHeader className="pb-3">
@@ -211,9 +248,39 @@ export function AuthenticCurriculumSelector({
                           <CardDescription>{topic.description}</CardDescription>
                         </div>
                       </div>
-                      <Badge variant="secondary">
-                        {topic.curriculum}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">
+                          {topic.curriculum}
+                        </Badge>
+                        {topicWithHierarchy && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">
+                              {topicObjectiveCodes.length} objectives
+                            </Badge>
+                            <Button
+                              variant={isTopicFullySelected ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                if (isTopicFullySelected) {
+                                  // Deselect all objectives in this topic
+                                  const newObjectives = selectedObjectives.filter(code => 
+                                    !topicObjectiveCodes.includes(code)
+                                  );
+                                  onObjectivesChange(newObjectives);
+                                  const newHours = Math.max(1, Math.round((newObjectives.length * 2) / 60));
+                                  onEstimatedHoursChange(newHours);
+                                } else {
+                                  selectAllTopicObjectives(topicWithHierarchy);
+                                }
+                              }}
+                              className={isTopicPartiallySelected ? "bg-yellow-100 border-yellow-500" : ""}
+                            >
+                              {isTopicFullySelected ? "Deselect All" : 
+                               isTopicPartiallySelected ? "Select All" : "Select All"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   
@@ -255,9 +322,20 @@ export function AuthenticCurriculumSelector({
                                       {subtopic.objectives.length} objectives
                                     </Badge>
                                     <Button
-                                      variant="outline"
+                                      variant={allSelected ? "default" : "outline"}
                                       size="sm"
-                                      onClick={() => selectAllSubtopicObjectives(subtopic)}
+                                      onClick={() => {
+                                        if (allSelected) {
+                                          deselectAllSubtopicObjectives(subtopic);
+                                        } else {
+                                          selectAllSubtopicObjectives(subtopic);
+                                        }
+                                      }}
+                                      className={
+                                        !allSelected && subtopicObjectiveCodes.some(code => 
+                                          selectedObjectives.includes(code)
+                                        ) ? "bg-yellow-100 border-yellow-500" : ""
+                                      }
                                     >
                                       {allSelected ? "Deselect All" : "Select All"}
                                     </Button>
