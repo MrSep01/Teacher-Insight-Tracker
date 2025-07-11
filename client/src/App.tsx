@@ -10,6 +10,7 @@ import Dashboard from "@/pages/dashboard";
 import Students from "@/pages/students";
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/course-detail";
+import Lessons from "@/pages/lessons";
 import Assessments from "@/pages/assessments";
 import Modules from "@/pages/modules";
 import ModuleDetail from "@/pages/module-detail";

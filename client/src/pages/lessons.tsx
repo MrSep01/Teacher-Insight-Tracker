@@ -88,7 +88,7 @@ function getLessonTypeColor(type: string) {
 
 export default function Lessons() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTab, setSelectedTab] = useState("lessons");
+  const [selectedTab, setSelectedTab] = useState("modules");
 
   // Fetch all lessons from all modules
   const { data: lessons = [], isLoading: lessonsLoading } = useQuery<LessonPlan[]>({
@@ -142,7 +142,7 @@ export default function Lessons() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900">Teaching Resources Library</h2>
-            <p className="text-sm text-gray-500">Access all your lessons, modules, and assessments in one place</p>
+            <p className="text-sm text-gray-500">Access all your modules, lessons, and assessments in organized sections</p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -167,13 +167,13 @@ export default function Lessons() {
         <div className="max-w-7xl mx-auto">
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="lessons" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Lessons ({filteredLessons.length})
-              </TabsTrigger>
               <TabsTrigger value="modules" className="flex items-center gap-2">
                 <Target className="h-4 w-4" />
                 Modules ({filteredModules.length})
+              </TabsTrigger>
+              <TabsTrigger value="lessons" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Lessons ({filteredLessons.length})
               </TabsTrigger>
               <TabsTrigger value="assessments" className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" />
@@ -181,7 +181,7 @@ export default function Lessons() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="lessons" className="mt-6">
+            <TabsContent value="modules" className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {lessonsLoading ? (
                   <div className="col-span-full text-center py-8">
