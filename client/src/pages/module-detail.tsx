@@ -550,10 +550,10 @@ export default function ModuleDetail() {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-              <div className="text-3xl font-bold text-green-600">{module.objectives?.length || 0}/7</div>
+              <div className="text-3xl font-bold text-green-600">{module.objectives?.length || 0}</div>
               <div className="text-sm text-gray-600 mt-1">Learning Objectives</div>
               <div className="text-xs text-gray-500 mt-1">
-                {module.objectives?.length === 7 ? "Complete ✓" : "In Progress"}
+                {module.objectives?.length > 0 ? "Available ✓" : "Not Set"}
               </div>
             </div>
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
@@ -643,7 +643,7 @@ export default function ModuleDetail() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
-            Complete Learning Objectives ({module.objectives?.length || 0}/7)
+            Complete Learning Objectives ({module.objectives?.length || 0})
           </CardTitle>
           <CardDescription>
             IGCSE Chemistry Edexcel specification objectives for this module - All {module.objectives?.length || 0} objectives displayed
@@ -748,8 +748,10 @@ export default function ModuleDetail() {
           ) : (
             <div className="text-center py-8">
               <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No lessons yet</h3>
-              <p className="text-gray-500 mb-4">Create your first lesson to get started</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No lessons found</h3>
+              <p className="text-gray-500 mb-4">
+                Debug Info: Loading={lessonsLoading ? "true" : "false"}, Count={lessons.length}
+              </p>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Create First Lesson
@@ -808,8 +810,10 @@ export default function ModuleDetail() {
           ) : (
             <div className="text-center py-8">
               <ClipboardList className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No assessments yet</h3>
-              <p className="text-gray-500 mb-4">Create your first assessment to track student progress</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No assessments found</h3>
+              <p className="text-gray-500 mb-4">
+                Debug Info: Loading={assessmentsLoading ? "true" : "false"}, Count={assessments.length}
+              </p>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Create First Assessment
