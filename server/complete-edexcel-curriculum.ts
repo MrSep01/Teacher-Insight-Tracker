@@ -30,7 +30,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
     topics: [
       {
         id: "igcse-topic-1",
-        name: "Principles of Chemistry",
+        name: "Topic 1: Principles of chemistry: Part 1",
         description: "Fundamental concepts of chemistry including atomic structure, bonding, and basic principles",
         specificationCode: "1",
         timeAllocation: 50,
@@ -520,7 +520,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
       },
       {
         id: "igcse-topic-2",
-        name: "Inorganic Chemistry",
+        name: "Topic 2: Inorganic chemistry",
         description: "Chemistry of metals, non-metals, and common compounds",
         specificationCode: "2",
         timeAllocation: 40,
@@ -728,7 +728,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
       },
       {
         id: "igcse-topic-3",
-        name: "Physical Chemistry",
+        name: "Topic 3: Physical chemistry",
         description: "Energy changes, reaction rates, and equilibrium",
         specificationCode: "3",
         timeAllocation: 35,
@@ -849,7 +849,7 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
       },
       {
         id: "igcse-topic-4",
-        name: "Organic Chemistry",
+        name: "Topic 4: Organic chemistry",
         description: "Chemistry of carbon compounds and polymers",
         specificationCode: "4",
         timeAllocation: 30,
@@ -1076,6 +1076,109 @@ export const COMPLETE_EDEXCEL_CURRICULUM: CurriculumLevel[] = [
             ],
             practicalWork: ["Polymer formation demonstrations", "Polymer property investigations", "Environmental impact studies"],
             mathematicalSkills: ["Polymer structure representation", "Molecular weight calculations", "Environmental data analysis"]
+          }
+        ]
+      },
+      {
+        id: "igcse-topic-5",
+        name: "Topic 5: Principles of chemistry: Part 2",
+        description: "Advanced chemistry concepts including bonding, periodic table, and electrolysis",
+        specificationCode: "5",
+        timeAllocation: 60,
+        assessmentNotes: "Advanced topic covering bonding theories, periodic trends, and electrochemistry",
+        subtopics: [
+          {
+            id: "5.f",
+            name: "Ionic bonding",
+            description: "Formation and properties of ionic compounds",
+            objectives: [
+              {
+                id: "5.f.1",
+                code: "5.1",
+                statement: "understand how ions are formed by electron loss or gain",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: [],
+                keywords: ["ions", "electron transfer", "cations", "anions", "electron loss", "electron gain"]
+              },
+              {
+                id: "5.f.2",
+                code: "5.2",
+                statement: "know the charges of these ions: metals in Groups 1, 2 and 3; non-metals in Groups 5, 6 and 7; Ag+, Cu2+, Fe2+, Fe3+, Pb2+, Zn2+; hydrogen (H+), hydroxide (OH-), ammonium (NH4+), carbonate (CO32-), nitrate (NO3-), sulfate (SO42-)",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "recall"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["5.f.1"],
+                keywords: ["ion charges", "metal ions", "non-metal ions", "polyatomic ions", "ionic charge"]
+              },
+              {
+                id: "5.f.3",
+                code: "5.3",
+                statement: "write formulae for compounds formed between the ions listed above",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["write", "construct"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["5.f.2"],
+                keywords: ["ionic formulae", "compound formulae", "charge balance", "ionic compounds"]
+              },
+              {
+                id: "5.f.4",
+                code: "5.4",
+                statement: "draw dot-and-cross diagrams to show the formation of ionic compounds by electron transfer, limited to combinations of elements from Groups 1, 2, 3 and 5, 6, 7",
+                bloomsLevel: "apply",
+                difficulty: "intermediate",
+                commandWords: ["draw", "show"],
+                estimatedTeachingMinutes: 90,
+                assessmentWeight: 5,
+                prerequisiteObjectives: ["5.f.1"],
+                keywords: ["dot-and-cross diagrams", "electron transfer", "ionic formation", "electron shells"]
+              },
+              {
+                id: "5.f.5",
+                code: "5.5",
+                statement: "understand ionic bonding in terms of electrostatic attractions",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 60,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["5.f.1"],
+                keywords: ["electrostatic attraction", "ionic bonding", "oppositely charged ions", "coulombic forces"]
+              },
+              {
+                id: "5.f.6",
+                code: "5.6",
+                statement: "understand why compounds with giant ionic lattices have high melting and boiling points",
+                bloomsLevel: "understand",
+                difficulty: "intermediate",
+                commandWords: ["understand", "explain"],
+                estimatedTeachingMinutes: 75,
+                assessmentWeight: 4,
+                prerequisiteObjectives: ["5.f.5"],
+                keywords: ["giant ionic lattice", "high melting point", "high boiling point", "lattice energy"]
+              },
+              {
+                id: "5.f.7",
+                code: "5.7",
+                statement: "know that ionic compounds do not conduct electricity when solid, but do conduct electricity when molten and in aqueous solution",
+                bloomsLevel: "remember",
+                difficulty: "basic",
+                commandWords: ["know", "recall"],
+                estimatedTeachingMinutes: 45,
+                assessmentWeight: 3,
+                prerequisiteObjectives: ["5.f.5"],
+                keywords: ["electrical conductivity", "solid ionic compounds", "molten", "aqueous solution", "mobile ions"]
+              }
+            ],
+            practicalWork: ["Ionic compound formation", "Conductivity testing", "Dot-and-cross diagram construction"],
+            mathematicalSkills: ["Charge calculations", "Formula writing", "Diagram construction"]
           }
         ]
       }
