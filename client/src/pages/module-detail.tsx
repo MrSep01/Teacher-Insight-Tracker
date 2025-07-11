@@ -285,24 +285,17 @@ export default function ModuleDetail() {
   // Update state when data changes
   useEffect(() => {
     if (lessonsData) {
-      console.log('Debug - Setting lessons:', lessonsData);
       setLessons(lessonsData);
     }
   }, [lessonsData]);
 
   useEffect(() => {
     if (assessmentsData) {
-      console.log('Debug - Setting assessments:', assessmentsData);
       setAssessments(assessmentsData);
     }
   }, [assessmentsData]);
 
-  // Debug logs
-  console.log('Debug - Module ID:', id);
-  console.log('Debug - Lessons State:', lessons);
-  console.log('Debug - Assessments State:', assessments);
-  console.log('Debug - Lessons Loading:', lessonsLoading);
-  console.log('Debug - Assessments Loading:', assessmentsLoading);
+
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -741,7 +734,7 @@ export default function ModuleDetail() {
               </div>
             ) : lessons.length > 0 ? (
               <div className="space-y-6">
-                <div className="text-sm text-blue-600 mb-4 font-medium">Debug: {lessons.length} lessons loaded</div>
+
                 {lessons.map((lesson) => (
                   <div key={lesson.id} className="bg-white p-6 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer min-h-[140px]" onClick={() => handleViewLesson(lesson)}>
                     <div className="flex items-start gap-4">
@@ -833,7 +826,7 @@ export default function ModuleDetail() {
               </div>
             ) : assessments.length > 0 ? (
               <div className="space-y-4">
-                <div className="text-xs text-gray-500 mb-2">Debug: {assessments.length} assessments loaded</div>
+
                 {assessments.map((assessment) => (
                   <div key={assessment.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:border-purple-300 transition-colors cursor-pointer" onClick={() => handleViewAssessment(assessment)}>
                     <div className="flex items-start gap-3">
