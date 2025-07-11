@@ -2,296 +2,431 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Filter, Book, Clock, Users, Star } from "lucide-react";
-import { StudentWithScores, Subject } from "@shared/schema";
-import { generateRecommendations, getRecommendationPriorityColor, getRecommendationBadgeColor } from "@/lib/recommendations";
+import { Search, Filter, BookOpen, Target, CheckCircle2, Users, Eye, Edit, Trash2, Plus, Clock, GraduationCap } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 interface LessonPlan {
   id: number;
+  moduleId: number;
   title: string;
-  subject: string;
-  duration: string;
-  targetStudents: string[];
-  difficulty: "beginner" | "intermediate" | "advanced";
-  objectives: string[];
-  materials: string[];
   description: string;
-  priority: "low" | "medium" | "high";
+  lessonType: "lecture" | "practical" | "project" | "assessment" | "discussion" | "fieldwork";
+  duration: number;
+  difficulty: "basic" | "intermediate" | "advanced";
+  objectives: string[];
+  activities: string[];
+  resources: string[];
+  equipment?: string[];
+  safetyNotes?: string;
+  aiGenerated: boolean;
+  createdAt: string;
+  // Additional fields from module
+  moduleName?: string;
+  courseName?: string;
+  grade?: string;
+  level?: string;
 }
 
-const sampleLessonPlans: LessonPlan[] = [
-  {
-    id: 1,
-    title: "Fraction Fundamentals",
-    subject: "Mathematics",
-    duration: "45 minutes",
-    targetStudents: ["Students scoring below 70% in Math"],
-    difficulty: "beginner",
-    objectives: ["Understand basic fraction concepts", "Practice fraction addition", "Visual fraction representation"],
-    materials: ["Fraction circles", "Worksheets", "Interactive whiteboard"],
-    description: "A comprehensive lesson to help students understand fractions through visual and hands-on activities.",
-    priority: "high"
-  },
-  {
-    id: 2,
-    title: "Advanced Reading Comprehension",
-    subject: "English",
-    duration: "60 minutes",
-    targetStudents: ["High-performing students"],
-    difficulty: "advanced",
-    objectives: ["Analyze complex texts", "Identify literary themes", "Critical thinking skills"],
-    materials: ["Selected short stories", "Analysis worksheets", "Discussion guides"],
-    description: "Challenge advanced readers with complex texts and analytical thinking exercises.",
-    priority: "medium"
-  },
-  {
-    id: 3,
-    title: "Plant Life Cycle Exploration",
-    subject: "Science",
-    duration: "50 minutes",
-    targetStudents: ["All Grade 5 students"],
-    difficulty: "intermediate",
-    objectives: ["Understand plant life cycles", "Observe real specimens", "Document findings"],
-    materials: ["Seeds", "Magnifying glasses", "Science journals", "Plant specimens"],
-    description: "Hands-on exploration of plant life cycles with real specimens and observation activities.",
-    priority: "medium"
-  },
-  {
-    id: 4,
-    title: "Story Writing Workshop",
-    subject: "English",
-    duration: "75 minutes",
-    targetStudents: ["Students needing creative writing practice"],
-    difficulty: "intermediate",
-    objectives: ["Develop creative writing skills", "Understand story structure", "Practice narrative techniques"],
-    materials: ["Writing prompts", "Story templates", "Computers/tablets"],
-    description: "Interactive workshop focusing on creative writing skills and narrative development.",
-    priority: "high"
-  }
-];
+interface Module {
+  id: number;
+  title: string;
+  description: string;
+  curriculumTopic: string;
+  gradeLevels: string[];
+  topics: string[];
+  objectives: string[];
+  estimatedHours: number;
+  createdAt: string;
+  // Additional fields from course
+  courseName?: string;
+  grade?: string;
+  level?: string;
+}
+
+interface Assessment {
+  id: number;
+  title: string;
+  description: string;
+  assessmentType: "formative" | "summative" | "diagnostic" | "practice";
+  difficulty: "basic" | "intermediate" | "advanced";
+  totalPoints: number;
+  estimatedDuration: number;
+  createdAt: string;
+  // Additional fields from module/course
+  moduleName?: string;
+  courseName?: string;
+  grade?: string;
+  level?: string;
+}
+
+function getLessonTypeIcon(type: string) {
+  const icons = {
+    lecture: BookOpen,
+    practical: Target,
+    project: Target,
+    assessment: CheckCircle2,
+    discussion: Users,
+    fieldwork: Users,
+  };
+  return icons[type as keyof typeof icons] || BookOpen;
+}
+
+function getLessonTypeColor(type: string) {
+  const colors = {
+    lecture: "bg-blue-100 text-blue-800 border-blue-200",
+    practical: "bg-green-100 text-green-800 border-green-200",
+    project: "bg-purple-100 text-purple-800 border-purple-200",
+    assessment: "bg-orange-100 text-orange-800 border-orange-200",
+    discussion: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    fieldwork: "bg-red-100 text-red-800 border-red-200",
+  };
+  return colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
+}
 
 export default function Lessons() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState<string>("all");
+  const [selectedTab, setSelectedTab] = useState("lessons");
 
-  const { data: students } = useQuery<StudentWithScores[]>({
-    queryKey: ["/api/dashboard/students"],
+  // Fetch all lessons from all modules
+  const { data: lessons = [], isLoading: lessonsLoading } = useQuery<LessonPlan[]>({
+    queryKey: ["/api/lessons/all"],
+    queryFn: async () => {
+      return await apiRequest("/api/lessons/all");
+    },
   });
 
-  const { data: subjects } = useQuery<Subject[]>({
-    queryKey: ["/api/subjects"],
+  // Fetch all modules
+  const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({
+    queryKey: ["/api/modules/all"],
+    queryFn: async () => {
+      return await apiRequest("/api/modules/all");
+    },
   });
 
-  // Generate AI recommendations based on student performance
-  const aiRecommendations = students?.flatMap(student => 
-    generateRecommendations(student).map(rec => ({
-      id: `ai-${student.id}-${rec.title.replace(/\s+/g, '-')}`,
-      title: rec.title,
-      subject: rec.subjectName,
-      duration: "45 minutes",
-      targetStudents: [student.name],
-      difficulty: "intermediate" as const,
-      objectives: [rec.description],
-      materials: ["Worksheets", "Interactive exercises"],
-      description: rec.description,
-      priority: rec.priority
-    }))
-  ) || [];
-
-  const allLessonPlans = [...sampleLessonPlans, ...aiRecommendations];
-
-  const filteredLessons = allLessonPlans.filter(lesson => {
-    const matchesSearch = lesson.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         lesson.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         lesson.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSubject = selectedSubject === "all" || lesson.subject === selectedSubject;
-    return matchesSearch && matchesSubject;
+  // Fetch all assessments
+  const { data: assessments = [], isLoading: assessmentsLoading } = useQuery<Assessment[]>({
+    queryKey: ["/api/assessments/all"],
+    queryFn: async () => {
+      return await apiRequest("/api/assessments/all");
+    },
   });
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner": return "bg-green-100 text-green-800";
-      case "intermediate": return "bg-yellow-100 text-yellow-800";
-      case "advanced": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
+  // Filter functions
+  const filteredLessons = lessons.filter(lesson =>
+    lesson.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    lesson.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    lesson.moduleName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    lesson.courseName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredModules = modules.filter(module =>
+    module.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    module.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    module.curriculumTopic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    module.courseName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredAssessments = assessments.filter(assessment =>
+    assessment.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    assessment.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    assessment.moduleName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    assessment.courseName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
       <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Lesson Plans</h2>
-            <p className="text-sm text-gray-500">Create and manage personalized lesson plans based on student needs.</p>
+            <h2 className="text-2xl font-semibold text-gray-900">Teaching Resources Library</h2>
+            <p className="text-sm text-gray-500">Access all your lessons, modules, and assessments in one place</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Button className="bg-primary text-white hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Lesson Plan
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search resources..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-64"
+              />
+            </div>
+            <Button variant="outline">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
             </Button>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto p-6">
-        {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Browse Lesson Plans ({filteredLessons.length})</h3>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    type="text"
-                    placeholder="Search lesson plans..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 w-64"
-                  />
-                </div>
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">All Subjects</option>
-                  {subjects?.map(subject => (
-                    <option key={subject.id} value={subject.name}>{subject.name}</option>
-                  ))}
-                  <option value="All Subjects">All Subjects</option>
-                </select>
-                <Button variant="outline">
-                  <Filter className="h-4 w-4 mr-2" />
-                  More Filters
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div className="max-w-7xl mx-auto">
+          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="lessons" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Lessons ({filteredLessons.length})
+              </TabsTrigger>
+              <TabsTrigger value="modules" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Modules ({filteredModules.length})
+              </TabsTrigger>
+              <TabsTrigger value="assessments" className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Assessments ({filteredAssessments.length})
+              </TabsTrigger>
+            </TabsList>
 
-        {/* AI Recommendations Section */}
-        {aiRecommendations.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center space-x-2 mb-4">
-              <Star className="h-5 w-5 text-yellow-500" />
-              <h3 className="text-lg font-semibold text-gray-900">AI-Generated Recommendations</h3>
-              <Badge variant="secondary">Based on student performance</Badge>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {aiRecommendations.slice(0, 6).map((lesson) => (
-                <Card key={lesson.id} className={`border-l-4 ${getRecommendationPriorityColor(lesson.priority)}`}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-base font-medium">{lesson.title}</CardTitle>
-                      <Badge className={getRecommendationBadgeColor(lesson.priority)}>
-                        {lesson.priority}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600">{lesson.subject}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-700 mb-3">{lesson.description}</p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{lesson.duration}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Users className="h-3 w-3" />
-                        <span>{lesson.targetStudents[0]}</span>
-                      </div>
-                    </div>
-                    <Button size="sm" className="w-full mt-3 bg-primary text-white hover:bg-primary/90">
-                      Use This Plan
+            <TabsContent value="lessons" className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {lessonsLoading ? (
+                  <div className="col-span-full text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading lessons...</p>
+                  </div>
+                ) : filteredLessons.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No lessons found</h3>
+                    <p className="text-gray-500 mb-4">
+                      {searchQuery ? "No lessons match your search criteria." : "Create your first lesson to get started."}
+                    </p>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Lesson
                     </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+                  </div>
+                ) : (
+                  filteredLessons.map((lesson) => {
+                    const IconComponent = getLessonTypeIcon(lesson.lessonType);
+                    return (
+                      <Card key={lesson.id} className="hover:shadow-lg transition-shadow">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg mb-2 line-clamp-2">{lesson.title}</CardTitle>
+                              <p className="text-sm text-gray-600 line-clamp-3">{lesson.description}</p>
+                            </div>
+                            <IconComponent className="h-5 w-5 text-gray-400 ml-2 flex-shrink-0" />
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="flex items-center flex-wrap gap-2 mb-4">
+                            <Badge variant="outline" className={getLessonTypeColor(lesson.lessonType)}>
+                              {lesson.lessonType}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {lesson.duration}min
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {lesson.difficulty}
+                            </Badge>
+                            {lesson.aiGenerated && (
+                              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                AI Generated
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          {lesson.courseName && (
+                            <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
+                              <GraduationCap className="h-4 w-4" />
+                              <span>{lesson.courseName}</span>
+                              {lesson.grade && <span>• Grade {lesson.grade}</span>}
+                              {lesson.level && <span>• {lesson.level}</span>}
+                            </div>
+                          )}
+                          
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-700">
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                            </div>
+                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                )}
+              </div>
+            </TabsContent>
 
-        {/* Standard Lesson Plans */}
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Standard Lesson Plans</h3>
+            <TabsContent value="modules" className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {modulesLoading ? (
+                  <div className="col-span-full text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading modules...</p>
+                  </div>
+                ) : filteredModules.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <Target className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No modules found</h3>
+                    <p className="text-gray-500 mb-4">
+                      {searchQuery ? "No modules match your search criteria." : "Create your first module to get started."}
+                    </p>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Module
+                    </Button>
+                  </div>
+                ) : (
+                  filteredModules.map((module) => (
+                    <Card key={module.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg mb-2 line-clamp-2">{module.title}</CardTitle>
+                            <p className="text-sm text-gray-600 line-clamp-3">{module.description}</p>
+                          </div>
+                          <Target className="h-5 w-5 text-gray-400 ml-2 flex-shrink-0" />
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex items-center flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs">
+                            {module.curriculumTopic}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {module.estimatedHours}h
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {module.objectives.length} objectives
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex items-center flex-wrap gap-1 mb-3">
+                          {module.gradeLevels.map((grade, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              Grade {grade}
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        {module.courseName && (
+                          <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
+                            <GraduationCap className="h-4 w-4" />
+                            <span>{module.courseName}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-700">
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="assessments" className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {assessmentsLoading ? (
+                  <div className="col-span-full text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading assessments...</p>
+                  </div>
+                ) : filteredAssessments.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <CheckCircle2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No assessments found</h3>
+                    <p className="text-gray-500 mb-4">
+                      {searchQuery ? "No assessments match your search criteria." : "Create your first assessment to get started."}
+                    </p>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Assessment
+                    </Button>
+                  </div>
+                ) : (
+                  filteredAssessments.map((assessment) => (
+                    <Card key={assessment.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg mb-2 line-clamp-2">{assessment.title}</CardTitle>
+                            <p className="text-sm text-gray-600 line-clamp-3">{assessment.description}</p>
+                          </div>
+                          <CheckCircle2 className="h-5 w-5 text-gray-400 ml-2 flex-shrink-0" />
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex items-center flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                            {assessment.assessmentType}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {assessment.estimatedDuration}min
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {assessment.totalPoints} points
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {assessment.difficulty}
+                          </Badge>
+                        </div>
+                        
+                        {assessment.courseName && (
+                          <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
+                            <GraduationCap className="h-4 w-4" />
+                            <span>{assessment.courseName}</span>
+                            {assessment.grade && <span>• Grade {assessment.grade}</span>}
+                            {assessment.level && <span>• {assessment.level}</span>}
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-700">
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sampleLessonPlans.filter(lesson => {
-            const matchesSearch = lesson.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                 lesson.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                 lesson.description.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesSubject = selectedSubject === "all" || lesson.subject === selectedSubject;
-            return matchesSearch && matchesSubject;
-          }).map((lesson) => (
-            <Card key={lesson.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg font-medium">{lesson.title}</CardTitle>
-                  <Badge className={getDifficultyColor(lesson.difficulty)}>
-                    {lesson.difficulty}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-600">{lesson.subject}</p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-700 mb-4">{lesson.description}</p>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center space-x-1 text-gray-500">
-                      <Clock className="h-4 w-4" />
-                      <span>{lesson.duration}</span>
-                    </div>
-                    <div className="flex items-center space-x-1 text-gray-500">
-                      <Book className="h-4 w-4" />
-                      <span>{lesson.materials.length} materials</span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <p className="text-xs font-medium text-gray-700 mb-1">Target Students:</p>
-                    <p className="text-xs text-gray-600">{lesson.targetStudents.join(", ")}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-xs font-medium text-gray-700 mb-1">Learning Objectives:</p>
-                    <ul className="text-xs text-gray-600 space-y-1">
-                      {lesson.objectives.slice(0, 2).map((objective, index) => (
-                        <li key={index}>• {objective}</li>
-                      ))}
-                      {lesson.objectives.length > 2 && (
-                        <li className="text-gray-500">+ {lesson.objectives.length - 2} more</li>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2 mt-4">
-                  <Button size="sm" className="flex-1 bg-primary text-white hover:bg-primary/90">
-                    Use Plan
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    Customize
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredLessons.length === 0 && (
-          <div className="text-center py-12">
-            <Book className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg mb-2">No lesson plans found</p>
-            <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
-          </div>
-        )}
       </main>
     </>
   );

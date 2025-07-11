@@ -87,6 +87,17 @@ function Router() {
         </AuthGuard>
       </Route>
       
+      <Route path="/lessons">
+        <AuthGuard>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Lessons />
+            </div>
+          </div>
+        </AuthGuard>
+      </Route>
+      
       <Route path="/modules/:id">
         <AuthGuard>
           <div className="flex h-screen overflow-hidden">

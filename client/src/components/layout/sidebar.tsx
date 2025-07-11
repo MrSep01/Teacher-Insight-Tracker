@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { GraduationCap, BarChart3, Users, Book, ClipboardCheck, FileText, Brain, LogOut, Settings, User } from "lucide-react";
+import { GraduationCap, BarChart3, Users, Book, BookOpen, ClipboardCheck, FileText, Brain, LogOut, Settings, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Students", href: "/students", icon: Users },
   { name: "Courses", href: "/courses", icon: Users },
+  { name: "Lessons", href: "/lessons", icon: BookOpen },
   { name: "Modules", href: "/modules", icon: Book },
   { name: "Assessments", href: "/assessments", icon: ClipboardCheck },
   { name: "Reports", href: "/reports", icon: FileText },
