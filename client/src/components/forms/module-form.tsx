@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, BookOpen, Target, Clock } from "lucide-react";
-import { HierarchicalCurriculumMapper } from "@/components/hierarchical-curriculum-mapper";
+import { AuthenticCurriculumSelector } from "@/components/forms/authentic-curriculum-selector";
 
 const moduleSchema = z.object({
   title: z.string().min(1, "Module title is required"),
@@ -40,8 +40,6 @@ interface ModuleFormProps {
 }
 
 export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: ModuleFormProps) {
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
   const [autoCalculatedHours, setAutoCalculatedHours] = useState<number>(0);
   const [manuallyAdjusted, setManuallyAdjusted] = useState<boolean>(false);
@@ -62,7 +60,6 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
   // Initialize form values when editing
   useEffect(() => {
     if (module) {
-      setSelectedTopics(module.topics || []);
       setSelectedObjectives(module.objectives || []);
       setAutoCalculatedHours(module.estimatedHours || 0);
     }
@@ -84,30 +81,18 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
   const watchedCurriculumTopic = form.watch("curriculumTopic");
   const watchedGradeLevels = form.watch("gradeLevels");
 
-  // Handle selection changes from hierarchical curriculum mapper
-  const handleSelectionChange = (selection: {
-    topics: string[];
-    subtopics: string[];
-    objectives: string[];
-  }) => {
-    setSelectedTopics(selection.topics);
-    setSelectedSubtopics(selection.subtopics);
-    setSelectedObjectives(selection.objectives);
-    
-    // Update form values
-    form.setValue("topics", selection.topics);
-    form.setValue("objectives", selection.objectives);
-  };
-
+  // Handle form submission with selected objectives
   const handleSubmit = (data: ModuleFormData) => {
     const moduleData = {
       ...data,
-      topics: selectedTopics.length > 0 ? selectedTopics : data.topics,
-      objectives: selectedObjectives.length > 0 ? selectedObjectives : data.objectives,
+      objectives: selectedObjectives,
+      topics: selectedObjectives.length > 0 ? [`Topic 1 - ${selectedObjectives.length} objectives`] : [],
     };
     
     onSubmit(moduleData);
   };
+
+
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -264,7 +249,7 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
               />
 
               {/* Enhanced Selection Summary with Time Breakdown */}
-              {(selectedTopics.length > 0 || selectedObjectives.length > 0) && (
+              {selectedObjectives.length > 0 && (
                 <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium">Current Selection</h4>
@@ -281,26 +266,6 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
                     )}
                   </div>
                   <div className="space-y-3">
-                    {selectedTopics.length > 0 && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">
-                          <BookOpen className="inline h-4 w-4 mr-1" />
-                          Topics ({selectedTopics.length})
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {selectedTopics.slice(0, 5).map((topicId) => (
-                            <Badge key={topicId} variant="secondary" className="text-xs">
-                              {topicId}
-                            </Badge>
-                          ))}
-                          {selectedTopics.length > 5 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{selectedTopics.length - 5} more
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
                     {selectedObjectives.length > 0 && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">
@@ -351,19 +316,26 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
 
         <TabsContent value="curriculum" className="space-y-4">
           <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <h4 className="font-medium mb-2">Flexible Curriculum Mapping</h4>
+            <h4 className="font-medium mb-2">Authentic IGCSE Chemistry Curriculum</h4>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Mix and match IGCSE and A Level topics to create customized modules that adapt to different student abilities within the same class. 
-              This approach allows for differentiated learning while maintaining curriculum alignment.
+              Select learning objectives from the official IGCSE Chemistry Edexcel specification. 
+              The system uses authentic curriculum data to ensure proper alignment with exam requirements.
             </p>
           </div>
           
-          <HierarchicalCurriculumMapper
-            selectedTopics={selectedTopics}
-            selectedSubtopics={selectedSubtopics}
+          <AuthenticCurriculumSelector
             selectedObjectives={selectedObjectives}
-            onSelectionChange={handleSelectionChange}
-            showLevelMixing={true}
+            onObjectivesChange={(objectives) => {
+              setSelectedObjectives(objectives);
+              form.setValue("objectives", objectives);
+            }}
+            estimatedHours={autoCalculatedHours}
+            onEstimatedHoursChange={(hours) => {
+              setAutoCalculatedHours(hours);
+              if (!manuallyAdjusted && hours > 0) {
+                form.setValue("estimatedHours", Math.ceil(hours));
+              }
+            }}
           />
         </TabsContent>
       </Tabs>
