@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, BookOpen, Target, CheckCircle2, Users, Eye, Edit, Trash2, Plus, Clock, GraduationCap } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Search, Filter, BookOpen, Target, CheckCircle2, Users, Eye, Edit, Trash2, Plus, Clock, GraduationCap, FileText, MoreVertical } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { LessonManagement } from "@/components/lesson-management";
+import { Link } from "wouter";
 
 interface LessonPlan {
   id: number;
@@ -266,6 +271,17 @@ export default function Lessons() {
             </TabsContent>
 
             <TabsContent value="modules" className="mt-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Teaching Modules</h3>
+                  <p className="text-sm text-gray-600">Reusable curriculum modules for your courses</p>
+                </div>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Module
+                </Button>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {modulesLoading ? (
                   <div className="col-span-full text-center py-8">
@@ -279,69 +295,14 @@ export default function Lessons() {
                     <p className="text-gray-500 mb-4">
                       {searchQuery ? "No modules match your search criteria." : "Create your first module to get started."}
                     </p>
-                    <Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
                       <Plus className="h-4 w-4 mr-2" />
                       Create Module
                     </Button>
                   </div>
                 ) : (
                   filteredModules.map((module) => (
-                    <Card key={module.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg mb-2 line-clamp-2">{module.title}</CardTitle>
-                            <p className="text-sm text-gray-600 line-clamp-3">{module.description}</p>
-                          </div>
-                          <Target className="h-5 w-5 text-gray-400 ml-2 flex-shrink-0" />
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex items-center flex-wrap gap-2 mb-4">
-                          <Badge variant="outline" className="text-xs">
-                            {module.curriculumTopic}
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {module.estimatedHours}h
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            {module.objectives.length} objectives
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex items-center flex-wrap gap-1 mb-3">
-                          {module.gradeLevels.map((grade, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              Grade {grade}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        {module.courseName && (
-                          <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
-                            <GraduationCap className="h-4 w-4" />
-                            <span>{module.courseName}</span>
-                          </div>
-                        )}
-                        
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-700">
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
-                            </Button>
-                          </div>
-                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <LibraryModuleCard key={module.id} module={module} />
                   ))
                 )}
               </div>
@@ -428,6 +389,176 @@ export default function Lessons() {
           </Tabs>
         </div>
       </main>
+    </>
+  );
+}
+
+interface LibraryModuleCardProps {
+  module: Module;
+}
+
+function LibraryModuleCard({ module }: LibraryModuleCardProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const deleteModuleMutation = useMutation({
+    mutationFn: async (moduleId: number) => {
+      return await apiRequest(`/api/modules/${moduleId}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Module deleted successfully",
+        description: "The module and all its lesson plans have been removed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/modules/all"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting module",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteModuleMutation.mutate(module.id);
+    setShowDeleteConfirm(false);
+  };
+
+  const handleLessonsClick = () => {
+    setIsLessonModalOpen(true);
+  };
+
+  return (
+    <>
+      <Card className="hover:shadow-lg transition-shadow group">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-lg line-clamp-1">{module.title}</CardTitle>
+              </div>
+              <CardDescription className="line-clamp-2 text-sm">
+                {module.description}
+              </CardDescription>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href={`/modules/${module.id}`}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLessonsClick}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Manage Lessons
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDeleteClick} className="text-red-600 focus:text-red-600">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Module
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            <div className="flex items-center flex-wrap gap-2">
+              <Badge variant="outline" className="text-xs">
+                {module.curriculumTopic}
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                <Clock className="h-3 w-3 mr-1" />
+                {module.estimatedHours}h
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                <Target className="h-3 w-3 mr-1" />
+                {module.objectives?.length || 0} objectives
+              </Badge>
+            </div>
+            
+            <div className="flex items-center flex-wrap gap-1">
+              {module.gradeLevels?.map((grade, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  Grade {grade}
+                </Badge>
+              ))}
+            </div>
+            
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1">
+                  <FileText className="h-4 w-4" />
+                  <span>0 lessons</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  <span>{module.topics?.length || 0} topics</span>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500">
+                {new Date(module.createdAt).toLocaleDateString()}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Module</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{module.title}"? This action cannot be undone and will remove all associated lesson plans.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDelete}
+              disabled={deleteModuleMutation.isPending}
+            >
+              {deleteModuleMutation.isPending ? "Deleting..." : "Delete Module"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lesson Management Modal */}
+      <Dialog open={isLessonModalOpen} onOpenChange={setIsLessonModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Lesson Plans - {module.title}</DialogTitle>
+            <DialogDescription>
+              Create and manage lesson plans for this module
+            </DialogDescription>
+          </DialogHeader>
+          <LessonManagement 
+            module={module} 
+            onClose={() => setIsLessonModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -11,7 +11,6 @@ const navigation = [
   { name: "Students", href: "/students", icon: Users },
   { name: "Courses", href: "/courses", icon: Users },
   { name: "Library", href: "/library", icon: BookOpen },
-  { name: "Modules", href: "/modules", icon: Book },
   { name: "Assessments", href: "/assessments", icon: ClipboardCheck },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "AI Recommendations", href: "/ai-recommendations", icon: Brain },
