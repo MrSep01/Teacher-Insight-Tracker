@@ -44,17 +44,17 @@ import { formatObjective, getTopic5Subtopics, getIonicBondingObjectives } from "
 
 // Curriculum Coverage Display Component
 function CurriculumCoverageDisplay({ objectives }: { objectives: string[] }) {
-  const { data: topicsData } = useQuery({
+  const { data: topicsData, isLoading: topicsLoading } = useQuery({
     queryKey: ['/api/curriculum/topics'],
     enabled: objectives.length > 0,
   });
 
-  const { data: hierarchyData } = useQuery({
+  const { data: hierarchyData, isLoading: hierarchyLoading } = useQuery({
     queryKey: ['/api/curriculum/topics/5/hierarchy'],
     enabled: objectives.length > 0,
   });
 
-  if (!objectives.length || !topicsData || !hierarchyData) {
+  if (!objectives.length) {
     return (
       <Card>
         <CardHeader>
@@ -65,24 +65,64 @@ function CurriculumCoverageDisplay({ objectives }: { objectives: string[] }) {
     );
   }
 
+  if (topicsLoading || hierarchyLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Curriculum Coverage</CardTitle>
+          <CardDescription>Loading curriculum coverage...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!topicsData || !hierarchyData || !hierarchyData.topic) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Curriculum Coverage</CardTitle>
+          <CardDescription>Unable to load curriculum data</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   const topic = hierarchyData.topic;
+  
+  // Check if topic has subtopics
+  if (!topic.subtopics || !Array.isArray(topic.subtopics)) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Curriculum Coverage</CardTitle>
+          <CardDescription>No curriculum structure available</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
   
   // Group objectives by subtopic
   const subtopicCoverage = topic.subtopics.map(subtopic => {
-    const subtopicObjectives = subtopic.objectives.filter(obj => 
+    const subtopicObjectives = subtopic.objectives?.filter(obj => 
       objectives.includes(obj.code)
-    );
+    ) || [];
     return {
       ...subtopic,
       coveredObjectives: subtopicObjectives,
-      totalObjectives: subtopic.objectives.length,
-      percentageCovered: Math.round((subtopicObjectives.length / subtopic.objectives.length) * 100)
+      totalObjectives: subtopic.objectives?.length || 0,
+      percentageCovered: subtopic.objectives?.length > 0 ? Math.round((subtopicObjectives.length / subtopic.objectives.length) * 100) : 0
     };
   }).filter(subtopic => subtopic.coveredObjectives.length > 0);
 
   const totalObjectivesCovered = objectives.length;
-  const totalObjectivesAvailable = topic.subtopics.reduce((sum, subtopic) => sum + subtopic.objectives.length, 0);
-  const overallPercentage = Math.round((totalObjectivesCovered / totalObjectivesAvailable) * 100);
+  const totalObjectivesAvailable = topic.subtopics.reduce((sum, subtopic) => sum + (subtopic.objectives?.length || 0), 0);
+  const overallPercentage = totalObjectivesAvailable > 0 ? Math.round((totalObjectivesCovered / totalObjectivesAvailable) * 100) : 0;
 
   return (
     <Card>
@@ -666,8 +706,8 @@ export default function ModuleDetail() {
         </CardContent>
       </Card>
 
-      {/* Curriculum Coverage */}
-      <CurriculumCoverageDisplay objectives={module.objectives || []} />
+      {/* Curriculum Coverage - Temporarily disabled to debug */}
+      {/* <CurriculumCoverageDisplay objectives={module.objectives || []} /> */}
 
       {/* Learning Objectives - Expanded */}
       <Card className="border-2 border-green-200 bg-green-50/30">
