@@ -277,12 +277,14 @@ export async function setupAuth(app: Express) {
       const { token } = req.query;
       
       if (!token) {
-        return res.status(400).json({ error: "Verification token is required" });
+        // Redirect to frontend verification page with error
+        return res.redirect(`/verify-email?error=${encodeURIComponent("Verification token is required")}`);
       }
 
       const user = await storage.getUserByVerificationToken(token as string);
       if (!user) {
-        return res.status(400).json({ error: "Invalid or expired verification token" });
+        // Redirect to frontend verification page with error
+        return res.redirect(`/verify-email?error=${encodeURIComponent("Invalid or expired verification token")}`);
       }
 
       // Update user as verified
@@ -291,10 +293,12 @@ export async function setupAuth(app: Express) {
         emailVerificationToken: null,
       });
 
-      res.json({ message: "Email verified successfully! You can now log in." });
+      // Redirect to frontend verification page with success
+      res.redirect(`/verify-email?success=${encodeURIComponent("Email verified successfully! You can now log in.")}`);
     } catch (error) {
       console.error("Email verification error:", error);
-      res.status(500).json({ error: "Email verification failed" });
+      // Redirect to frontend verification page with error
+      res.redirect(`/verify-email?error=${encodeURIComponent("Email verification failed. Please try again.")}`);
     }
   });
 
