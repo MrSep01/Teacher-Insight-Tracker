@@ -116,9 +116,8 @@ class EmailService {
   }
 
   private async sendEmail(to: string, subject: string, html: string) {
-    // Use a verified sender email for SendGrid
-    // TODO: Update this to your verified SendGrid sender email
-    const fromEmail = process.env.FROM_EMAIL || 'james.co@bcc1852.com';
+    // Use the verified sender email from SendGrid
+    const fromEmail = process.env.FROM_EMAIL || 'smarteducationsolutions3@gmail.com';
 
     // Try SendGrid first - but only if sender is likely verified
     if (this.sendGridService) {
@@ -132,19 +131,24 @@ class EmailService {
         console.log('Email sent successfully via SendGrid to:', to);
         return true;
       } catch (error) {
-        console.error('SendGrid failed - sender email may not be verified in SendGrid dashboard');
+        console.error('SendGrid failed - This is likely due to sender verification issues');
+        console.error('Verified sender in dashboard:', 'smarteducationsolutions3@gmail.com');
+        console.error('Trying to send from:', fromEmail);
         if (error.response?.body?.errors) {
           console.error('SendGrid error details:', error.response.body.errors);
         }
+        console.log('Falling back to console email display for development...');
         // Don't return false, continue to fallback
       }
     }
 
     // Fallback to console logging for development
-    console.log('\n=== EMAIL SENT (CONSOLE MODE) ===');
+    console.log('\n=== EMAIL VERIFICATION READY ===');
     console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
-    console.log(`HTML: ${html}`);
+    console.log('\n📧 EMAIL CONTENT PREVIEW:');
+    console.log('This email would contain a verification link.');
+    console.log('For testing, manually verify the user or check SendGrid sender verification.');
     console.log('=================================\n');
     return true;
   }
