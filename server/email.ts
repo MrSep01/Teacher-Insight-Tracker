@@ -1,18 +1,25 @@
 import * as nodemailer from 'nodemailer';
+import { MailService } from '@sendgrid/mail';
 
-// Simple email service using nodemailer with multiple provider support
+// Simple email service using SendGrid or nodemailer with fallback
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
+  private sendGridService: MailService | null = null;
 
   constructor() {
-    this.setupTransporter();
+    this.setupEmailService();
   }
 
-  private setupTransporter() {
-    // Try to set up email transporter with various providers
-    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      // Custom SMTP configuration
-      this.transporter = nodemailer.createTransporter({
+  private setupEmailService() {
+    // First try SendGrid if API key is available
+    if (process.env.SENDGRID_API_KEY) {
+      this.sendGridService = new MailService();
+      this.sendGridService.setApiKey(process.env.SENDGRID_API_KEY);
+      console.log('Email service configured with SendGrid');
+    } 
+    // Then try custom SMTP configuration
+    else if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
@@ -21,10 +28,10 @@ class EmailService {
           pass: process.env.SMTP_PASS,
         },
       });
+      console.log('Email service configured with custom SMTP');
     } else {
-      // For development, use Ethereal Email (test email service)
-      console.log('No SMTP configuration found. Using console logging for emails in development.');
-      this.transporter = null;
+      // For development, use console logging
+      console.log('No email configuration found. Using console logging for emails in development.');
     }
   }
 
@@ -123,30 +130,49 @@ class EmailService {
   }
 
   private async sendEmail(to: string, subject: string, html: string) {
-    if (!this.transporter) {
-      // For development, log email to console
-      console.log('\n=== EMAIL SENT ===');
-      console.log(`To: ${to}`);
-      console.log(`Subject: ${subject}`);
-      console.log(`HTML: ${html}`);
-      console.log('==================\n');
-      return true;
+    const fromEmail = process.env.FROM_EMAIL || 'noreply@edutrack.com';
+
+    // Try SendGrid first
+    if (this.sendGridService) {
+      try {
+        await this.sendGridService.send({
+          to,
+          from: fromEmail,
+          subject,
+          html,
+        });
+        console.log('Email sent successfully via SendGrid to:', to);
+        return true;
+      } catch (error) {
+        console.error('SendGrid email error:', error);
+        return false;
+      }
     }
 
-    try {
-      const info = await this.transporter.sendMail({
-        from: process.env.FROM_EMAIL || 'noreply@edutrack.com',
-        to,
-        subject,
-        html,
-      });
-
-      console.log('Email sent:', info.messageId);
-      return true;
-    } catch (error) {
-      console.error('Email send error:', error);
-      return false;
+    // Try SMTP transporter next
+    if (this.transporter) {
+      try {
+        const info = await this.transporter.sendMail({
+          from: fromEmail,
+          to,
+          subject,
+          html,
+        });
+        console.log('Email sent via SMTP:', info.messageId);
+        return true;
+      } catch (error) {
+        console.error('SMTP email error:', error);
+        return false;
+      }
     }
+
+    // Fallback to console logging for development
+    console.log('\n=== EMAIL SENT (CONSOLE MODE) ===');
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`HTML: ${html}`);
+    console.log('=================================\n');
+    return true;
   }
 }
 
