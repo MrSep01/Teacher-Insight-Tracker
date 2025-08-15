@@ -117,7 +117,8 @@ class EmailService {
 
   private async sendEmail(to: string, subject: string, html: string) {
     // Use a verified sender email for SendGrid
-    const fromEmail = process.env.FROM_EMAIL || 'noreply@replit.dev';
+    // TODO: Update this to your verified SendGrid sender email
+    const fromEmail = process.env.FROM_EMAIL || 'james.co@bcc1852.com';
 
     // Try SendGrid first - but only if sender is likely verified
     if (this.sendGridService) {
