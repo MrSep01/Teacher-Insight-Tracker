@@ -117,7 +117,7 @@ class EmailService {
 
   private async sendEmail(to: string, subject: string, html: string) {
     // Use the verified sender email from SendGrid
-    const fromEmail = process.env.FROM_EMAIL || 'smarteducationsolutions3@gmail.com';
+    const fromEmail = process.env.FROM_EMAIL || 'smarteducationsolutionsbkk@gmail.com';
 
     // Try SendGrid first - but only if sender is likely verified
     if (this.sendGridService) {
@@ -132,7 +132,7 @@ class EmailService {
         return true;
       } catch (error) {
         console.error('SendGrid failed - This is likely due to sender verification issues');
-        console.error('Verified sender in dashboard:', 'smarteducationsolutions3@gmail.com');
+        console.error('Verified sender in dashboard:', 'smarteducationsolutionsbkk@gmail.com');
         console.error('Trying to send from:', fromEmail);
         if (error.response?.body?.errors) {
           console.error('SendGrid error details:', error.response.body.errors);
