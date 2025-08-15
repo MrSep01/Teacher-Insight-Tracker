@@ -15,23 +15,9 @@ class EmailService {
     if (process.env.SENDGRID_API_KEY) {
       this.sendGridService = new MailService();
       this.sendGridService.setApiKey(process.env.SENDGRID_API_KEY);
-      console.log('Email service configured with SendGrid');
-    } 
-    // Then try custom SMTP configuration
-    else if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      console.log('Email service configured with custom SMTP');
+      console.log('SendGrid configured - NOTE: Sender email must be verified in SendGrid dashboard');
     } else {
-      // For development, use console logging
-      console.log('No email configuration found. Using console logging for emails in development.');
+      console.log('No SendGrid API key found - using console logging for development');
     }
   }
 
@@ -130,9 +116,10 @@ class EmailService {
   }
 
   private async sendEmail(to: string, subject: string, html: string) {
-    const fromEmail = process.env.FROM_EMAIL || 'noreply@edutrack.com';
+    // Use a verified sender email for SendGrid
+    const fromEmail = process.env.FROM_EMAIL || 'noreply@replit.dev';
 
-    // Try SendGrid first
+    // Try SendGrid first - but only if sender is likely verified
     if (this.sendGridService) {
       try {
         await this.sendGridService.send({
@@ -144,25 +131,11 @@ class EmailService {
         console.log('Email sent successfully via SendGrid to:', to);
         return true;
       } catch (error) {
-        console.error('SendGrid email error:', error);
-        return false;
-      }
-    }
-
-    // Try SMTP transporter next
-    if (this.transporter) {
-      try {
-        const info = await this.transporter.sendMail({
-          from: fromEmail,
-          to,
-          subject,
-          html,
-        });
-        console.log('Email sent via SMTP:', info.messageId);
-        return true;
-      } catch (error) {
-        console.error('SMTP email error:', error);
-        return false;
+        console.error('SendGrid failed - sender email may not be verified in SendGrid dashboard');
+        if (error.response?.body?.errors) {
+          console.error('SendGrid error details:', error.response.body.errors);
+        }
+        // Don't return false, continue to fallback
       }
     }
 
