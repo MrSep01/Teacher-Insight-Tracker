@@ -1,443 +1,55 @@
 # EduTrack - Teacher Dashboard
 
 ## Overview
+EduTrack is a comprehensive teacher dashboard application designed to empower educators in managing students, assessments, and tracking academic progress. It provides an intuitive interface for creating assessments, monitoring student performance, and generating AI-powered lesson recommendations. The platform aims to streamline the teaching workflow, enable differentiated instruction, and provide teachers with tools to create a personalized learning experience for students, particularly focusing on IGCSE and A Level Chemistry Edexcel specifications. Its vision is to let AI handle the complexities of lesson differentiation and resource generation, allowing teachers to focus on teaching.
 
-EduTrack is a comprehensive teacher dashboard application built with React and Express.js, designed to help educators manage students, assessments, and track academic progress. The system provides an intuitive interface for creating assessments, monitoring student performance, and generating lesson recommendations based on student data.
+## User Preferences
+Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React with TypeScript
-- **Build Tool**: Vite for fast development and optimized production builds
-- **State Management**: TanStack Query for server state management
-- **Routing**: Wouter for lightweight client-side routing
-- **UI Framework**: Radix UI components with shadcn/ui design system
-- **Styling**: Tailwind CSS with CSS variables for theming
-- **Authentication**: Protected routes with authentication guards and session management
+### Frontend
+- **Framework & Build**: React with TypeScript, Vite.
+- **State & Routing**: TanStack Query for server state, Wouter for routing.
+- **UI/Styling**: Radix UI components, shadcn/ui design, Tailwind CSS with theming.
+- **Authentication**: Protected routes, session management.
 
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
-- **Database**: PostgreSQL with Drizzle ORM for persistent data storage
-- **Database Provider**: Neon serverless PostgreSQL with automatic seeding
-- **API Design**: RESTful API with JSON responses
-- **Authentication**: Multi-provider OAuth (Google, Microsoft, Apple) + email/password with Passport.js
-- **Email Service**: Nodemailer with welcome emails and verification system
-- **Security**: Password hashing with bcrypt, secure session management, and CSRF protection
-- **Middleware**: Express middleware for logging, error handling, request parsing, and authentication
+### Backend
+- **Runtime & Framework**: Node.js with Express.js (TypeScript, ES modules).
+- **Database**: PostgreSQL with Drizzle ORM (Neon serverless).
+- **API**: RESTful JSON API.
+- **Authentication**: Multi-provider OAuth (Google, Microsoft, Apple) + email/password with Passport.js, secure sessions, email verification, password hashing (bcrypt), CSRF protection.
+- **Middleware**: Logging, error handling, request parsing.
 
-### Development Setup
-- **Monorepo Structure**: Client and server code in separate directories with shared schema
-- **Development Server**: Vite dev server with HMR for frontend, tsx for backend development
-- **Database Migration**: Drizzle Kit for schema management with automatic database seeding
-- **Production Build**: Vite build for frontend, esbuild for backend bundling
-
-## Key Components
-
-### Database Schema
-- **Users**: Teacher accounts with multi-provider authentication support and email verification
-- **User Sessions**: Secure session storage for maintaining login state
-- **Students**: Core student information with performance status tracking
-- **Subjects**: Subject management with visual identifiers (colors, icons)
-- **Assessments**: Assessment creation and management with subject relationships
-- **Student Scores**: Individual assessment results with percentage calculations
-- **Lesson Recommendations**: AI-generated recommendations based on performance data
-
-### API Endpoints
-- **Authentication Routes**: `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/user`
-- **Email Verification**: `/api/auth/verify-email`, `/api/auth/forgot-password`, `/api/auth/reset-password`
-- **OAuth Providers**: `/api/auth/google`, `/api/auth/microsoft`, `/api/auth/apple` with callback handling
-- **Dashboard Routes**: `/api/dashboard/stats`, `/api/dashboard/students`, `/api/dashboard/assessments/recent`
-- **Student Management**: `/api/students` with full CRUD operations and search functionality
-- **Assessment Management**: Complete CRUD operations for assessments with subject relationships
-- **Score Tracking**: Student score management and analytics with progress tracking
-- **Subjects**: `/api/subjects` for subject management and categorization
-
-### UI Components
-- **Authentication System**: Multi-provider login/signup with email verification and password reset
-- **Protected Routes**: Authentication guards ensuring secure access to all dashboard features
-- **Dashboard**: Overview with stats cards, interactive progress charts, and recent activity
-- **Student Management**: Complete student roster with performance tracking, search, and filtering
-- **Assessment Tools**: Assessment creation and management interface with form validation
-- **Lesson Plans**: AI-generated curriculum recommendations based on student performance
-- **Reports & Analytics**: Comprehensive reporting with data export capabilities
-- **Modals**: Student profiles with personalized recommendations and assessment forms
-- **Responsive Design**: Mobile-first approach with adaptive layouts
-
-## Data Flow
-
-### Client-Server Communication
-1. Frontend makes HTTP requests to Express API endpoints
-2. Server processes requests and queries PostgreSQL database via Drizzle ORM
-3. Response data is cached client-side using TanStack Query
-4. UI components reactively update based on cached data
-
-### Database Operations
-1. Drizzle ORM handles database schema migrations and queries
-2. Type-safe database operations with TypeScript integration
-3. Connection pooling managed by Neon serverless PostgreSQL
-4. Database schema changes managed through migration files
-
-### State Management
-1. Server state managed by TanStack Query with automatic caching
-2. Local component state handled by React hooks
-3. Form state managed by React Hook Form with Zod validation
-4. Global UI state (toasts, modals) managed by context providers
+### Development & Core Design
+- **Monorepo**: Client and server in separate directories with shared schema.
+- **Database Management**: Drizzle Kit for schema management, automatic seeding.
+- **Curriculum Integration**: Comprehensive, authentic IGCSE and A Level Edexcel Chemistry specifications are deeply integrated, including topics, subtopics, objectives (with official codes, Bloom's taxonomy, difficulty), practical work, and mathematical skills. This data forms the backbone of assessment generation and lesson planning.
+- **AI Integration**: OpenAI GPT-4o for AI-powered assessment generation, lesson recommendations, and comprehensive lesson content generation (including multimedia suggestions, differentiated activities, teacher guides, student worksheets).
+- **Module & Course Management**: Teachers can create, manage, and reorder modules within courses. Modules are objective-based and linked to the integrated curriculum.
+- **Lesson System**: Comprehensive AI-powered lesson generation, with a multi-tab viewer for lesson content, student worksheets, teacher scripts, and guides. Lessons can be differentiated based on student performance data. A separate, linked assessment system is also in place.
+- **UI/UX**: Responsive design, consistent headers/footers, sortable (drag-and-drop) elements for module management, detailed course/module/lesson views, and a dedicated marketing landing page with contact forms and legal pages.
 
 ## External Dependencies
 
 ### Database
-- **Neon PostgreSQL**: Serverless PostgreSQL database provider
-- **Drizzle ORM**: Type-safe database toolkit and query builder
-- **connect-pg-simple**: PostgreSQL session store for Express
+- **Neon PostgreSQL**: Serverless PostgreSQL database provider.
+- **Drizzle ORM**: Type-safe database toolkit and query builder.
+- **connect-pg-simple**: PostgreSQL session store for Express.
 
 ### UI Libraries
-- **Radix UI**: Headless UI components for accessibility
-- **Tailwind CSS**: Utility-first CSS framework
-- **Lucide React**: Icon library for consistent iconography
-- **React Hook Form**: Form validation and management
-- **Zod**: TypeScript-first schema validation
+- **Radix UI**: Headless UI components.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Lucide React**: Icon library.
+- **React Hook Form**: Form validation and management.
+- **Zod**: TypeScript-first schema validation.
+- **@dnd-kit**: Drag-and-drop functionality.
 
 ### Development Tools
-- **Vite**: Fast build tool with HMR support
-- **ESBuild**: JavaScript bundler for production builds
-- **TypeScript**: Type safety across the entire application
-- **Replit Integration**: Development environment optimization
+- **Vite**: Fast build tool.
+- **ESBuild**: JavaScript bundler.
+- **TypeScript**: Type safety across the application.
 
-## Deployment Strategy
-
-### Production Build
-1. Frontend assets built with Vite and output to `dist/public`
-2. Backend bundled with ESBuild targeting Node.js ESM
-3. Static assets served by Express in production mode
-4. Database migrations applied via Drizzle Kit
-
-### Environment Configuration
-- **Development**: Vite dev server with Express API, local database
-- **Production**: Single Express server serving both API and static assets
-- **Database**: Neon PostgreSQL with connection string via environment variables
-
-### Performance Optimizations
-- **Code Splitting**: Automatic code splitting via Vite
-- **Asset Optimization**: Vite handles CSS/JS minification and asset optimization
-- **Database Indexing**: Proper indexing on frequently queried columns
-- **Query Caching**: TanStack Query provides intelligent client-side caching
-
-## Changelog
-
-```
-Changelog:
-- July 07, 2025. Initial setup
-- July 07, 2025. Added comprehensive student management functionality:
-  * Student creation with form validation and auto-generated IDs
-  * Enhanced Students page with full CRUD operations
-  * AI-generated lesson recommendations based on performance data
-  * Lesson Plans page with personalized curriculum suggestions
-  * Reports & Analytics page with export functionality (CSV/PDF)
-  * Interactive progress charts with subject-specific filtering
-  * Fixed navigation issues and LSP errors
-  * Integrated smart recommendation engine for tailored teaching strategies
-  * Migrated from in-memory storage to PostgreSQL database with persistent data
-  * Added automatic database seeding with sample students, subjects, and assessments
-- July 08, 2025. Enhanced AI recommendation system:
-  * Implemented hybrid AI approach combining OpenAI GPT-4o with pattern analysis
-  * Added sophisticated learning pattern detection (progress trends, learning styles, risk levels)
-  * Created comprehensive AI recommendations with detailed activities and resources
-  * Added new AI Recommendations page with advanced filtering and categorization
-  * Integrated contextual AI-powered suggestions based on real student performance data
-  * Enhanced recommendation engine with confidence scoring and success metrics
-- July 08, 2025. Complete authentication system implementation:
-  * Added multi-provider OAuth authentication (Google, Microsoft, Apple) with Passport.js
-  * Implemented secure email/password authentication with bcrypt password hashing
-  * Created email verification system with welcome emails containing app feature overview
-  * Added password reset functionality with secure token-based verification
-  * Implemented protected routes with authentication guards for all dashboard features
-  * Added user session management with PostgreSQL session storage
-  * Created comprehensive login/signup interface with form validation and error handling
-- July 08, 2025. Restructured for IGCSE/A Level Edexcel Chemistry focus:
-  * Updated database schema to support grade levels (10, 11, 12) and education levels (IGCSE, A Level)
-  * Replaced generic subjects with Chemistry-specific topics (Atomic Structure, Bonding, Organic Chemistry, etc.)
-  * Implemented computed student status based on real assessment results instead of manual assignment
-  * Updated student forms to focus on Chemistry curriculum with proper grade/level validation
-  * Enhanced data export to include Chemistry topic performance breakdowns
-  * Restructured student IDs to follow Chemistry-specific patterns (CHE10IGC001, CHE12AL002, etc.)
-- July 08, 2025. Implemented curriculum-based module system:
-  * Redesigned teacher profile setup to focus on curriculum selection (IGCSE vs A Level Chemistry Edexcel)
-  * Created comprehensive curriculum data with detailed topics for both IGCSE and A Level
-  * Added modules and lesson_plans database tables with proper relationships
-  * Built Modules page for creating curriculum-based modules with topic selection
-  * Implemented module management API with full CRUD operations
-  * Updated navigation from generic "Lessons" to curriculum-focused "Modules"
-  * Prepared foundation for AI-powered lesson plan suggestions within modules
-- July 08, 2025. Fixed critical profile setup issues:
-  * Resolved infinite loop error caused by Radix UI Checkbox components with duplicate event handlers
-  * Replaced problematic checkboxes with custom UI elements using simple div styling
-  * Fixed API request authentication by correcting apiRequest function usage
-  * Enhanced error handling and validation for profile setup process
-  * Successfully enabled teachers to complete curriculum and grade level selection
-- July 08, 2025. Enhanced assessment system with AI-powered generation:
-  * Implemented comprehensive AI assessment generator using OpenAI GPT-4o
-  * Created structured curriculum data system for proper topic/objective mapping
-  * Added assessment creation workflow based on modules, topics, and learning objectives
-  * Built curriculum API endpoints for hierarchical data access (topics → subtopics → objectives)
-  * Enhanced assessment schema to support AI-generated content with difficulty levels and question types
-  * Prepared curriculum data structure for official Edexcel specification integration
-- July 08, 2025. Implemented flexible curriculum mapping system:
-  * Created comprehensive IGCSE and A Level Edexcel curriculum data with detailed topics, subtopics, and learning objectives
-  * Built FlexibleCurriculumMapper component allowing teachers to mix and match IGCSE and A Level topics based on student abilities
-  * Enhanced module creation with side-by-side curriculum selection enabling differentiated instruction within the same class
-  * Added detailed learning objectives with official specification codes, Bloom's taxonomy levels, and difficulty classifications
-  * Integrated practical work requirements and mathematical skills for each subtopic
-  * Created search and filtering capabilities for easy curriculum navigation with real-time selection tracking
-  * Added graceful fallback for OpenAI quota limitations to ensure system reliability
-- July 08, 2025. Fixed critical module creation functionality:
-  * Resolved "string did not match the expected pattern" error by correcting API request function usage
-  * Updated database schema to include topics, objectives, and estimatedHours fields in modules table
-  * Fixed apiRequest function call to use proper parameters (url, options) instead of incorrect signature
-  * Restored proper validation with insertModuleSchema for production-ready code
-  * Successfully enabled module creation with curriculum topic selection and time estimation
-- July 08, 2025. Implemented strict objective-based constraint system:
-  * Fixed database date field handling errors by converting strings to Date objects
-  * Added validation to prevent lesson creation without module objectives
-  * Enhanced lesson creation workflow to use only pre-defined module objectives
-  * Updated AI lesson generator to enforce module objectives constraint
-  * Modified assessment dashboard with objective-based filtering and validation
-  * Added warning messages and disabled buttons when modules lack objectives
-  * Implemented backend validation for lesson and assessment creation based on module objectives
-  * System now ensures teachers cannot write their own objectives during lesson/assessment creation
-  * Simplified lesson creation interface to two options: manual creation and AI generation
-  * Removed "From Objectives" bulk creation option to streamline the user experience
-- July 08, 2025. Implemented comprehensive chemistry curriculum with hierarchical selection:
-  * Created complete IGCSE and A Level Edexcel chemistry curriculum with all topics, subtopics, and objectives
-  * Built HierarchicalCurriculumMapper component with three-level selection system
-  * Implemented cascading selection: selecting topics auto-selects all subtopics and objectives
-  * Added individual subtopic and objective selection capabilities for granular control
-  * Enhanced curriculum data with official specification codes, Bloom's taxonomy levels, and difficulty classifications
-  * Integrated practical work requirements and mathematical skills for each subtopic
-  * Created visual indicators for selection state at all hierarchy levels (topics, subtopics, objectives)
-  * Added comprehensive search and filtering capabilities across all curriculum levels
-  * Implemented real-time hour calculation based on selected learning objectives
-- July 08, 2025. Completed official Edexcel curriculum implementation with full specification compliance:
-  * Conducted extensive research on official 2024 Edexcel IGCSE Chemistry (4CH1) and A Level Chemistry (9CH0) specifications
-  * Created comprehensive curriculum covering all 4 IGCSE topics and 19 A Level topics with authentic specification codes
-  * Implemented detailed learning objectives with official Edexcel specification codes (1.1, 1.2, 2.1, etc.)
-  * Added complete assessment structure information for both IGCSE and A Level papers
-  * Integrated Bloom's taxonomy levels, difficulty classifications, and command words for each objective
-  * Included practical work requirements and mathematical skills for every subtopic
-  * Added prerequisite mapping and estimated teaching minutes for proper curriculum sequencing
-  * System now exclusively uses authentic Edexcel Pearson curriculum data with full specification compliance
-- July 09, 2025. Fixed critical module creation and deletion functionality:
-  * Resolved module form schema mismatch between frontend and backend (title vs name, curriculumTopic vs curriculum)
-  * Fixed field name inconsistencies that were preventing module creation from working
-  * Updated form validation to match backend InsertModule schema requirements
-  * Added proper grade level selection with multiple choice capability
-  * Implemented delete module functionality with confirmation dialog and proper authentication
-  * Successfully tested both module creation and deletion operations with proper data persistence
-- July 09, 2025. Completed comprehensive A Level Chemistry curriculum expansion:
-  * Conducted extensive research on official Edexcel A Level Chemistry specification (9CH0)
-  * Expanded A Level curriculum from 2 topics to complete 20-topic structure based on authentic Edexcel specifications
-  * Added all physical chemistry topics: Atomic Structure, Bonding, Energetics I & II, Kinetics I & II, Equilibrium I-III, Acid-Base Equilibria
-  * Included comprehensive inorganic chemistry: Redox I & II, Periodic Table, Transition Metals with complex ions and catalysis
-  * Integrated complete organic chemistry pathway: Organic Chemistry I-III covering alkanes to aromatic compounds and synthesis
-  * Added analytical chemistry topics: Modern Analytical Techniques I & II with mass spectrometry, IR, NMR, and chromatography
-  * Implemented quantitative chemistry foundation with formulae, equations, and amounts of substance
-  * Each topic includes detailed subtopics with learning objectives, practical work, and mathematical skills
-  * All learning objectives include official specification codes, Bloom's taxonomy levels, and assessment weights
-  * Curriculum now represents authentic, comprehensive A Level Chemistry content suitable for university preparation
-- July 09, 2025. Completed comprehensive IGCSE Chemistry Edexcel curriculum expansion:
-  * Conducted extensive research on official Edexcel IGCSE Chemistry specification (4CH1)
-  * Implemented complete 4-chapter structure: Principles of Chemistry, Inorganic Chemistry, Physical Chemistry, and Organic Chemistry
-  * Chapter 1 includes 8 subtopics: States of Matter, Elements/Compounds/Mixtures, Atomic Structure, Periodic Table, Chemical Formulae/Equations, Ionic Bonding, Covalent Bonding, Metallic Bonding
-  * Chapter 2 covers 6 subtopics: Group 1 (Alkali Metals), Group 7 (Halogens), Oxygen and Oxides, Hydrogen and Water, Reactivity Series, Tests for Ions and Gases
-  * Chapter 3 includes 3 subtopics: Energetics (exothermic/endothermic reactions, bond energies), Rates of Reaction (collision theory, catalysts), Reversible Reactions and Equilibrium (Le Chatelier's principle)
-  * Chapter 4 covers 6 subtopics: Introduction to Organic Chemistry, Alkanes, Alkenes, Alcohols, Carboxylic Acids, Synthetic Polymers
-  * Added comprehensive practical work requirements and mathematical skills for each subtopic
-  * Implemented proper assessment structure with Paper 1C and Paper 2C covering foundation and extended content
-  * All learning objectives include authentic specification codes (1.1-4.21), Bloom's taxonomy levels, and detailed keyword mapping
-  * IGCSE curriculum now complete with 160+ specific learning objectives covering all essential chemistry concepts for foundation-level study
-- July 09, 2025. Implemented comprehensive marketing landing page:
-  * Created professional landing page targeting teachers, schools, and districts
-  * Added compelling hero section with slogan "Empowering Educators, Inspiring Students"
-  * Included mission and vision statements with visual icons
-  * Built comprehensive features section showcasing AI-powered assessments, curriculum management, and analytics
-  * Added benefits section highlighting time savings and improved outcomes
-  * Created three-tier pricing structure (Individual Teacher, School License, District)
-  * Implemented functional contact form with API endpoint and form validation
-  * Added professional footer with company information and social media links
-  * Updated routing to show landing page as homepage with proper authentication flow
-  * Added call-to-action buttons throughout for user conversion
-- July 09, 2025. Refocused value proposition for new teachers and IGCSE education:
-  * Updated slogan to "Focus on Teaching, Let AI Handle the Rest" to emphasize core value
-  * Shifted from chemistry-specific to general IGCSE education focus
-  * Redesigned features to highlight AI-generated lessons, instant feedback, and progress-based adaptations
-  * Added teacher community section showcasing resource sharing and collaboration
-  * Updated benefits to emphasize support for new teachers and collaborative learning
-  * Refined mission and vision statements to focus on empowering new teachers with AI assistance
-  * Enhanced messaging around personalized learning and community-driven education
-- July 09, 2025. Completed footer links and contact form functionality:
-  * Created comprehensive Privacy Policy page with proper legal content and navigation
-  * Built Terms of Service page with detailed user agreements and licensing information
-  * Developed Documentation page with feature guides and help sections
-  * Updated footer links to connect to proper pages instead of placeholder anchors
-  * Verified contact form API endpoint works correctly with validation and error handling
-  * All footer links now functional: Privacy Policy, Terms of Service, Documentation, and contact emails
-  * Fixed sidebar Dashboard link routing to match application structure
-  * Thoroughly tested all navigation flows and form submissions
-- July 09, 2025. Added comprehensive page headers, footers, and additional footer pages:
-  * Created shared PageHeader and Footer components for consistent navigation across all pages
-  * Added missing pages: Cookie Policy, GDPR, Careers, Blog, and API Info with full content
-  * Updated all existing pages (Privacy Policy, Terms of Service, Documentation) to use shared components
-  * Fixed all footer links to navigate to proper pages instead of opening email clients
-  * All pages now have consistent headers with EduTrack branding and "Back to Home" navigation
-  * All pages include comprehensive footer with working links to all sections
-  * Updated App.tsx routing to include all new public pages
-  * Contact form configured to send notifications to sep.alamouti@sepalamouti.com
-  * Complete site navigation now functional with no broken links or missing pages
-  * Fixed API Info page React syntax error with JSON code example using proper HTML entities
-  * All footer links confirmed working: Privacy Policy, Terms of Service, Documentation, Cookie Policy, GDPR, Careers, Blog, and API Info
-  * Implemented scroll-to-top functionality for all page navigation links
-  * Made logo and slogan clickable in headers and footers to return to homepage
-  * All page transitions now automatically scroll to top for improved user experience
-- July 09, 2025. Implemented comprehensive differentiated lesson system:
-  * Created AI-powered differentiated lesson generator that analyzes individual student assessment data
-  * Built system to create personalized lesson plans with activities for struggling, on-track, and advanced students
-  * Added individual student adaptations with specific strategies based on learning styles and performance
-  * Implemented smart student grouping suggestions and optimal pairing recommendations
-  * Created differentiated assessment system with varying criteria for different ability levels
-  * Added structured lesson plans with starter, main, and plenary activities all differentiated by ability
-  * Updated website landing page to highlight revolutionary differentiated lesson capabilities
-  * Enhanced documentation to showcase AI-powered personalized teaching features
-  * System focuses on letting teachers teach while AI handles complex lesson differentiation
-- July 09, 2025. Restored complete IGCSE and A Level curriculum specifications:
-  * Fixed missing A Level chemistry curriculum data that was truncated at 522 lines
-  * Restored complete A Level curriculum with all 20 topics covering comprehensive chemistry specification
-  * Added detailed subtopics and learning objectives for each A Level topic
-  * Curriculum file now contains 2,253 lines with complete IGCSE and A Level specifications
-  * Both curricula now fully accessible via API endpoints and module creation system
-  * Fixed authentication navigation: sign-out now redirects to landing page instead of login page
-  * Added "Back to Home" buttons to login/signup pages for easy navigation to landing page
-- July 10, 2025. Implemented comprehensive AI-powered lesson generation system:
-  * Created ComprehensiveLessonGenerator with full multimedia content, differentiated activities, and teacher guides
-  * Built multi-step lesson creation form with AI preferences, student performance integration, and generation options
-  * Added comprehensive lesson viewer with tabbed interface for lesson content, teacher guide, multimedia, differentiation, and assessment
-  * Implemented student performance data integration for personalized lesson differentiation
-  * Created full lesson content structure with introduction, development, practice, assessment, and closure sections
-  * Added multimedia content suggestions with specific sources, search keywords, and placement recommendations
-  * Built differentiated activities system with support for below-grade, on-grade, and above-grade learners
-  * Created detailed teacher guides with preparation checklists, timing guides, misconception handling, and troubleshooting tips
-  * Implemented assessment rubrics with multiple performance levels and detailed indicators
-  * Added API endpoints for comprehensive lesson generation and student performance data retrieval
-  * Fixed database connection timeout issues by implementing connection pooling with extended timeout settings
-  * Enhanced lesson creation workflow to support manual mode and AI-assisted full lesson generation
-  * System now generates complete lessons with images, videos, interactive content, and teacher support materials
-- July 10, 2025. Successfully created complete ionic bonding module with 5 AI-generated lessons:
-  * Created "IGCSE Chemistry - Ionic Bonding Complete Module" with 8 learning objectives and 8 estimated hours
-  * Generated 5 comprehensive AI-powered lessons covering complete ionic bonding curriculum
-  * Lesson 1: "Introduction to Ionic Bonding - Electron Transfer" (lecture, basic level, 60 min)
-  * Lesson 2: "Dot-and-Cross Diagrams for Ionic Compounds" (practical, intermediate level, 60 min)
-  * Lesson 3: "Properties of Ionic Compounds" (lecture, intermediate level, 60 min)
-  * Lesson 4: "Common Ionic Compounds - Formation and Properties" (practical, intermediate level, 60 min)
-  * Lesson 5: "Ionic Bonding Review and Assessment" (assessment, advanced level, 60 min)
-  * All lessons include detailed activities, resources, equipment lists, safety notes, and differentiation strategies
-  * Each lesson properly sequenced with objectives aligned to IGCSE Chemistry Edexcel curriculum
-  * Verified frontend module creation functionality works for future module development
-  * Confirmed lesson creation through both API and direct database insertion methods
-  * System now demonstrates complete workflow from module creation to lesson generation using frontend interface
-  * Enhanced comprehensive lesson system with complete teaching materials for new teachers:
-    - Student worksheets with detailed exercises, practice problems, and assessment questions
-    - Step-by-step teaching scripts with exact timing, key points, and differentiation notes
-    - Complete assessment questions including formative, summative, and homework activities
-    - Full lesson content with introduction, development, practice, assessment, and closure sections
-    - Updated lesson viewer with 7 tabs: Lesson Content, Student Worksheet, Teacher Script, Teacher Guide, Multimedia, Differentiation, Assessment
-    - New teachers can now follow detailed scripts and use ready-made materials immediately
-    - All lessons include comprehensive support materials eliminating preparation time for new educators
-- July 10, 2025. Completely redesigned lesson system with student-friendly interface and separate assessment system:
-  * Created StudentLessonViewer component with interactive, gamified learning experience
-  * Implemented progress tracking with section completion and visual progress bar
-  * Added comprehensive lesson structure: Objectives → Introduction → Main Learning → Activities → Practice → Assessments → Summary
-  * Created TeacherGuideViewer component with 6 comprehensive tabs: Overview, Preparation, Timing Guide, Teaching Script, Troubleshooting, Adaptations
-  * Built separate assessment system with AssessmentLinkCard component linking assessments to lessons
-  * Implemented AI-powered multimedia content generation with MultimediaContentGenerator service
-  * Added support for images, videos, diagrams, simulations, and interactive content with AI-generated search keywords
-  * Enhanced lesson viewer with 5 tabs: Student View, Teacher Guide, Student Worksheet, Teacher Script, Objectives
-  * Student view now includes multimedia content placeholders and structured learning progression
-  * Teacher guide includes preparation checklists, timing guides, common misconceptions, and adaptation strategies
-  * Assessments are now separate from lessons but linked through related assessments system
-  * System builds comprehensive resource book over time with detailed teaching materials for every aspect of lesson delivery
-- July 10, 2025. Completed comprehensive course module management system:
-  * Fixed critical apiRequest function JSON parsing issue by implementing proper JSON.stringify for request bodies
-  * Created comprehensive CourseModuleManager component with dual-tab interface for assigned/available modules
-  * Added "Manage Modules" button integration to each course card with proper modal functionality
-  * Implemented backend API routes for complete course module operations (get, add, remove modules)
-  * Added module search and filtering capabilities across course module management interface
-  * Created intuitive interface allowing teachers to add existing modules to courses or remove them with confirmation
-  * Integrated proper authentication and authorization checks for all course module endpoints
-  * Fixed course creation form to properly submit JSON data and handle validation errors
-  * System now supports reusable modules across multiple courses with many-to-many relationships
-  * Teachers can now efficiently manage course content by selecting from existing modules or creating new ones
-- July 10, 2025. Implemented clickable module navigation and individual module detail pages:
-  * Created ModuleDetail page component with comprehensive module information display
-  * Added clickable navigation to module cards in CourseModuleManager with ExternalLink icons and "View Details" text
-  * Implemented handleModuleClick function that closes modal and navigates to /modules/{id}
-  * Added /modules/:id route to App.tsx with proper authentication and sidebar layout
-  * Fixed LessonManagement component integration by passing moduleId directly from URL parameter
-  * Module cards now fully clickable with stopPropagation on action buttons to prevent navigation conflicts
-  * Teachers can click any module card to view detailed module information, topics, objectives, and lesson plans
-- July 10, 2025. Created comprehensive course detail page with ribbon module layout:
-  * Built CourseDetail page with expandable modules and lessons in ribbon format
-  * Added course statistics dashboard showing modules, lessons, duration, and progress
-  * Implemented collapsible module sections with detailed topic and objective information
-  * Created nested expandable lesson cards showing full lesson content, activities, resources, and safety notes
-  * Added course navigation from clickable course cards in main Courses page
-  * Integrated proper API endpoints for individual course fetching and course-specific data
-  * Enhanced lesson display with difficulty levels, assessment information, and completion status
-  * Added "Start Lesson" buttons for direct lesson navigation
-  * Fixed LessonManagement component prop interface to receive full module object instead of moduleId
-- July 10, 2025. Redesigned course detail page for teacher dashboard functionality:
-  * Transformed student-oriented view into comprehensive teacher management interface
-  * Replaced expandable lesson content with teacher-focused lesson summary cards
-  * Added lesson management tools: View Details, Edit Lesson, Teacher Guide, Duplicate, Reorder, Delete
-  * Implemented "Manage Lessons" button opening full LessonManagement component in modal dialog
-  * Created numbered lesson sequence display with lesson type icons and status badges
-  * Added AI Generated, Assessment, and Safety Notes indicators for quick teacher reference
-  * Integrated dropdown menus for individual lesson actions and management
-  * Enhanced with "Add Another Lesson" functionality for expanding course content
-  * System now provides proper teacher tools for lesson creation, editing, reordering, and assessment management
-- July 10, 2025. Implemented comprehensive drag-and-drop module management system:
-  * Successfully installed @dnd-kit packages for drag-and-drop functionality across the application
-  * Created SortableModuleCard component with drag handles and visual feedback during dragging
-  * Integrated DndContext and SortableContext in CourseDetail page for module reordering
-  * Added backend API route /api/courses/:id/modules/reorder for updating module sequence order
-  * Implemented reorderCourseModules storage method with database persistence of new module order
-  * Fixed duplicate component issues and cleaned up course detail page structure
-  * Module cards now display comprehensive information: lessons count, assessments count, estimated hours, objectives
-  * Teachers can drag and drop modules within courses to reorder them with automatic database updates
-  * Enhanced module management with dropdown actions: Edit Module, Manage Lessons, Add Assessment, Delete Module
-  * System provides complete visual feedback during drag operations with opacity changes and hover states
-- July 11, 2025. Consolidated modules under Library with enhanced functionality and fixed deletion issues:
-  * Removed separate "Modules" navigation from sidebar to consolidate everything under Library section
-  * Enhanced Library module cards with better formatting similar to standalone modules page
-  * Made module cards fully clickable with navigation to detailed module views and "View Details" visual indicator
-  * Added dropdown menus for module management (View Details, Manage Lessons, Delete) with proper modal dialogs
-  * Implemented create module functionality in Library with comprehensive form and curriculum selection
-  * Fixed critical module deletion issue by properly handling foreign key constraints in database
-  * Updated deleteModule function to remove module from all courses first, then delete associated lesson plans, then delete module
-  * System now provides consistent module functionality across Library and course management areas
-  * Library serves as unified resource hub for all modules with complete management capabilities
-- July 11, 2025. Implemented global curriculum utility system for authentic IGCSE structure:
-  * Created comprehensive curriculum-utils.ts with formatObjective, getCurriculumHierarchy, getTopic5Subtopics, and getIonicBondingObjectives functions
-  * Implemented global highlighting system for focused subtopics (ionic bonding subtopic (f) highlighted in yellow)
-  * Added authentic IGCSE Topic 5 structure with proper subtopic lettering: (d) through (i) with correct objective ranges
-  * Updated all curriculum displays to use consistent authentic IGCSE Chemistry Edexcel specification codes
-  * Enhanced objective formatting to show proper topic hierarchy: Curriculum → Topic → Subtopic → Objectives
-  * Implemented highlighting for focused subtopics throughout the application with visual indicators
-  * All curriculum components now use shared utility functions for consistent IGCSE formatting
-  * Fixed ionic bonding objectives to show complete range 5.1-5.7 with authentic specification statements
-  * System ensures authentic IGCSE curriculum structure is maintained globally across all components
-```
-
-## User Preferences
-
-```
-Preferred communication style: Simple, everyday language.
+### AI/API Services
+- **OpenAI GPT-4o**: For AI-powered generation of assessments, lessons, and recommendations.
 ```
