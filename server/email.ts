@@ -22,7 +22,12 @@ class EmailService {
   }
 
   async sendWelcomeEmail(email: string, firstName: string, verificationToken: string) {
-    const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/verify-email?token=${verificationToken}`;
+    // Use Replit domain from environment or fallback
+    const baseUrl = process.env.REPLIT_DOMAINS ? 
+      `https://${process.env.REPLIT_DOMAINS}` :
+      process.env.BASE_URL || 'http://localhost:5000';
+    
+    const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${verificationToken}`;
     
     const subject = 'Welcome to EduTrack - Verify Your Email';
     const html = `
@@ -78,7 +83,12 @@ class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, firstName: string, resetToken: string) {
-    const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+    // Use Replit domain from environment or fallback  
+    const baseUrl = process.env.REPLIT_DOMAINS ? 
+      `https://${process.env.REPLIT_DOMAINS}` :
+      process.env.BASE_URL || 'http://localhost:5000';
+    
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
     
     const subject = 'EduTrack - Password Reset Request';
     const html = `
