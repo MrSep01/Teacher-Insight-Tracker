@@ -93,7 +93,7 @@ export default function ProfileSetup() {
     mutationFn: async (data: ProfileSetupData) => {
       return await apiRequest("/api/auth/setup-profile", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
