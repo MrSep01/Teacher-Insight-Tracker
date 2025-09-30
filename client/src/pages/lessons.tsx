@@ -129,7 +129,7 @@ export default function Lessons() {
     mutationFn: async (data: any) => {
       return await apiRequest("/api/modules", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
