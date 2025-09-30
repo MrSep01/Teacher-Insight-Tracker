@@ -840,6 +840,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Curriculum routes
+  app.get("/api/curriculum/topics", requireAuth, async (req, res) => {
+    try {
+      const topics = await storage.getCurriculumTopics();
+      res.json(topics);
+    } catch (error) {
+      console.error('Error fetching curriculum topics:', error);
+      res.status(500).json({ error: "Failed to fetch curriculum topics" });
+    }
+  });
+
+  app.get("/api/curriculum/topics/:id/hierarchy", requireAuth, async (req, res) => {
+    try {
+      const topicId = parseInt(req.params.id);
+      const hierarchy = await storage.getCurriculumHierarchy(topicId);
+      res.json(hierarchy);
+    } catch (error) {
+      console.error('Error fetching curriculum hierarchy:', error);
+      res.status(500).json({ error: "Failed to fetch curriculum hierarchy" });
+    }
+  });
+
   // Contact form endpoint (public)
   app.post("/api/contact", async (req, res) => {
     try {

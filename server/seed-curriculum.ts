@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { curriculumTopics, curriculumSubtopics, curriculumObjectives } from "@shared/schema";
-import { UPDATED_COMPLETE_CHEMISTRY_CURRICULUM } from "./updated-complete-chemistry-curriculum";
+import { OFFICIAL_EDEXCEL_CHEMISTRY_CURRICULUM } from "./official-edexcel-chemistry-curriculum";
 import { eq } from "drizzle-orm";
 
 async function seedCurriculum() {
@@ -25,7 +25,7 @@ async function seedCurriculum() {
       console.log("Cleared curriculum topics");
 
       // Step 2: Insert data for each curriculum level
-      for (const curriculumLevel of UPDATED_COMPLETE_CHEMISTRY_CURRICULUM) {
+      for (const curriculumLevel of OFFICIAL_EDEXCEL_CHEMISTRY_CURRICULUM) {
         console.log(`\nSeeding curriculum: ${curriculumLevel.name}`);
         
         // Create a prefix based on curriculum level to ensure unique codes

@@ -117,6 +117,12 @@ export interface IStorage {
   getSubjectById(id: number): Promise<Subject | undefined>;
   createSubject(subject: InsertSubject): Promise<Subject>;
 
+  // Curriculum
+  getCurriculumTopics(): Promise<CurriculumTopic[]>;
+  getCurriculumHierarchy(topicId: number): Promise<{
+    subtopics: (CurriculumSubtopic & { objectives: CurriculumObjective[] })[];
+  }>;
+
   // Assessments
   getAssessments(): Promise<Assessment[]>;
   getAssessmentById(id: number): Promise<Assessment | undefined>;
@@ -1359,6 +1365,26 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(curriculumObjectives)
       .where(eq(curriculumObjectives.code, codes[0])) // Need to use inArray for multiple codes
       .orderBy(curriculumObjectives.sequenceOrder);
+  }
+
+  async getCurriculumHierarchy(topicId: number): Promise<{
+    subtopics: (CurriculumSubtopic & { objectives: CurriculumObjective[] })[];
+  }> {
+    const subtopics = await this.getCurriculumSubtopicsByTopicId(topicId);
+    
+    const subtopicsWithObjectives = await Promise.all(
+      subtopics.map(async (subtopic) => {
+        const objectives = await this.getCurriculumObjectivesBySubtopicId(subtopic.id);
+        return {
+          ...subtopic,
+          objectives
+        };
+      })
+    );
+    
+    return {
+      subtopics: subtopicsWithObjectives
+    };
   }
 }
 
