@@ -25,8 +25,8 @@ const moduleSchema = z.object({
   description: z.string().min(1, "Description is required"),
   curriculumTopic: z.string().min(1, "Curriculum topic is required"),
   gradeLevels: z.array(z.string()).min(1, "At least one grade level is required"),
-  topics: z.array(z.string()).min(1, "At least one topic is required"),
-  objectives: z.array(z.string()).optional(),
+  topics: z.array(z.string()).optional(), // Made optional since it's auto-generated from objectives
+  objectives: z.array(z.string()).min(1, "At least one learning objective is required"),
   estimatedHours: z.number().min(1, "Estimated hours must be greater than 0"),
 });
 
@@ -86,7 +86,7 @@ export function ModuleForm({ module, onSubmit, isLoading = false, onClose }: Mod
     const moduleData = {
       ...data,
       objectives: selectedObjectives,
-      topics: selectedObjectives.length > 0 ? [`Topic 1 - ${selectedObjectives.length} objectives`] : [],
+      topics: selectedObjectives.length > 0 ? [`Topic 1 - ${selectedObjectives.length} objectives`] : ["General Module"], // Ensure there's always at least one topic
     };
     
     onSubmit(moduleData);
