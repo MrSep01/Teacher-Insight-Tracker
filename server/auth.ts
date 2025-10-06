@@ -1,8 +1,18 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as FacebookStrategy } from "passport-facebook";
+import { Strategy as LocalStrategy } from "passport-local";
+
+// Type declarations for packages without types
+declare module 'passport-microsoft' {
+  export const Strategy: any;
+}
+declare module 'passport-apple' {
+  export const Strategy: any;
+}
+
 import { Strategy as MicrosoftStrategy } from "passport-microsoft";
 import { Strategy as AppleStrategy } from "passport-apple";
-import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
@@ -58,6 +68,35 @@ export async function setupAuth(app: Express) {
             lastName: profile.name?.familyName || "",
             profileImageUrl: profile.photos?.[0]?.value || "",
             provider: "google",
+            providerId: profile.id,
+          });
+        }
+        
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
+      }
+    }));
+  }
+
+  // Facebook OAuth Strategy
+  if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
+    passport.use(new FacebookStrategy({
+      clientID: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      callbackURL: "/api/auth/facebook/callback",
+      profileFields: ['id', 'emails', 'name', 'picture.type(large)']
+    }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
+      try {
+        let user = await storage.getUserByEmail(profile.emails?.[0]?.value || "");
+        
+        if (!user) {
+          user = await storage.createUser({
+            email: profile.emails?.[0]?.value || "",
+            firstName: profile.name?.givenName || "",
+            lastName: profile.name?.familyName || "",
+            profileImageUrl: profile.photos?.[0]?.value || "",
+            provider: "facebook",
             providerId: profile.id,
           });
         }
@@ -183,6 +222,11 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/auth/apple", passport.authenticate("apple"));
   app.get("/api/auth/apple/callback", passport.authenticate("apple", { failureRedirect: "/login" }), (req, res) => {
+    res.redirect("/");
+  });
+
+  app.get("/api/auth/facebook", passport.authenticate("facebook", { scope: ["email"] }));
+  app.get("/api/auth/facebook/callback", passport.authenticate("facebook", { failureRedirect: "/login" }), (req, res) => {
     res.redirect("/");
   });
 
@@ -395,7 +439,7 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/auth/user", async (req, res) => {
     if (req.isAuthenticated()) {
-      const user = await storage.getUserById(req.user.id);
+      const user = await storage.getUserById((req.user as any).id);
       res.json(user);
     } else {
       res.status(401).json({ error: "Not authenticated" });
@@ -418,8 +462,8 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ error: "Invalid curriculum value" });
       }
 
-      const updatedUser = await storage.updateUser(req.user.id, {
-        curriculum,
+      const updatedUser = await storage.updateUser((req.user as any).id, {
+        curricula: [curriculum],
         gradeLevels,
         profileCompleted: true,
       });

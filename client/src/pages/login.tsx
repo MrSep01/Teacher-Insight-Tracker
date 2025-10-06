@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogIn, Mail, User, Lock, Eye, EyeOff, Home } from "lucide-react";
 import { Link } from "wouter";
-import { FaGoogle, FaMicrosoft, FaApple } from "react-icons/fa";
+import { FaGoogle, FaMicrosoft, FaApple, FaFacebook } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -134,6 +134,10 @@ export default function Login() {
 
   const handleAppleLogin = () => {
     window.location.href = "/api/auth/apple";
+  };
+
+  const handleFacebookLogin = () => {
+    window.location.href = "/api/auth/facebook";
   };
 
   return (
@@ -320,6 +324,15 @@ export default function Login() {
             >
               <FaApple className="h-5 w-5 text-gray-800" />
               Continue with Apple
+            </Button>
+
+            <Button
+              onClick={handleFacebookLogin}
+              variant="outline"
+              className="w-full h-12 text-left justify-start gap-3"
+            >
+              <FaFacebook className="h-5 w-5 text-blue-600" />
+              Continue with Facebook
             </Button>
           </div>
 
