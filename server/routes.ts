@@ -1,9 +1,10 @@
-import type { Express } from "express";
+import type { Express, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAssessmentSchema, insertStudentSchema, insertStudentScoreSchema, insertClassSchema, insertCourseSchema, insertCourseModuleSchema, insertCourseItemSchema } from "@shared/schema";
 import { aiEngine } from "./ai-recommendations";
 import { aiAssessmentGenerator } from "./ai-assessment-generator";
+import { aiLessonGenerator } from "./ai-lesson-generator";
 import { enhancedLessonGenerator } from "./enhanced-lesson-generator";
 import { enhancedAssessmentGenerator } from "./enhanced-assessment-generator";
 import { comprehensiveLessonGenerator } from "./comprehensive-lesson-generator";
@@ -11,6 +12,16 @@ import { setupAuth, requireAuth } from "./auth";
 import { registerModuleRoutes } from "./modules";
 import { registerCurriculumRoutes } from "./curriculum-api";
 import { emailService } from "./email";
+import { MissingOpenAIKeyError } from "./openai-client";
+
+function handleAIError(res: Response, error: unknown, fallbackMessage: string) {
+  if (error instanceof MissingOpenAIKeyError) {
+    return res.status(503).json({ error: error.message });
+  }
+
+  const message = error instanceof Error ? error.message : fallbackMessage;
+  return res.status(500).json({ error: message || fallbackMessage });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -364,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ objectives });
     } catch (error) {
       console.error("Error generating objectives:", error);
-      res.status(500).json({ error: "Failed to generate learning objectives" });
+      return handleAIError(res, error, "Failed to generate learning objectives");
     }
   });
 
@@ -379,7 +390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ topics });
     } catch (error) {
       console.error("Error suggesting topics:", error);
-      res.status(500).json({ error: "Failed to suggest topics" });
+      return handleAIError(res, error, "Failed to suggest topics");
     }
   });
 
@@ -415,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error generating assessment:", error);
-      res.status(500).json({ error: "Failed to generate assessment" });
+      return handleAIError(res, error, "Failed to generate assessment");
     }
   });
 
@@ -540,7 +551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error) {
       console.error('Error generating AI lesson:', error);
-      res.status(500).json({ error: error.message });
+      return handleAIError(res, error, 'Failed to generate AI lesson');
     }
   });
 
@@ -561,7 +572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error) {
       console.error('Error generating comprehensive lesson:', error);
-      res.status(500).json({ error: error.message });
+      return handleAIError(res, error, 'Failed to generate comprehensive lesson');
     }
   });
 
@@ -672,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ content: aiContent });
     } catch (error) {
       console.error('Error generating AI section:', error);
-      res.status(500).json({ error: error.message || "Failed to generate AI content" });
+      return handleAIError(res, error, 'Failed to generate AI content');
     }
   });
 
@@ -809,7 +820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(recommendations);
     } catch (error) {
       console.error('Error generating AI recommendations:', error);
-      res.status(500).json({ error: "Failed to generate recommendations" });
+      return handleAIError(res, error, "Failed to generate recommendations");
     }
   });
 
@@ -836,7 +847,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(allRecommendations);
     } catch (error) {
       console.error('Error generating bulk AI recommendations:', error);
-      res.status(500).json({ error: "Failed to generate recommendations" });
+      return handleAIError(res, error, "Failed to generate recommendations");
     }
   });
 

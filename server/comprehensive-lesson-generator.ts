@@ -1,12 +1,11 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
 import { storage } from "./storage";
 import type { InsertLessonPlan } from "@shared/schema";
 import { multimediaGenerator } from "./multimedia-content-generator";
+import { getOpenAIClient, MissingOpenAIKeyError } from "./openai-client";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+const sharedClient = getOpenAIClient();
 
 export interface ComprehensiveLessonRequest {
   moduleId: number;
@@ -154,10 +153,22 @@ export interface ComprehensiveLesson {
 }
 
 export class ComprehensiveLessonGenerator {
-  private openai: OpenAI;
+  private openai: OpenAI | null;
 
   constructor() {
-    this.openai = openai;
+    this.openai = sharedClient;
+  }
+
+  private requireClient(): OpenAI {
+    if (!this.openai) {
+      this.openai = getOpenAIClient();
+    }
+
+    if (!this.openai) {
+      throw new MissingOpenAIKeyError();
+    }
+
+    return this.openai;
   }
 
   async generateFullLesson(request: ComprehensiveLessonRequest): Promise<any> {
@@ -214,6 +225,9 @@ export class ComprehensiveLessonGenerator {
       return { ...savedLesson, fullLesson: comprehensiveLesson };
     } catch (error) {
       console.error("Error generating comprehensive lesson:", error);
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
       throw new Error("Failed to generate comprehensive lesson plan");
     }
   }
@@ -221,7 +235,8 @@ export class ComprehensiveLessonGenerator {
   private async generateLessonContent(request: ComprehensiveLessonRequest): Promise<Partial<ComprehensiveLesson>> {
     const prompt = this.createLessonContentPrompt(request);
     
-    const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -245,7 +260,8 @@ export class ComprehensiveLessonGenerator {
   private async generateTeacherGuide(request: ComprehensiveLessonRequest, lessonContent: Partial<ComprehensiveLesson>): Promise<TeacherGuide> {
     const prompt = this.createTeacherGuidePrompt(request, lessonContent);
     
-    const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -310,7 +326,8 @@ export class ComprehensiveLessonGenerator {
   private async generateDifferentiatedActivities(request: ComprehensiveLessonRequest, lessonContent: Partial<ComprehensiveLesson>): Promise<DifferentiatedActivity[]> {
     const prompt = this.createDifferentiationPrompt(request, lessonContent);
     
-    const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -334,7 +351,8 @@ export class ComprehensiveLessonGenerator {
   private async generateAssessmentRubrics(request: ComprehensiveLessonRequest, lessonContent: Partial<ComprehensiveLesson>): Promise<AssessmentRubric[]> {
     const prompt = this.createAssessmentRubricPrompt(request, lessonContent);
     
-    const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {

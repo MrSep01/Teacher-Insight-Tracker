@@ -20,6 +20,13 @@ interface EnhancedLessonCreatorProps {
   onLessonCreated: () => void;
 }
 
+interface StudentPerformanceSummary {
+  id: number;
+  name: string;
+  overallPercentage?: number;
+  subjectAverages?: Record<string, number>;
+}
+
 export function EnhancedLessonCreator({ moduleId, moduleObjectives, onLessonCreated }: EnhancedLessonCreatorProps) {
   const [creationMethod, setCreationMethod] = useState<"ai" | "manual">("ai");
   const [lessonData, setLessonData] = useState({
@@ -35,7 +42,7 @@ export function EnhancedLessonCreator({ moduleId, moduleObjectives, onLessonCrea
   const queryClient = useQueryClient();
 
   // Get students for differentiation
-  const { data: students = [] } = useQuery({
+  const { data: students = [] } = useQuery<StudentPerformanceSummary[]>({
     queryKey: ["/api/students"],
     enabled: creationMethod === "ai",
   });
@@ -44,7 +51,7 @@ export function EnhancedLessonCreator({ moduleId, moduleObjectives, onLessonCrea
     mutationFn: async (data: any) => {
       return apiRequest("/api/lessons/ai-generate", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
@@ -68,7 +75,7 @@ export function EnhancedLessonCreator({ moduleId, moduleObjectives, onLessonCrea
     mutationFn: async (data: any) => {
       return apiRequest("/api/lessons/manual-create", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {

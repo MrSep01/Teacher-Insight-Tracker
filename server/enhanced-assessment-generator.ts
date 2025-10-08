@@ -1,10 +1,11 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
 import { db } from "./db";
 import { assessments, assessmentQuestions, modules, InsertAssessment, InsertAssessmentQuestion } from "../shared/schema";
 import { eq } from "drizzle-orm";
+import { getOpenAIClient, MissingOpenAIKeyError } from "./openai-client";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const sharedClient = getOpenAIClient();
 
 // Formative.com-inspired question types
 export type QuestionType = 
@@ -101,10 +102,22 @@ export interface EnhancedAssessment {
 }
 
 export class EnhancedAssessmentGenerator {
-  private openai: OpenAI;
+  private openai: OpenAI | null;
 
   constructor() {
-    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    this.openai = sharedClient;
+  }
+
+  private requireClient(): OpenAI {
+    if (!this.openai) {
+      this.openai = getOpenAIClient();
+    }
+
+    if (!this.openai) {
+      throw new MissingOpenAIKeyError();
+    }
+
+    return this.openai;
   }
 
   // Generate AI-powered assessment with diverse question types
@@ -120,7 +133,8 @@ export class EnhancedAssessmentGenerator {
 
       const prompt = this.createEnhancedAssessmentPrompt(request, module);
       
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
@@ -176,7 +190,11 @@ export class EnhancedAssessmentGenerator {
 
     } catch (error) {
       console.error("Error generating AI assessment:", error);
-      throw new Error("Failed to generate AI assessment: " + error.message);
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error("Failed to generate AI assessment: " + message);
     }
   }
 

@@ -1,5 +1,6 @@
 import { StudentWithScores, Subject, Assessment } from "@shared/schema";
-import OpenAI from "openai";
+import type OpenAI from "openai";
+import { getOpenAIClient, MissingOpenAIKeyError } from "./openai-client";
 
 export interface DetailedRecommendation {
   id: string;
@@ -30,12 +31,22 @@ export interface LearningPattern {
 }
 
 export class AIRecommendationEngine {
-  private openai: OpenAI;
-  
+  private openai: OpenAI | null;
+
   constructor() {
-    this.openai = new OpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY 
-    });
+    this.openai = getOpenAIClient();
+  }
+
+  private requireClient(): OpenAI {
+    if (!this.openai) {
+      this.openai = getOpenAIClient();
+    }
+
+    if (!this.openai) {
+      throw new MissingOpenAIKeyError();
+    }
+
+    return this.openai;
   }
   
   // Analyze student's learning patterns
@@ -115,7 +126,8 @@ export class AIRecommendationEngine {
     try {
       const prompt = this.createPrompt(student, patterns);
       
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
@@ -134,6 +146,9 @@ export class AIRecommendationEngine {
       const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
       return this.parseAIResponse(aiResponse, student);
     } catch (error) {
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
       console.error('Error generating AI recommendations:', error);
       return [];
     }

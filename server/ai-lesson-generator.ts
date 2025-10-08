@@ -1,11 +1,10 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
 import { storage } from "./storage";
 import type { InsertLessonPlan } from "@shared/schema";
+import { getOpenAIClient, MissingOpenAIKeyError } from "./openai-client";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+const sharedClient = getOpenAIClient();
 
 export interface LessonGenerationRequest {
   moduleId: number;
@@ -38,17 +37,30 @@ export interface GeneratedLesson {
 }
 
 export class AILessonGenerator {
-  private openai: OpenAI;
+  private openai: OpenAI | null;
 
   constructor() {
-    this.openai = openai;
+    this.openai = sharedClient;
+  }
+
+  private requireClient(): OpenAI {
+    if (!this.openai) {
+      this.openai = getOpenAIClient();
+    }
+
+    if (!this.openai) {
+      throw new MissingOpenAIKeyError();
+    }
+
+    return this.openai;
   }
 
   async generateLesson(request: LessonGenerationRequest): Promise<any> {
     try {
       const prompt = this.createLessonPrompt(request);
       
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
@@ -95,6 +107,9 @@ export class AILessonGenerator {
       return savedLesson;
     } catch (error) {
       console.error("Error generating lesson:", error);
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
       throw new Error("Failed to generate lesson plan");
     }
   }
@@ -176,7 +191,8 @@ Make the lesson engaging, practical, and aligned with Edexcel chemistry specific
     const prompt = this.createSectionPrompt(request);
     
     try {
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -200,7 +216,11 @@ Make the lesson engaging, practical, and aligned with Edexcel chemistry specific
       return content.trim();
     } catch (error) {
       console.error('AI section generation error:', error);
-      throw new Error(`Failed to generate AI content: ${error.message}`);
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to generate AI content: ${message}`);
     }
   }
 

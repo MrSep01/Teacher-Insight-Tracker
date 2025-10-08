@@ -64,12 +64,12 @@ export function CurriculumBrowser({
   const [bloomsFilter, setBlomsFilter] = useState("all");
 
   // Fetch curriculum data
-  const { data: curriculumData, isLoading } = useQuery({
+  const { data: curriculumData, isLoading } = useQuery<{ topics: CurriculumTopic[] }>({
     queryKey: ["/api/curriculum", selectedCurriculum, selectedGrade],
     enabled: !!selectedCurriculum && !!selectedGrade,
   });
 
-  const topics = curriculumData?.topics || [];
+  const topics: CurriculumTopic[] = curriculumData?.topics ?? [];
 
   // Filter topics based on search and filters
   const filteredTopics = topics.filter((topic: CurriculumTopic) => {

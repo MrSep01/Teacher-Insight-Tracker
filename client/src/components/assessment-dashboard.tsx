@@ -65,6 +65,12 @@ interface LessonPlan {
   assessmentType?: "formative" | "summative";
 }
 
+interface Subject {
+  id: number;
+  name: string;
+  color: string;
+}
+
 export function AssessmentDashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
@@ -73,19 +79,19 @@ export function AssessmentDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: assessments, isLoading: loadingAssessments } = useQuery({
+  const { data: assessments = [], isLoading: loadingAssessments } = useQuery<Assessment[]>({
     queryKey: ["/api/assessments"],
   });
 
-  const { data: modules } = useQuery({
+  const { data: modules = [] } = useQuery<Module[]>({
     queryKey: ["/api/modules"],
   });
 
-  const { data: lessons } = useQuery({
+  const { data: lessons = [] } = useQuery<LessonPlan[]>({
     queryKey: ["/api/lessons"],
   });
 
-  const { data: subjects } = useQuery({
+  const { data: subjects = [] } = useQuery<Subject[]>({
     queryKey: ["/api/subjects"],
   });
 
@@ -93,7 +99,7 @@ export function AssessmentDashboard() {
     mutationFn: async (data: any) => {
       return await apiRequest("/api/assessments", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
@@ -113,21 +119,21 @@ export function AssessmentDashboard() {
     },
   });
 
-  const filteredAssessments = assessments?.filter((assessment: Assessment) => {
+  const filteredAssessments = assessments.filter((assessment: Assessment) => {
     if (filterType === "all") return true;
     return assessment.type === filterType;
-  }) || [];
+  });
 
   const assessmentStats = {
-    total: assessments?.length || 0,
-    formative: assessments?.filter((a: Assessment) => a.type === "formative").length || 0,
-    summative: assessments?.filter((a: Assessment) => a.type === "summative").length || 0,
-    recentWeek: assessments?.filter((a: Assessment) => {
+    total: assessments.length,
+    formative: assessments.filter((a: Assessment) => a.type === "formative").length,
+    summative: assessments.filter((a: Assessment) => a.type === "summative").length,
+    recentWeek: assessments.filter((a: Assessment) => {
       const assessmentDate = new Date(a.date);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return assessmentDate >= weekAgo;
-    }).length || 0,
+    }).length,
   };
 
   return (
@@ -190,7 +196,7 @@ export function AssessmentDashboard() {
           <p className="text-gray-600">Manage formative and summative assessments</p>
         </div>
         <div className="flex space-x-2">
-          <Select value={filterType} onValueChange={setFilterType}>
+          <Select value={filterType} onValueChange={(value) => setFilterType(value as typeof filterType)}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
