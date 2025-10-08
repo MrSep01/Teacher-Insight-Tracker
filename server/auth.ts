@@ -16,14 +16,33 @@ import { Strategy as AppleStrategy } from "passport-apple";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
+import memorystore from "memorystore";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { storage } from "./storage";
 import { emailService } from "./email";
 import { insertUserSchema } from "@shared/schema";
+import { databaseStatus } from "./db";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  if (databaseStatus.mode !== 'postgres') {
+    const MemoryStore = memorystore(session);
+    const memoryStore = new MemoryStore({ checkPeriod: sessionTtl });
+
+    return session({
+      secret: process.env.SESSION_SECRET || "your-session-secret-key-here",
+      store: memoryStore,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: sessionTtl,
+      },
+    });
+  }
+
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -31,7 +50,7 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "user_sessions",
   });
-  
+
   return session({
     secret: process.env.SESSION_SECRET || "your-session-secret-key-here",
     store: sessionStore,
@@ -50,6 +69,17 @@ export async function setupAuth(app: Express) {
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
+
+  if (databaseStatus.mode !== 'postgres') {
+    const demoUser = await storage.getUserByEmail("demo.teacher@example.com");
+    if (demoUser) {
+      app.use((req, _res, next) => {
+        (req as any).user = demoUser;
+        req.isAuthenticated = () => true;
+        next();
+      });
+    }
+  }
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {

@@ -1,8 +1,9 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
+import { getOpenAIClient, MissingOpenAIKeyError } from "./openai-client";
 import type { Module } from "@shared/schema";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const sharedClient = getOpenAIClient();
 
 export interface AssessmentObjective {
   id: string;
@@ -63,17 +64,30 @@ export interface AssessmentGenerationRequest {
 }
 
 export class AIAssessmentGenerator {
-  private openai: OpenAI;
+  private openai: OpenAI | null;
 
   constructor() {
-    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    this.openai = sharedClient;
+  }
+
+  private requireClient(): OpenAI {
+    if (!this.openai) {
+      this.openai = getOpenAIClient();
+    }
+
+    if (!this.openai) {
+      throw new MissingOpenAIKeyError();
+    }
+
+    return this.openai;
   }
 
   async generateAssessment(request: AssessmentGenerationRequest): Promise<GeneratedAssessment> {
     try {
       const prompt = this.createAssessmentPrompt(request);
       
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -94,6 +108,9 @@ export class AIAssessmentGenerator {
       return this.processAIResponse(aiResponse, request);
     } catch (error) {
       console.error("Error generating assessment:", error);
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
       throw new Error("Failed to generate assessment using AI");
     }
   }
@@ -121,7 +138,8 @@ Return JSON format:
   ]
 }`;
 
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -159,7 +177,8 @@ Generate a comprehensive list of subtopics that students should be assessed on. 
   "topics": ["topic1", "topic2", ...]
 }`;
 
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {

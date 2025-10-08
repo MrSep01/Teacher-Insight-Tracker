@@ -512,8 +512,6 @@ export type InsertStudent = z.infer<typeof insertStudentSchema>;
 export type Subject = typeof subjects.$inferSelect;
 export type InsertSubject = z.infer<typeof insertSubjectSchema>;
 
-export type Assessment = typeof assessments.$inferSelect;
-export type InsertAssessment = z.infer<typeof insertAssessmentSchema>;
 
 export type AssessmentQuestion = typeof assessmentQuestions.$inferSelect;
 export type InsertAssessmentQuestion = z.infer<typeof insertAssessmentQuestionSchema>;
@@ -526,6 +524,7 @@ export type InsertLessonActivity = z.infer<typeof insertLessonActivitySchema>;
 
 export type LessonTemplate = typeof lessonTemplates.$inferSelect;
 export type InsertLessonTemplate = z.infer<typeof insertLessonTemplateSchema>;
+export type Assessment = typeof assessments.$inferSelect;
 export type InsertAssessment = z.infer<typeof insertAssessmentSchema>;
 
 export type StudentScore = typeof studentScores.$inferSelect;

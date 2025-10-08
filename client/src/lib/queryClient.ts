@@ -7,24 +7,57 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
+type JsonSerializableBody =
+  | string
+  | FormData
+  | URLSearchParams
+  | Blob
+  | ArrayBuffer
+  | ArrayBufferView
+  | ReadableStream<Uint8Array>
+  | null
+  | undefined
+  | Record<string, unknown>
+  | unknown[];
+
+type ApiRequestOptions = Omit<RequestInit, "body" | "headers"> & {
+  body?: JsonSerializableBody;
+  headers?: Record<string, string>;
+};
+
+export async function apiRequest<TResponse = unknown>(
   url: string,
-  options: RequestInit = {}
-): Promise<any> {
-  const { body, ...restOptions } = options;
-  
-  const res = await fetch(url, {
+  options: ApiRequestOptions = {},
+): Promise<TResponse> {
+  const { body, headers, ...restOptions } = options;
+
+  const shouldSerializeBody =
+    body !== undefined &&
+    !(body instanceof FormData) &&
+    !(body instanceof URLSearchParams) &&
+    !(body instanceof Blob) &&
+    !(body instanceof ArrayBuffer) &&
+    !(ArrayBuffer.isView(body)) &&
+    !(body instanceof ReadableStream) &&
+    typeof body !== "string";
+
+  const response = await fetch(url, {
     ...restOptions,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body:
+      body === undefined
+        ? undefined
+        : shouldSerializeBody
+        ? JSON.stringify(body)
+        : (body as BodyInit),
   });
 
-  if (!res.ok) {
-    const errorText = await res.text();
+  if (!response.ok) {
+    const errorText = await response.text();
     let errorMessage = errorText;
     try {
       const errorJson = JSON.parse(errorText);
@@ -35,14 +68,18 @@ export async function apiRequest(
     throw new Error(errorMessage);
   }
 
-  return res.json();
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return (await response.json()) as TResponse;
+  }
+
+  return (await response.text()) as TResponse;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
+export const getQueryFn = ({ on401: unauthorizedBehavior }: {
   on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
+}): QueryFunction<unknown> =>
   async ({ queryKey }) => {
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",

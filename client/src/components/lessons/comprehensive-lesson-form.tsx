@@ -67,16 +67,24 @@ interface ComprehensiveLessonFormProps {
   onCancel?: () => void;
 }
 
-export default function ComprehensiveLessonForm({ 
-  moduleId, 
-  moduleData, 
-  onSuccess, 
-  onCancel 
+export default function ComprehensiveLessonForm({
+  moduleId,
+  moduleData,
+  onSuccess,
+  onCancel
 }: ComprehensiveLessonFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("basic");
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
+
+  interface StudentPerformance {
+    studentId: number;
+    name: string;
+    overallPerformance?: number;
+    strengths?: string[];
+    areasForImprovement?: string[];
+  }
 
   const form = useForm<ComprehensiveLessonFormData>({
     resolver: zodResolver(comprehensiveLessonSchema),
@@ -102,7 +110,7 @@ export default function ComprehensiveLessonForm({
   });
 
   // Fetch student performance data for differentiation
-  const { data: studentPerformanceData, isLoading: isLoadingStudents } = useQuery({
+  const { data: studentPerformanceData = [], isLoading: isLoadingStudents } = useQuery<StudentPerformance[]>({
     queryKey: ["/api/lessons/student-performance", moduleId],
     enabled: !!moduleId,
   });
@@ -111,16 +119,16 @@ export default function ComprehensiveLessonForm({
     mutationFn: async (data: ComprehensiveLessonFormData) => {
       const requestData = {
         ...data,
-        studentPerformanceData: selectedStudents.length > 0 
-          ? studentPerformanceData?.filter((student: any) => 
+        studentPerformanceData: selectedStudents.length > 0
+          ? studentPerformanceData.filter((student) =>
               selectedStudents.includes(student.studentId)
             )
           : studentPerformanceData,
       };
-      
+
       return await apiRequest("/api/lessons/comprehensive-generate", {
         method: "POST",
-        body: JSON.stringify(requestData),
+        body: requestData,
       });
     },
     onSuccess: (data) => {

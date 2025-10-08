@@ -1,7 +1,12 @@
-import { db } from "./db";
+import { db, databaseStatus } from "./db";
 import { students, subjects, assessments, studentScores } from "@shared/schema";
 
 export async function seedDatabase() {
+  if (databaseStatus.mode !== 'postgres' || !db) {
+    console.log("Skipping database seed because the persistent database connection is unavailable.");
+    return;
+  }
+
   try {
     // Check if data already exists
     const existingStudents = await db.select().from(students);

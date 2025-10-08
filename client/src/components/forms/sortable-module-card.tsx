@@ -10,6 +10,7 @@ import { Module } from "@shared/schema";
 interface ModuleWithContent extends Module {
   lessons: any[];
   assessments: any[];
+  curriculum?: string | null;
 }
 
 interface SortableModuleCardProps {

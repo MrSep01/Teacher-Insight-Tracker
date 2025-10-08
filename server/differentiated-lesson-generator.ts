@@ -1,10 +1,9 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
 import { storage } from "./storage";
 import type { InsertLessonPlan, Student, StudentScore, Assessment } from "@shared/schema";
+import { getOpenAIClient, MissingOpenAIKeyError } from "./openai-client";
 
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+const sharedClient = getOpenAIClient();
 
 export interface StudentPerformanceData {
   studentId: number;
@@ -139,17 +138,30 @@ export interface DifferentiatedLessonPlan {
 }
 
 export class DifferentiatedLessonGenerator {
-  private openai: OpenAI;
+  private openai: OpenAI | null;
 
   constructor() {
-    this.openai = openai;
+    this.openai = sharedClient;
+  }
+
+  private requireClient(): OpenAI {
+    if (!this.openai) {
+      this.openai = getOpenAIClient();
+    }
+
+    if (!this.openai) {
+      throw new MissingOpenAIKeyError();
+    }
+
+    return this.openai;
   }
 
   async generateDifferentiatedLesson(request: DifferentiatedLessonRequest): Promise<any> {
     try {
       const prompt = this.createDifferentiatedLessonPrompt(request);
       
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -199,6 +211,9 @@ export class DifferentiatedLessonGenerator {
       };
     } catch (error) {
       console.error("Error generating differentiated lesson:", error);
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
       throw new Error("Failed to generate differentiated lesson plan");
     }
   }

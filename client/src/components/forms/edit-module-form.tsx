@@ -40,6 +40,8 @@ export function EditModuleForm({
 
   // Separate state for curriculum mapper
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>(module.objectives || []);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(module.topics || []);
+  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
 
   const [nameChanged, setNameChanged] = useState(false);
   const [showDuplicateOption, setShowDuplicateOption] = useState(false);

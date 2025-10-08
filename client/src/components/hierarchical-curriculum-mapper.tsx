@@ -19,6 +19,10 @@ interface CurriculumTopic {
   subtopics: CurriculumSubtopic[];
 }
 
+interface CurriculumResponse {
+  topics: Array<Omit<CurriculumTopic, "level">>;
+}
+
 interface CurriculumSubtopic {
   id: string;
   name: string;
@@ -69,22 +73,22 @@ export function HierarchicalCurriculumMapper({
   const [expandedSubtopics, setExpandedSubtopics] = useState<string[]>([]);
 
   // Fetch both IGCSE and A Level curriculum data
-  const { data: igcseData, isLoading: igcseLoading } = useQuery({
+  const { data: igcseData, isLoading: igcseLoading } = useQuery<CurriculumResponse>({
     queryKey: ["/api/curriculum", "IGCSE Chemistry Edexcel"],
     queryFn: () => fetch("/api/curriculum/IGCSE Chemistry Edexcel").then(res => res.json()),
   });
 
-  const { data: aLevelData, isLoading: aLevelLoading } = useQuery({
-    queryKey: ["/api/curriculum", "A Level Chemistry Edexcel"], 
+  const { data: aLevelData, isLoading: aLevelLoading } = useQuery<CurriculumResponse>({
+    queryKey: ["/api/curriculum", "A Level Chemistry Edexcel"],
     queryFn: () => fetch("/api/curriculum/A Level Chemistry Edexcel").then(res => res.json()),
   });
 
   const isLoading = igcseLoading || aLevelLoading;
 
   // Combine curriculum data for flexible mixing
-  const allTopics = [
-    ...(igcseData?.topics?.map((topic: any) => ({ ...topic, level: "IGCSE" })) || []),
-    ...(aLevelData?.topics?.map((topic: any) => ({ ...topic, level: "A Level" })) || [])
+  const allTopics: CurriculumTopic[] = [
+    ...(igcseData?.topics?.map((topic) => ({ ...topic, level: "IGCSE" as const })) ?? []),
+    ...(aLevelData?.topics?.map((topic) => ({ ...topic, level: "A Level" as const })) ?? []),
   ];
 
   // Filter topics based on search and filters

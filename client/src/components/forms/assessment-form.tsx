@@ -30,6 +30,12 @@ interface AssessmentFormProps {
 function AssessmentForm({ onSubmit, isLoading = false, onClose }: AssessmentFormProps) {
   const { toast } = useToast();
 
+  interface SubjectOption {
+    id: number;
+    topicArea?: string | null;
+    name?: string | null;
+  }
+
   const form = useForm<AssessmentFormData>({
     resolver: zodResolver(assessmentSchema),
     defaultValues: {
@@ -41,7 +47,7 @@ function AssessmentForm({ onSubmit, isLoading = false, onClose }: AssessmentForm
   });
 
   // Fetch subjects for selection
-  const { data: subjects } = useQuery({
+  const { data: subjects = [] } = useQuery<SubjectOption[]>({
     queryKey: ["/api/subjects"],
   });
 
@@ -106,9 +112,9 @@ function AssessmentForm({ onSubmit, isLoading = false, onClose }: AssessmentForm
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {subjects?.map((subject: any) => (
+                      {subjects.map((subject) => (
                         <SelectItem key={subject.id} value={subject.id.toString()}>
-                          {subject.topicArea}
+                          {subject.topicArea || subject.name || `Subject ${subject.id}`}
                         </SelectItem>
                       ))}
                     </SelectContent>

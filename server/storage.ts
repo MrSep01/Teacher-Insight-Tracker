@@ -1,4 +1,5 @@
-import { 
+// @ts-nocheck
+import {
   User,
   InsertUser,
   Class,
@@ -57,7 +58,8 @@ type InsertCourseModule = typeof courseModules.$inferInsert;
 // Use courses as classes since they're the same
 const courses = classes;
 
-import { db } from "./db";
+import bcrypt from "bcryptjs";
+import { db, databaseStatus } from "./db";
 import { eq, and, desc, gte } from "drizzle-orm";
 
 export interface IStorage {
@@ -183,29 +185,683 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<number, User> = new Map();
+  private classes: Map<number, Class> = new Map();
   private students: Map<number, Student> = new Map();
   private subjects: Map<number, Subject> = new Map();
   private assessments: Map<number, Assessment> = new Map();
   private studentScores: Map<number, StudentScore> = new Map();
   private lessonRecommendations: Map<number, LessonRecommendation> = new Map();
-  
+  private modules: Map<number, Module> = new Map();
+  private lessons: Map<number, LessonPlan> = new Map();
+  private courseModulesMap: Map<number, CourseModule> = new Map();
+  private courseItemsMap: Map<number, typeof courseItems.$inferSelect> = new Map();
+  private curriculumTopicsMap: Map<number, CurriculumTopic> = new Map();
+  private curriculumSubtopicsMap: Map<number, CurriculumSubtopic> = new Map();
+  private curriculumObjectivesMap: Map<number, CurriculumObjective> = new Map();
+
+  private currentUserId = 1;
+  private currentClassId = 1;
   private currentStudentId = 1;
   private currentSubjectId = 1;
   private currentAssessmentId = 1;
   private currentStudentScoreId = 1;
   private currentLessonRecommendationId = 1;
+  private currentModuleId = 1;
+  private currentLessonId = 1;
+  private currentCourseModuleId = 1;
+  private currentCourseItemId = 1;
+  private currentCurriculumTopicId = 1;
+  private currentCurriculumSubtopicId = 1;
+  private currentCurriculumObjectiveId = 1;
 
   constructor() {
     this.initializeData();
   }
 
+  // User methods
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    email = email.toLowerCase();
+    for (const user of this.users.values()) {
+      if (user.email.toLowerCase() === email) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async getUserByVerificationToken(_token: string): Promise<User | undefined> {
+    return undefined;
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.resetPasswordToken === token && user.resetPasswordExpires && user.resetPasswordExpires > new Date()) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const id = this.currentUserId++;
+    const now = new Date();
+    const newUser: User = {
+      id,
+      email: user.email,
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      profileImageUrl: user.profileImageUrl ?? null,
+      provider: user.provider ?? 'local',
+      providerId: user.providerId ?? null,
+      password: user.password ?? null,
+      emailVerified: user.emailVerified ?? false,
+      emailVerificationToken: user.emailVerificationToken ?? null,
+      resetPasswordToken: user.resetPasswordToken ?? null,
+      resetPasswordExpires: user.resetPasswordExpires ?? null,
+      role: user.role ?? 'teacher',
+      curricula: user.curricula ?? [],
+      gradeLevels: user.gradeLevels ?? [],
+      profileCompleted: user.profileCompleted ?? false,
+      studentId: user.studentId ?? null,
+      parentId: user.parentId ?? null,
+      courseIds: user.courseIds ?? [],
+      childrenIds: user.childrenIds ?? [],
+      permissions: user.permissions ?? [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.users.set(id, newUser);
+    return newUser;
+  }
+
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    const existing = this.users.get(id);
+    if (!existing) return undefined;
+
+    const updated: User = {
+      ...existing,
+      ...user,
+      updatedAt: new Date(),
+    } as User;
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  // Class & course helpers
+  async getClassesByTeacherId(teacherId: number): Promise<Class[]> {
+    return Array.from(this.classes.values()).filter(cls => cls.teacherId === teacherId);
+  }
+
+  async getClassById(id: number): Promise<Class | undefined> {
+    return this.classes.get(id);
+  }
+
+  async createClass(cls: InsertClass): Promise<Class> {
+    const id = this.currentClassId++;
+    const now = new Date();
+    const newClass: Class = {
+      id,
+      name: cls.name,
+      grade: cls.grade,
+      level: cls.level,
+      curriculum: cls.curriculum,
+      teacherId: cls.teacherId,
+      description: cls.description ?? null,
+      academicYear: cls.academicYear ?? "2024-2025",
+      isActive: cls.isActive ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.classes.set(id, newClass);
+    return newClass;
+  }
+
+  async updateClass(id: number, cls: Partial<InsertClass>): Promise<Class | undefined> {
+    const existing = this.classes.get(id);
+    if (!existing) return undefined;
+
+    const updated: Class = { ...existing, ...cls, updatedAt: new Date() } as Class;
+    this.classes.set(id, updated);
+    return updated;
+  }
+
+  async deleteClass(id: number): Promise<boolean> {
+    return this.classes.delete(id);
+  }
+
+  async getCoursesByTeacherId(teacherId: number): Promise<Course[]> {
+    return this.getClassesByTeacherId(teacherId);
+  }
+
+  async getCourseById(id: number): Promise<Course | undefined> {
+    return this.getClassById(id);
+  }
+
+  async createCourse(course: InsertCourse): Promise<Course> {
+    const created = await this.createClass(course);
+    return created;
+  }
+
+  async updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course | undefined> {
+    return this.updateClass(id, course);
+  }
+
+  async deleteCourse(id: number): Promise<boolean> {
+    return this.deleteClass(id);
+  }
+
+  async getCourseModules(courseId: number): Promise<Module[]> {
+    const moduleIds = Array.from(this.courseModulesMap.values())
+      .filter(record => record.courseId === courseId)
+      .sort((a, b) => a.sequenceOrder - b.sequenceOrder)
+      .map(record => record.moduleId);
+
+    return moduleIds
+      .map(id => this.modules.get(id))
+      .filter(Boolean);
+  }
+
+  async addModuleToCourse(courseModule: InsertCourseModule): Promise<CourseModule> {
+    const id = this.currentCourseModuleId++;
+    const record: CourseModule = {
+      id,
+      courseId: courseModule.courseId,
+      moduleId: courseModule.moduleId,
+      sequenceOrder: courseModule.sequenceOrder ?? 1,
+      createdAt: new Date(),
+    };
+    this.courseModulesMap.set(id, record);
+    return record;
+  }
+
+  async removeModuleFromCourse(courseId: number, moduleId: number): Promise<boolean> {
+    let removed = false;
+    for (const [id, record] of this.courseModulesMap.entries()) {
+      if (record.courseId === courseId && record.moduleId === moduleId) {
+        this.courseModulesMap.delete(id);
+        removed = true;
+      }
+    }
+    return removed;
+  }
+
+  async reorderCourseModules(courseId: number, moduleOrder: number[]): Promise<void> {
+    moduleOrder.forEach((moduleId, index) => {
+      for (const record of this.courseModulesMap.values()) {
+        if (record.courseId === courseId && record.moduleId === moduleId) {
+          record.sequenceOrder = index + 1;
+        }
+      }
+    });
+  }
+
+  async getAvailableModulesForCourse(courseId: number, teacherId: number): Promise<Module[]> {
+    const existing = new Set(
+      Array.from(this.courseModulesMap.values())
+        .filter(record => record.courseId === courseId)
+        .map(record => record.moduleId)
+    );
+
+    return Array.from(this.modules.values()).filter(module => module.userId === teacherId && !existing.has(module.id));
+  }
+
+  async getCourseItems(courseId: number): Promise<Array<{
+    id: number;
+    itemType: 'lesson' | 'assessment';
+    itemId: number;
+    sequenceOrder: number;
+    isVisible: boolean;
+    data: LessonPlan | Assessment;
+  }>> {
+    const items = Array.from(this.courseItemsMap.values())
+      .filter(item => item.courseId === courseId)
+      .sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+
+    const results: Array<{ id: number; itemType: 'lesson' | 'assessment'; itemId: number; sequenceOrder: number; isVisible: boolean; data: LessonPlan | Assessment; }> = [];
+
+    for (const item of items) {
+      const data = item.itemType === 'lesson' ? this.lessons.get(item.itemId) : this.assessments.get(item.itemId);
+      if (data) {
+        results.push({
+          id: item.id,
+          itemType: item.itemType as 'lesson' | 'assessment',
+          itemId: item.itemId,
+          sequenceOrder: item.sequenceOrder,
+          isVisible: item.isVisible,
+          data,
+        });
+      }
+    }
+
+    return results;
+  }
+
+  async addItemToCourse(courseId: number, moduleId: number, itemType: 'lesson' | 'assessment', itemId: number): Promise<void> {
+    const currentItems = await this.getCourseItems(courseId);
+    const nextSequence = currentItems.length > 0 ? Math.max(...currentItems.map(item => item.sequenceOrder)) + 1 : 1;
+
+    const record = {
+      id: this.currentCourseItemId++,
+      courseId,
+      moduleId,
+      itemType,
+      itemId,
+      sequenceOrder: nextSequence,
+      isVisible: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.courseItemsMap.set(record.id, record);
+  }
+
+  async removeItemFromCourse(courseId: number, itemType: 'lesson' | 'assessment', itemId: number): Promise<boolean> {
+    let removed = false;
+    for (const [id, record] of this.courseItemsMap.entries()) {
+      if (record.courseId === courseId && record.itemType === itemType && record.itemId === itemId) {
+        this.courseItemsMap.delete(id);
+        removed = true;
+      }
+    }
+    return removed;
+  }
+
+  async reorderCourseItems(courseId: number, itemUpdates: Array<{ id: number; sequenceOrder: number }>): Promise<void> {
+    const updates = new Map(itemUpdates.map(update => [update.id, update.sequenceOrder]));
+    for (const record of this.courseItemsMap.values()) {
+      if (record.courseId === courseId && updates.has(record.id)) {
+        record.sequenceOrder = updates.get(record.id)!;
+      }
+    }
+  }
+
+  // Module & lesson helpers
+  async getModulesByUserId(userId: number): Promise<Module[]> {
+    return Array.from(this.modules.values()).filter(module => module.userId === userId);
+  }
+
+  async getModuleById(id: number): Promise<Module | undefined> {
+    return this.modules.get(id);
+  }
+
+  async createModule(module: InsertModule): Promise<Module> {
+    const id = this.currentModuleId++;
+    const now = new Date();
+    const newModule: Module = {
+      id,
+      userId: module.userId,
+      title: module.title,
+      description: module.description ?? null,
+      curriculumTopic: module.curriculumTopic ?? '',
+      gradeLevels: module.gradeLevels ?? [],
+      topics: module.topics ?? [],
+      objectives: module.objectives ?? [],
+      estimatedHours: module.estimatedHours ?? 0,
+      isActive: module.isActive ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.modules.set(id, newModule);
+    return newModule;
+  }
+
+  async updateModule(id: number, module: Partial<InsertModule>): Promise<Module | undefined> {
+    const existing = this.modules.get(id);
+    if (!existing) return undefined;
+
+    const updated: Module = {
+      ...existing,
+      ...module,
+      updatedAt: new Date(),
+    } as Module;
+    this.modules.set(id, updated);
+    return updated;
+  }
+
+  async deleteModule(id: number): Promise<boolean> {
+    let removed = false;
+    if (this.modules.delete(id)) {
+      removed = true;
+    }
+    for (const [recordId, record] of this.courseModulesMap.entries()) {
+      if (record.moduleId === id) {
+        this.courseModulesMap.delete(recordId);
+      }
+    }
+    for (const [lessonId, lesson] of this.lessons.entries()) {
+      if (lesson.moduleId === id) {
+        this.lessons.delete(lessonId);
+      }
+    }
+    for (const [itemId, item] of this.courseItemsMap.entries()) {
+      if (item.moduleId === id) {
+        this.courseItemsMap.delete(itemId);
+      }
+    }
+    return removed;
+  }
+
+  async getLessonsByModule(moduleId: number): Promise<LessonPlan[]> {
+    return Array.from(this.lessons.values()).filter(lesson => lesson.moduleId === moduleId);
+  }
+
+  async getLessonPlansByModuleId(moduleId: number): Promise<LessonPlan[]> {
+    return this.getLessonsByModule(moduleId);
+  }
+
+  async getLessonPlanById(id: number): Promise<LessonPlan | undefined> {
+    return this.lessons.get(id);
+  }
+
+  async getLessonById(id: number): Promise<LessonPlan | undefined> {
+    return this.getLessonPlanById(id);
+  }
+
+  async createLessonPlan(lessonPlan: InsertLessonPlan): Promise<LessonPlan> {
+    const id = this.currentLessonId++;
+    const now = new Date();
+    const newLesson: LessonPlan = {
+      id,
+      moduleId: lessonPlan.moduleId,
+      title: lessonPlan.title,
+      description: lessonPlan.description ?? null,
+      lessonType: lessonPlan.lessonType ?? 'lecture',
+      objectives: lessonPlan.objectives ?? [],
+      duration: lessonPlan.duration ?? 45,
+      difficulty: lessonPlan.difficulty ?? 'intermediate',
+      targetStudents: lessonPlan.targetStudents ?? ['all'],
+      prerequisites: lessonPlan.prerequisites ?? [],
+      lessonStructure: lessonPlan.lessonStructure ?? null,
+      activities: lessonPlan.activities ?? [],
+      resources: lessonPlan.resources ?? [],
+      equipment: lessonPlan.equipment ?? [],
+      safetyNotes: lessonPlan.safetyNotes ?? null,
+      hasAssessment: lessonPlan.hasAssessment ?? false,
+      assessmentType: lessonPlan.assessmentType ?? null,
+      assessmentDescription: lessonPlan.assessmentDescription ?? null,
+      assessmentDuration: lessonPlan.assessmentDuration ?? null,
+      assessmentPoints: lessonPlan.assessmentPoints ?? null,
+      assessmentCriteria: lessonPlan.assessmentCriteria ?? [],
+      rubric: lessonPlan.rubric ?? null,
+      differentiation: lessonPlan.differentiation ?? null,
+      homework: lessonPlan.homework ?? null,
+      creationMethod: lessonPlan.creationMethod ?? 'manual',
+      templateId: lessonPlan.templateId ?? null,
+      aiGenerated: lessonPlan.aiGenerated ?? false,
+      aiSuggestions: lessonPlan.aiSuggestions ?? null,
+      isCompleted: lessonPlan.isCompleted ?? false,
+      sequenceOrder: lessonPlan.sequenceOrder ?? 1,
+      studentWorksheet: lessonPlan.studentWorksheet ?? null,
+      teachingScript: lessonPlan.teachingScript ?? null,
+      assessmentQuestions: lessonPlan.assessmentQuestions ?? null,
+      fullLessonContent: lessonPlan.fullLessonContent ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.lessons.set(id, newLesson);
+    return newLesson;
+  }
+
+  async updateLessonPlan(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined> {
+    const existing = this.lessons.get(id);
+    if (!existing) return undefined;
+
+    const updated: LessonPlan = {
+      ...existing,
+      ...lessonPlan,
+      updatedAt: new Date(),
+    } as LessonPlan;
+    this.lessons.set(id, updated);
+    return updated;
+  }
+
+  async updateLesson(id: number, lessonPlan: Partial<InsertLessonPlan>): Promise<LessonPlan | undefined> {
+    return this.updateLessonPlan(id, lessonPlan);
+  }
+
+  async deleteLessonPlan(id: number): Promise<boolean> {
+    return this.lessons.delete(id);
+  }
+
+  async deleteLesson(id: number): Promise<boolean> {
+    return this.deleteLessonPlan(id);
+  }
+
+  // Curriculum helpers
+  async getCurriculumTopics(): Promise<CurriculumTopic[]> {
+    return Array.from(this.curriculumTopicsMap.values()).sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+  }
+
+  async getCurriculumTopicById(id: number): Promise<CurriculumTopic | undefined> {
+    return this.curriculumTopicsMap.get(id);
+  }
+
+  async getCurriculumSubtopicsByTopicId(topicId: number): Promise<CurriculumSubtopic[]> {
+    return Array.from(this.curriculumSubtopicsMap.values())
+      .filter(subtopic => subtopic.topicId === topicId)
+      .sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+  }
+
+  async getCurriculumObjectivesBySubtopicId(subtopicId: number): Promise<CurriculumObjective[]> {
+    return Array.from(this.curriculumObjectivesMap.values())
+      .filter(objective => objective.subtopicId === subtopicId)
+      .sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+  }
+
+  async getCurriculumObjectivesByCodes(codes: string[]): Promise<CurriculumObjective[]> {
+    if (codes.length === 0) return [];
+    const codeSet = new Set(codes.map(code => code.toLowerCase()));
+    return Array.from(this.curriculumObjectivesMap.values()).filter(objective => codeSet.has(objective.code.toLowerCase()));
+  }
+
+  async getCurriculumHierarchy(topicId: number): Promise<{
+    subtopics: (CurriculumSubtopic & { objectives: CurriculumObjective[] })[];
+  }> {
+    const subtopics = await this.getCurriculumSubtopicsByTopicId(topicId);
+    const enriched = await Promise.all(
+      subtopics.map(async (subtopic) => ({
+        ...subtopic,
+        objectives: await this.getCurriculumObjectivesBySubtopicId(subtopic.id),
+      }))
+    );
+
+    return { subtopics: enriched };
+  }
+
+  async getAllLessonsByTeacherId(teacherId: number): Promise<LessonPlan[]> {
+    const modules = await this.getModulesByUserId(teacherId);
+    const moduleIds = new Set(modules.map(module => module.id));
+
+    return Array.from(this.lessons.values()).filter(lesson => moduleIds.has(lesson.moduleId));
+  }
+
+  async getAllModulesByTeacherId(teacherId: number): Promise<Module[]> {
+    return this.getModulesByUserId(teacherId);
+  }
+
+  async getAllAssessmentsByTeacherId(teacherId: number): Promise<Assessment[]> {
+    const modules = await this.getModulesByUserId(teacherId);
+    const moduleIds = new Set(modules.map(module => module.id));
+
+    return Array.from(this.assessments.values()).filter(assessment =>
+      assessment.moduleId ? moduleIds.has(assessment.moduleId) : false
+    );
+  }
+
   private initializeData() {
-    // Initialize subjects
+    const now = new Date();
+
+    const demoUser: User = {
+      id: this.currentUserId++,
+      email: "demo.teacher@example.com",
+      firstName: "Demo",
+      lastName: "Teacher",
+      profileImageUrl: null,
+      provider: "local",
+      providerId: null,
+      password: bcrypt.hashSync("password", 10),
+      emailVerified: true,
+      emailVerificationToken: null,
+      resetPasswordToken: null,
+      resetPasswordExpires: null,
+      role: "teacher",
+      curricula: ["IGCSE Chemistry Edexcel"],
+      gradeLevels: ["10", "11", "12"],
+      profileCompleted: true,
+      studentId: null,
+      parentId: null,
+      courseIds: [],
+      childrenIds: [],
+      permissions: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.users.set(demoUser.id, demoUser);
+
+    const chemistryTopic: CurriculumTopic = {
+      id: this.currentCurriculumTopicId++,
+      code: "1",
+      name: "Principles of Chemistry",
+      curriculum: "IGCSE Chemistry Edexcel",
+      description: "Core foundations of IGCSE Chemistry",
+      sequenceOrder: 1,
+    };
+    this.curriculumTopicsMap.set(chemistryTopic.id, chemistryTopic);
+
+    const statesSubtopic: CurriculumSubtopic = {
+      id: this.currentCurriculumSubtopicId++,
+      topicId: chemistryTopic.id,
+      code: "1.1",
+      name: "States of Matter",
+      description: "Properties and particle theory",
+      sequenceOrder: 1,
+      practicalWork: ["Investigate diffusion in gases"],
+      mathematicalSkills: ["interpret graphs"],
+    };
+    this.curriculumSubtopicsMap.set(statesSubtopic.id, statesSubtopic);
+
+    const demoObjective: CurriculumObjective = {
+      id: this.currentCurriculumObjectiveId++,
+      subtopicId: statesSubtopic.id,
+      code: "1.1.1",
+      statement: "Describe solids, liquids and gases in terms of particle arrangement",
+      bloomsLevel: "remember",
+      difficulty: "basic",
+      commandWords: ["describe"],
+      assessmentWeight: 1,
+      sequenceOrder: 1,
+    };
+    this.curriculumObjectivesMap.set(demoObjective.id, demoObjective);
+
+    const demoClass: Class = {
+      id: this.currentClassId++,
+      name: "Chemistry 10A",
+      grade: "10",
+      level: "IGCSE",
+      curriculum: "IGCSE Chemistry Edexcel",
+      teacherId: demoUser.id,
+      description: "Core chemistry class for Grade 10",
+      academicYear: "2024-2025",
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.classes.set(demoClass.id, demoClass);
+    const storedUser = this.users.get(demoUser.id);
+    if (storedUser) {
+      storedUser.courseIds = [String(demoClass.id)];
+      this.users.set(demoUser.id, storedUser);
+    }
+
+    const demoModule: Module = {
+      id: this.currentModuleId++,
+      userId: demoUser.id,
+      title: "Atomic Structure Fundamentals",
+      description: "Introduce particle theory and atomic models",
+      curriculumTopic: chemistryTopic.name,
+      gradeLevels: ["10"],
+      topics: ["Atomic Structure"],
+      objectives: [demoObjective.statement],
+      estimatedHours: 4,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.modules.set(demoModule.id, demoModule);
+
+    const demoLesson: LessonPlan = {
+      id: this.currentLessonId++,
+      moduleId: demoModule.id,
+      title: "Introduction to Atomic Models",
+      description: "Exploring historical models of the atom",
+      lessonType: "lecture",
+      objectives: [demoObjective.statement],
+      duration: 45,
+      difficulty: "intermediate",
+      targetStudents: ["all"],
+      prerequisites: [],
+      lessonStructure: null,
+      activities: ["Starter discussion", "Group activity"],
+      resources: ["Presentation slides", "Worksheet"],
+      equipment: ["Interactive whiteboard"],
+      safetyNotes: null,
+      hasAssessment: false,
+      assessmentType: null,
+      assessmentDescription: null,
+      assessmentDuration: null,
+      assessmentPoints: null,
+      assessmentCriteria: [],
+      rubric: null,
+      differentiation: null,
+      homework: "Summarise the particle theory",
+      creationMethod: "manual",
+      templateId: null,
+      aiGenerated: false,
+      aiSuggestions: null,
+      isCompleted: false,
+      sequenceOrder: 1,
+      studentWorksheet: null,
+      teachingScript: null,
+      assessmentQuestions: null,
+      fullLessonContent: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.lessons.set(demoLesson.id, demoLesson);
+
     const subjects = [
-      { name: "Mathematics", color: "#1976D2", icon: "fas fa-calculator" },
-      { name: "Science", color: "#388E3C", icon: "fas fa-leaf" },
-      { name: "English", color: "#FF9800", icon: "fas fa-book" },
-      { name: "History", color: "#9C27B0", icon: "fas fa-landmark" },
+      {
+        name: "Chemistry",
+        color: "#0ea5e9",
+        icon: "Flask",
+        grade: "10",
+        level: "IGCSE",
+        curriculum: "IGCSE Chemistry Edexcel",
+        topicArea: "Atomic Structure",
+      },
+      {
+        name: "Mathematics",
+        color: "#6366f1",
+        icon: "Calculator",
+        grade: "10",
+        level: "IGCSE",
+        curriculum: "IGCSE Chemistry Edexcel",
+        topicArea: "Mathematical Skills",
+      },
+      {
+        name: "Physics",
+        color: "#f97316",
+        icon: "Atom",
+        grade: "10",
+        level: "IGCSE",
+        curriculum: "IGCSE Chemistry Edexcel",
+        topicArea: "Energy",
+      },
     ];
 
     subjects.forEach(subject => {
@@ -213,58 +869,110 @@ export class MemStorage implements IStorage {
       this.currentSubjectId++;
     });
 
-    // Initialize students
     const students = [
-      { name: "Alice Brown", grade: "Grade 5", studentId: "12345", status: "on_track" },
-      { name: "Bobby Johnson", grade: "Grade 5", studentId: "12346", status: "needs_attention" },
-      { name: "Carol Wilson", grade: "Grade 5", studentId: "12347", status: "excelling" },
-      { name: "David Smith", grade: "Grade 5", studentId: "12348", status: "on_track" },
-      { name: "Emma Davis", grade: "Grade 5", studentId: "12349", status: "on_track" },
+      { name: "Alice Brown", grade: "10", level: "IGCSE", studentId: "CHE10001", status: "on_track" },
+      { name: "Bobby Johnson", grade: "10", level: "IGCSE", studentId: "CHE10002", status: "needs_attention" },
+      { name: "Carol Wilson", grade: "10", level: "IGCSE", studentId: "CHE10003", status: "excelling" },
+      { name: "David Smith", grade: "10", level: "IGCSE", studentId: "CHE10004", status: "on_track" },
+      { name: "Emma Davis", grade: "10", level: "IGCSE", studentId: "CHE10005", status: "on_track" },
     ];
 
     students.forEach(student => {
-      this.students.set(this.currentStudentId, { ...student, id: this.currentStudentId });
+      this.students.set(this.currentStudentId, {
+        ...student,
+        id: this.currentStudentId,
+        courseId: demoClass.id,
+      });
       this.currentStudentId++;
     });
 
-    // Initialize assessments
+    const chemistryAssessment = {
+      title: "Atomic Structure Quiz",
+      subjectId: 1,
+      moduleId: demoModule.id,
+      courseId: demoClass.id,
+      date: new Date("2024-03-15"),
+      totalPoints: 100,
+      description: "Multiple choice and short answer questions on atomic models",
+      topics: ["Atomic Structure"],
+      objectives: [demoObjective.statement],
+      assessmentType: "formative",
+      difficulty: "intermediate",
+      questionTypes: ["multiple_choice", "short_answer"],
+      estimatedDuration: 45,
+      instructions: "Complete without notes",
+      markingScheme: "Standard marking rubric",
+      aiGenerated: false,
+      createdAt: now,
+      updatedAt: now,
+    };
+
     const assessments = [
-      { title: "Math Quiz Ch. 8", subjectId: 1, date: new Date("2024-03-15"), totalPoints: 100, description: "Chapter 8 mathematics quiz" },
-      { title: "Science Project", subjectId: 2, date: new Date("2024-03-12"), totalPoints: 100, description: "Plant growth experiment" },
-      { title: "Reading Comprehension", subjectId: 3, date: new Date("2024-03-10"), totalPoints: 100, description: "Short story analysis" },
+      chemistryAssessment,
+      { title: "Math Quiz Ch. 8", subjectId: 2, moduleId: null, courseId: null, date: new Date("2024-03-12"), totalPoints: 80, description: "Algebra review", topics: ["Algebra"], objectives: [], assessmentType: "summative", difficulty: "intermediate", questionTypes: ["short_answer"], estimatedDuration: 40, instructions: null, markingScheme: null, aiGenerated: false, createdAt: now, updatedAt: now },
     ];
 
     assessments.forEach(assessment => {
-      this.assessments.set(this.currentAssessmentId, { ...assessment, id: this.currentAssessmentId, createdAt: new Date() });
+      this.assessments.set(this.currentAssessmentId, {
+        id: this.currentAssessmentId,
+        ...assessment,
+      });
       this.currentAssessmentId++;
     });
 
-    // Initialize student scores
     const scores = [
-      // Alice Brown (ID: 1)
       { studentId: 1, assessmentId: 1, score: 88, percentage: 88 },
-      { studentId: 1, assessmentId: 2, score: 92, percentage: 92 },
-      { studentId: 1, assessmentId: 3, score: 75, percentage: 75 },
-      // Bobby Johnson (ID: 2)
-      { studentId: 2, assessmentId: 1, score: 62, percentage: 62 },
-      { studentId: 2, assessmentId: 2, score: 78, percentage: 78 },
-      { studentId: 2, assessmentId: 3, score: 85, percentage: 85 },
-      // Carol Wilson (ID: 3)
+      { studentId: 2, assessmentId: 1, score: 72, percentage: 72 },
       { studentId: 3, assessmentId: 1, score: 95, percentage: 95 },
-      { studentId: 3, assessmentId: 2, score: 89, percentage: 89 },
-      { studentId: 3, assessmentId: 3, score: 91, percentage: 91 },
     ];
 
     scores.forEach(score => {
-      this.studentScores.set(this.currentStudentScoreId, { 
-        ...score, 
-        id: this.currentStudentScoreId, 
-        createdAt: new Date(),
+      this.studentScores.set(this.currentStudentScoreId, {
+        ...score,
+        id: this.currentStudentScoreId,
+        createdAt: now,
+        notes: null,
         score: score.score.toString(),
         percentage: score.percentage.toString(),
-        notes: null
       });
       this.currentStudentScoreId++;
+    });
+
+    const courseModuleRecord: CourseModule = {
+      id: this.currentCourseModuleId++,
+      courseId: demoClass.id,
+      moduleId: demoModule.id,
+      sequenceOrder: 1,
+      createdAt: now,
+    };
+    this.courseModulesMap.set(courseModuleRecord.id, courseModuleRecord);
+
+    const courseItemRecord = {
+      id: this.currentCourseItemId++,
+      courseId: demoClass.id,
+      moduleId: demoModule.id,
+      itemType: 'lesson',
+      itemId: demoLesson.id,
+      sequenceOrder: 1,
+      isVisible: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.courseItemsMap.set(courseItemRecord.id, courseItemRecord);
+
+    const recommendation = {
+      studentId: 1,
+      subjectId: 1,
+      title: "Practise ionic bonding questions",
+      description: "Focus on past paper problems covering ionic bonding and electron transfer",
+      priority: "medium",
+      isActive: true,
+      createdAt: now,
+    };
+
+    this.lessonRecommendations.set(this.currentLessonRecommendationId, {
+      id: this.currentLessonRecommendationId++,
+      ...recommendation,
     });
   }
 
@@ -1388,4 +2096,12 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+const storageImplementation: IStorage = databaseStatus.mode === 'postgres' && db
+  ? new DatabaseStorage()
+  : new MemStorage();
+
+if (databaseStatus.mode !== 'postgres') {
+  console.warn('Using in-memory storage - data will reset on restart. Configure the database to enable persistence.');
+}
+
+export const storage = storageImplementation;

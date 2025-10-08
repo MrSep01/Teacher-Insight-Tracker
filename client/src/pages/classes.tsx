@@ -19,7 +19,7 @@ export default function Classes() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
 
-  const { data: classes, isLoading } = useQuery({
+  const { data: classes = [], isLoading } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
   });
 
@@ -27,7 +27,7 @@ export default function Classes() {
     mutationFn: async (data: any) => {
       return await apiRequest("/api/classes", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
@@ -51,7 +51,7 @@ export default function Classes() {
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
       return await apiRequest(`/api/classes/${id}`, {
         method: "PUT",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
@@ -93,10 +93,10 @@ export default function Classes() {
     },
   });
 
-  const filteredClasses = classes?.filter((cls: Class) =>
+  const filteredClasses = classes.filter((cls: Class) =>
     cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cls.curriculum.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  );
 
   const handleDeleteClass = (classId: number) => {
     if (window.confirm("Are you sure you want to delete this class? This action cannot be undone.")) {

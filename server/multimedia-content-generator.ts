@@ -1,4 +1,5 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
+import { getOpenAIClient, MissingOpenAIKeyError } from "./openai-client";
 
 export interface MultimediaContent {
   type: "image" | "video" | "diagram" | "simulation" | "interactive";
@@ -23,19 +24,30 @@ export interface MultimediaRequest {
 }
 
 export class MultimediaContentGenerator {
-  private openai: OpenAI;
+  private openai: OpenAI | null;
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    this.openai = getOpenAIClient();
+  }
+
+  private requireClient(): OpenAI {
+    if (!this.openai) {
+      this.openai = getOpenAIClient();
+    }
+
+    if (!this.openai) {
+      throw new MissingOpenAIKeyError();
+    }
+
+    return this.openai;
   }
 
   async generateMultimediaContent(request: MultimediaRequest): Promise<MultimediaContent[]> {
     try {
       const prompt = this.createMultimediaPrompt(request);
       
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
@@ -56,6 +68,9 @@ export class MultimediaContentGenerator {
       return this.processMultimediaResponse(aiResponse, request);
     } catch (error) {
       console.error("Error generating multimedia content:", error);
+      if (error instanceof MissingOpenAIKeyError) {
+        throw error;
+      }
       return this.getFallbackMultimediaContent(request);
     }
   }
@@ -157,7 +172,8 @@ Respond in JSON format with a "multimediaContent" array.
 
   async generateImagePrompt(topic: string, context: string): Promise<string> {
     try {
-      const response = await this.openai.chat.completions.create({
+      const client = this.requireClient();
+      const response = await client.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {

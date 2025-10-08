@@ -22,6 +22,12 @@ interface EnhancedAssessmentCreatorProps {
   onAssessmentCreated: () => void;
 }
 
+interface QuestionTypeOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
 export function EnhancedAssessmentCreator({ moduleId, moduleObjectives, onAssessmentCreated }: EnhancedAssessmentCreatorProps) {
   const [creationMethod, setCreationMethod] = useState<"ai" | "manual">("ai");
   const [assessmentData, setAssessmentData] = useState({
@@ -44,7 +50,7 @@ export function EnhancedAssessmentCreator({ moduleId, moduleObjectives, onAssess
   const queryClient = useQueryClient();
 
   // Get available question types
-  const { data: questionTypes = [] } = useQuery({
+  const { data: questionTypes = [] } = useQuery<QuestionTypeOption[]>({
     queryKey: ["/api/assessments/question-types"],
   });
 
@@ -52,7 +58,7 @@ export function EnhancedAssessmentCreator({ moduleId, moduleObjectives, onAssess
     mutationFn: async (data: any) => {
       return apiRequest("/api/assessments/ai-generate", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
@@ -76,7 +82,7 @@ export function EnhancedAssessmentCreator({ moduleId, moduleObjectives, onAssess
     mutationFn: async (data: any) => {
       return apiRequest("/api/assessments/manual-create", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
