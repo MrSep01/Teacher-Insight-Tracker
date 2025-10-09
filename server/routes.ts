@@ -370,7 +370,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Assessment Generation Routes
   app.post("/api/assessments/generate-objectives", requireAuth, async (req, res) => {
     try {
-      const { topics, curriculum, gradeLevel } = req.body;
+      const { subject, grade, topic } = req.body;
+      const topics = topic ? [topic] : [subject]; // Convert single topic to array
+      const curriculum = "Edexcel"; // Default curriculum
+      const gradeLevel = grade || "10"; // Default grade level
       const objectives = await aiAssessmentGenerator.generateObjectivesFromTopics(topics, curriculum, gradeLevel);
       res.json({ objectives });
     } catch (error) {
@@ -396,20 +399,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/assessments/generate", requireAuth, async (req, res) => {
     try {
-      const generatedAssessment = await aiAssessmentGenerator.generateAssessment(req.body);
+      const { subject, grade, topic, questionCount = 5 } = req.body;
+      
+      // Get a subject ID from the database (use the first Chemistry subject)
+      const subjects = await storage.getSubjects();
+      const chemistrySubject = subjects.find(s => s.name.toLowerCase().includes('chemistry')) || subjects[0];
+      
+      if (!chemistrySubject) {
+        return res.status(400).json({ error: "No subjects found in database" });
+      }
+      
+      // Format the request to match AssessmentGenerationRequest interface
+      const assessmentRequest = {
+        topics: topic ? [topic] : [subject],
+        objectives: [], // Will be generated if empty
+        assessmentType: "formative" as const,
+        difficulty: "intermediate" as const,
+        duration: 60,
+        questionTypes: ["multiple_choice", "short_answer"] as const,
+        curriculum: "IGCSE Chemistry Edexcel",
+        gradeLevel: grade || "10"
+      };
+      
+      const generatedAssessment = await aiAssessmentGenerator.generateAssessment(assessmentRequest);
       
       // Create the assessment in the database
       const assessmentData = {
         title: generatedAssessment.title,
         description: generatedAssessment.description,
-        subjectId: req.body.subjectId,
-        moduleId: req.body.moduleId,
-        classId: req.body.classId,
-        topics: req.body.topics,
-        objectives: req.body.objectives.map((obj: any) => obj.objective),
-        assessmentType: req.body.assessmentType,
-        difficulty: req.body.difficulty,
-        questionTypes: req.body.questionTypes,
+        subjectId: chemistrySubject.id,
+        moduleId: null, // No module specified
+        classId: null, // No class specified
+        topics: assessmentRequest.topics,
+        objectives: [], // Objectives will be generated separately
+        assessmentType: assessmentRequest.assessmentType,
+        difficulty: assessmentRequest.difficulty,
+        questionTypes: assessmentRequest.questionTypes,
         totalPoints: generatedAssessment.totalPoints,
         estimatedDuration: generatedAssessment.estimatedDuration,
         instructions: generatedAssessment.instructions,
