@@ -209,7 +209,7 @@ Assessment Requirements:
 - Duration: ${request.duration} minutes
 - Difficulty: ${request.difficulty}
 - Question types: ${request.questionTypes.join(", ")}
-- Learning objectives: ${request.objectives.map(obj => obj.objective).join("; ")}
+- Learning objectives: ${request.objectives.length > 0 ? request.objectives.map(obj => obj.objective).join("; ") : "To be determined based on topics"}
 
 Create questions that:
 1. Align with Edexcel chemistry specifications
